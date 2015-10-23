@@ -1,0 +1,46 @@
+a:hover {
+	text-decoration: none;
+}
+
+.register, .login {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.help-block {
+    margin-top: 5px;
+    text-align: left;
+    margin-bottom: 0px;
+}
+
+.veri_q {
+	text-align: left;
+	font-size: 15px;
+}
+
+.veri_q .question {
+	text-align: left;
+	margin-top: 5px;
+	font-size: 17px;
+}
+
+.veri_q .option {
+	text-align: center;
+}
+
+.robot-checker {
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+	margin-left: 15px;
+    color: #dedede;
+    text-align: left;
+    /*background-color: rgb(249, 249, 249);*/
+}
+
+.robot-checker input {
+	margin-top: 13px;
+	margin-left: 13px;
+	width: 14px;
+	height: 14px;
+}

@@ -1,0 +1,66 @@
+<style>
+    .intro p{
+        font-size: 20px;
+        text-indent: 2em;
+    }
+
+</style>
+
+<div class="page-header col-md-8 col-md-offset-2">
+    <h2>实验说明<small></small></h2>
+</div>
+
+<div class="alert alert-info col-md-8 col-md-offset-2" role="alert">主持人正在努力分组，请耐心等待。。。</div>
+<div class="well col-md-8 col-md-offset-2 intro">
+    <p>首先，欢迎你参加本实验！实验具体介绍如下</p>
+    <p>每轮实验总共有三个部分组成，分别是第二价格密封拍卖，英式升价拍卖（价值隐藏），英式升价拍卖（价值公开）。
+        每个部分都是多人单物品拍卖（您在试验中的竞争者将会由系统随机分配）。</p>
+    <p>拍卖的物品价值为q（q服从6-10的均匀分布），所有竞拍者使用这一物品的成本c均服从0-4的均匀分布。特别的，但是您使用
+        该物品的成本为c，也就是说该物品对您的实际价值为q-c，现在您和其他多个人一起竞拍这一物品。</p>
+    <p>在第一部分实验中，您和其他竞拍人进行密封拍卖，即每个人分别提交一个报价，价高者赢得实验，但胜者只需要支付第二高报价；
+        第二和第三部分都是英式升价公开拍卖，即个参与人轮流提交报价，所有人都能看到所有报价历史，且下一个报价必须高于上一个报价。
+        最后的报价人即为胜者，胜者支付其所报的价。不同的是，第二部分并不透露物品的价值q的实际值（只告知其分布），而第三阶段会
+        告知q的真实值。在每轮实验的三个部分中，物品的价值q都是一致的。</p>
+    <p>各个部分总最大进行时间均为3分钟（180秒），公开拍卖的提交报价时间间隔最大为30秒（即30秒若无人提交更高的报价则实验结束）。
+    </p>
+    <p>在正式开始实验之前会有一轮测试实验，测试实验形式与正式试验一样，但不计入最后结果，只旨在让您熟悉试验流程。测试实验过后
+        有且仅有一轮正式试验。正式试验将决定您在本次试验的实际收益（将会与实验报酬挂钩）。所有试验结束后，您将看到您在
+        试验中的表现。</p>
+</div>
+
+<script type="text/javascript" language="javascript">
+
+function enableButton(){
+    $("button.next-stage").removeAttr("disabled");
+    $("button.next-stage").html("下一步");
+}
+
+$("button.next-stage").on("click", function(){
+    $("button.next-stage").attr("disabled", "disabled");
+    $("button.next-stage").html("准备");
+    send( {cmd:'ready'} );
+});
+
+$(document).ready(function(){
+
+    ws.handler.GroupReady = function(data, evt){
+        alert("是否准备好？");
+        send( {cmd:'ready'} );
+    };
+
+    ws.handler.Ready = function(data, evt){
+        $(".alert").removeClass("alert-info");
+        $(".alert").addClass("alert-warning");
+        $(".alert").html("等待其他人做好准备，注意：实验可能随时开始！");
+    };
+
+    {% if substage == 'GroupReady'%}
+     ws.handler.GroupReady();
+    {% elif substage == 'Ready' %}
+     ws.handler.Ready();
+    {% end %}
+
+});
+
+</script>
+

@@ -1,0 +1,11 @@
+<html>
+<body>
+尊敬的 {{ user.username }} 先生/女士:<br/>
+    <p>您好！</p>
+    <p>首先，欢迎您注册使用我们的拍卖试验系统！</p>
+    <p>为了更好地使用本系统，请点击下面的链接激活您的账户：<br/>
+        <a href="http://127.0.0.1:5000/account/activate?userid={{user['_id']}}&code={{user['activecode']}}">http://127.0.0.1/account/activate?userid={{user['_id']}}&code={{user['activecode']}}</a>
+    </p>
+    <p>谢谢您的配合！</p>
+</body>
+</html>

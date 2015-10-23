@@ -1,0 +1,74 @@
+<style type="text/css">
+
+.problem {
+    margin-top: 20px;
+    margin-left: 40px;
+}
+
+.bid-msg-list {
+    margin-top: 40px;
+    margin-left: 60px;
+}
+
+.bid-msg-list ul {
+    height: 250px;
+    overflow-y: auto;
+}
+
+</style>
+
+<div class="col-md-5 col-md-offset-1" style="margin-top: 20px;">
+    {% include 'showitem.html' %}
+</div>
+
+<div class="col-md-4 list-unstyled bid-msg-list">
+    <p>竞价历史：</p>
+    <ul class="list-unstyled well">
+        {% for bid in bids %}
+            <li>{{ bid['player_name'] }}出价{{ bid['bid'] }}</li>
+        {% end %}
+    </ul>
+</div>
+
+<form class="col-md-5 problem">
+    <p>初始赋予你100点，假如右图的物品对你的价值是{{ value }}点，你愿意为它出价多少？</p>
+    <p>
+    <div class="input-group col-md-4">
+        <input type="text" class="form-control" placeholder="0-100" aria-describedby="basic-addon2" name="bid">
+        <span class="input-group-addon" id="basic-addon2">点</span>
+    </div>
+    </p>
+    <p><button class="btn btn-primary" type="submit" role="button">提交</a></button></p>
+</form>
+
+<script type="text/javascript" language="javascript">
+
+$(document).ready(function(){
+    $("form").submit( function(){
+        var bid = $("input[name='bid']").val();
+        send( {cmd:'bid', data:{bid:bid}} );
+        return false;
+    });
+
+    ws.handler.bid = function(data, evt){
+        msg = data.player_name + "出价" + data.bid;
+        $(".bid-msg-list ul").append("<li>" + msg  + "</li>");
+    };
+
+    ws.handler.result = function(data, evt){
+        console.log(data);
+    };
+
+    ws.handler.timeout = function(data, evt){
+        alert("timeout");
+        $(".bid-msg-list ul").append("<li>本轮拍卖结束</li>");
+        $(".problem button").attr("disabled", "disabled");
+        send({'cmd': 'result'});
+    };
+    {% if timeout %}
+        ws.handler.timeout();
+    {% end %}
+
+});
+
+</script>
