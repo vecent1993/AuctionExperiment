@@ -15,7 +15,7 @@ class NewExpHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         settings = Experiment()
-        self.render('newexp.html', settings=settings, baseexp_list=baseexp_list)
+        self.render('expmanage/newexp.html', settings=settings, baseexp_list=baseexp_list)
 
     @tornado.web.authenticated
     def post(self):
@@ -34,7 +34,7 @@ class ExpIndexHandler(BaseHandler):
         exp = self.db.get('select * from exp where exp_id=%s', expid)
         if not exp:
             raise tornado.web.HTTPError(404)
-        self.render('expindex.html', exp=exp)
+        self.render('expmanage/expindex.html', exp=exp)
 
 
 class ExpSettingsHandler(BaseHandler):
@@ -43,7 +43,7 @@ class ExpSettingsHandler(BaseHandler):
         if not exp:
             raise tornado.web.HTTPError(404)
         settings = Experiment(json.loads(exp['exp_settings']))
-        self.render('expsettings.html', exp=exp, settings=settings, baseexp_list=baseexp_list)
+        self.render('expmanage/expsettings.html', exp=exp, settings=settings, baseexp_list=baseexp_list)
 
 
 class NewTreatmentHandler(BaseHandler):
@@ -62,7 +62,7 @@ class ExpListHandler(BaseHandler):
     def get(self):
         explist = self.db.query('select exp_id, exp_title, exp_status, host_id, user_name '
                                 'from exp join user on host_id = user_id limit 10')
-        self.render('explist.html', explist=explist)
+        self.render('expmanage/explist.html', explist=explist)
 
 
 class ActivateExpHandler(BaseHandler):
@@ -123,10 +123,10 @@ class ExpResultHandler(BaseHandler):
             self.render('stat.html', exp=exp)
         else:
             player = Player(self.redis, expid, self.current_user['user_id'])
-            if not(exp['exp_status'] == '2' or player.get('stage') == 'END'):
+            if not(exp['exp_status'] == '2' or player.get('stage') == 'End'):
                 raise tornado.web.HTTPError(503)
 
             results = self.db.query('select * from result where exp_id=%s and user_id=%s',
                                     expid, self.current_user['user_id'])
 
-            self.render('result.html', exp=exp, results=results)
+            self.render('expmanage/result.html', exp=exp, results=results)

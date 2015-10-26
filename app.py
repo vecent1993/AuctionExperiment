@@ -12,14 +12,21 @@ import torndb
 from account import *
 from baseexps import *
 from expmanage import *
-from expinprogress import *
+from expon import *
 from self import *
 from help import *
+
+
+class IndexHandler(BaseHandler):
+    def get(self):
+        self.render('index.html')
 
 
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
+            (r"/", IndexHandler),
+
             (r"/account/login", LoginHandler),
             (r"/account/logout", LogoutHandler),
             (r"/account/register", RegisterHandler),

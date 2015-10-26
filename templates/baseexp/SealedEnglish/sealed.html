@@ -21,7 +21,7 @@
     }
 </style>
 
-<div class="page-header col-md-offset-3 col-md-6">
+<div class="page-header col-md-offset-2 col-md-8">
     <h3>{% if train %}<a class="back" href="javascript:void(0)"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span></a>{% end %}
         第二价格密封拍卖阶段</h3>
 </div>
@@ -86,13 +86,13 @@ $(document).ready(function(){
     ws.handler.result = function(data, evt){
         disableForm("form");
         $("form").find("button[type='submit']").html("您已出价，请等待");
-        sealedT.hide();
-        sealedT.stop();
         send( {cmd:'getresult', data:'sealed'} );
         send( {cmd:'gettimeout', data:{'name': 'sealedresult'}} );
     };
 
     ws.handler.showresult = function(data, evt){
+        sealedT.hide();
+        sealedT.stop();
         $(".result").html(data);
         $(".result").show();
     };

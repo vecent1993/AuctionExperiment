@@ -2,7 +2,7 @@
 
 import tornado.web
 
-from session import RedisSession
+from util.session import RedisSession
 
 
 class BaseHandler(tornado.web.RequestHandler):
