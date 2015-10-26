@@ -67,7 +67,7 @@
         <p>竞价历史：</p>
         <ul class="list-unstyled well well-sm">
             {% for bid in bids %}
-            <li class="message">{{ bid['username'] }}出价{{ bid['bid'] }}</li>
+            <li class="message" {% if bid.get('self') %}self{% end %}>{{ bid['username'] }}出价{{ bid['bid'] }}</li>
             {% end %}
             <li class="message empty"></li>
         </ul>
@@ -106,6 +106,13 @@
 function disableForm(form){
     $(form).find("button[type='submit']").attr('disabled', 'disabled');
     $(form).find("input").attr('disabled', 'disabled');
+    $(form).find("button[type='submit']").html("您已出价，请等待");
+}
+
+function enableForm(form){
+    $(form).find("button[type='submit']").removeAttr('disabled');
+    $(form).find("input").removeAttr('disabled');
+    $(form).find("button[type='submit']").html("提交");
 }
 
 $(document).ready(function(){
@@ -116,24 +123,32 @@ $(document).ready(function(){
         return false;
     });
 
-    function addMessage(txt){
+    function addMessage(data){
         var new_message = $(".message.empty").clone(true);
         new_message.removeClass("empty");
-        new_message.html(txt);
+        new_message.html(data.username + "出价" + data.bid);
+        if(data.self){
+            new_message.attr('self', '');
+            disableForm("form");
+        } else {
+            enableForm("form");
+        }
         $(".message.empty").before(new_message);
         send( {cmd:'gettimeout', data:{'name': 'englisheach'}} );
     };
 
     ws.handler.englishbid = function(data, evt){
-        addMessage(data.username + "出价" + data.bid);
-        var minBid = (parseFloat(data.bid) + 0.1).toFixed(1);
+        addMessage(data);
+        var minBid = parseFloat(data.bid) + 0.1;
+        if(minBid > 10)
+            minBid = 10;
+        minBid = minBid.toFixed(1);
         document.getElementsByName('bid')[0].min = minBid;
         $("form input").val(minBid);
     };
 
     ws.handler.result = function(data, evt){
         disableForm("form");
-        $("form").find("button[type='submit']").html("您已出价，请等待");
         send( {cmd:'getresult', data:'{% if q is None %}english{% else %}englishopen{% end %}'} );
         send( {cmd:'gettimeout', data:{'name': 'englishresult'}} );
     };
@@ -161,6 +176,10 @@ $(document).ready(function(){
             resultT.set(data.seconds);
         }
     }
+
+    {% if bids and bids[-1].get('self') %}
+     disableForm("form");
+    {% end %}
 
     {% if train %}
     var totalT = new Timer(10, "totalT", ws.handler.result);

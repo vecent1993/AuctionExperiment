@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-
 import hashlib
 import json
 
 import tornado.web
 import tornado.template
-from bson import ObjectId
 import concurrent.futures
 import uuid
 import email
@@ -32,7 +30,7 @@ class LoginHandler(BaseHandler):
                 user.pop('user_pwd')
                 self.session.set('user', user)
                 self.set_secure_cookie("_session_id", self.session.sid)
-                res = {'redirect': self.get_argument("next", "/account/")}
+                res = {'redirect': self.get_argument("next", "/self/")}
             else:
                 res = {'errors':[{'name': 'password', 'reason': '密码错误'}, ]}
         self.write(json.dumps(res))
@@ -71,7 +69,7 @@ class RegisterHandler(BaseHandler):
                  self.get_argument('gender'), self.get_argument('age'), self.get_argument('nation'),
                  self.get_argument('residence'), self.get_argument('identity'), self.get_argument('major')
              )
-             res = {'redirect': self.get_argument("next", "/account/")}
+             res = {'redirect': self.get_argument("next", "/account/login")}
         self.write(json.dumps(res))
 
     def sendActivationEmail(self, user):

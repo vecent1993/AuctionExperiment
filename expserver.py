@@ -12,7 +12,7 @@ from util.redissub import RedisSub
 import util.pool
 from util.core import RedisExp
 from handler import getHandler
-from handler.grouphandler_.grouphandler import Delay
+from handler.grouphandler_.grouphandler import Delay, GroupHandler
 
 explist = {}
 redisclient = redis.Redis()
@@ -116,35 +116,26 @@ class Experiment(Exp):
             return
 
         sid, gid = data['sid'], data['gid']
+        group = util.pool.Group(self.redis, self.exp['id'], sid, gid)
+        if 'stage' not in group:
+            return
+            # GroupHandler.nextStage(self.redis, self.exp['id'], sid, gid)
+
         groupkey = ':'.join(('group', str(self.exp['id']), str(sid), str(gid)))
         if groupkey in self.groups:
             self.groups[groupkey].close()
-        g = util.pool.Group(self.redis, self.exp['id'], sid, gid)
-        if g.get('stage', '').startswith('SealedEnglish'):
-            self.groups[groupkey] = getHandler('group', 'SealedEnglish')(gid, sid, self.exp['id'])
-        elif g.get('stage', '').startswith('End'):
-            pass
 
-    def nextStage(self, data=None):
+        self.groups[groupkey] = getHandler('group', group.get('stage', refresh=True))(self.exp['id'], sid, gid)
+
+    def changeStage(self, data=None):
         sid, gid = data['sid'], data['gid']
-        g = util.pool.Group(self.redis, self.exp['id'], sid, gid)
-        if 'stage' not in g:
-            g.set('stage', 'SealedEnglish')
-
-        elif g['stage'].startswith('SealedEnglish'):
-            g.set('stage', 'End')
-            for pid in filter(lambda pid: not pid.startswith('agent'), g['players'].keys()):
-                player = util.pool.Player(self.redis, self.exp['id'], pid)
-                player.set('stage', 'End')
-                self.publish({'cmd': 'changeStage', 'domain': ':'.join(('player', str(self.exp['id']), pid))})
-
-            groupkey = ':'.join(('group', str(self.exp['id']), str(sid), str(gid)))
-            if groupkey in self.groups:
-                self.groups[groupkey].close()
-                self.groups.pop(groupkey)
-
+        GroupHandler.nextStage(self.redis, self.exp['id'], sid, gid)
         self.switchHandler(data)
 
+    def closeGroup(self, data=None):
+        groupkey = ':'.join(('group', str(self.exp['id']), str(data['sid']), str(data['gid'])))
+        self.groups[groupkey].close()
+        self.groups.pop(groupkey)
 
 server = Server()
 server.start()

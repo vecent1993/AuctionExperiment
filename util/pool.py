@@ -17,9 +17,9 @@ class Agent(object):
 
 
 class Host(RedisValue):
-    def __init__(self, connection, exp_id, host_id):
-        self.hid = str(host_id)
-        self.expid = str(exp_id)
+    def __init__(self, connection, expid, hid):
+        self.hid = str(hid)
+        self.expid = str(expid)
         self.key = ":".join(('host', self.expid, self.hid))
         super(Host, self).__init__(connection, self.key)
 
