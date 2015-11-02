@@ -61,12 +61,13 @@ class RedisValue(dict):
     def save(self, key):
         self._saveToRedis(key)
 
-    def delete(self):
-        self.conn.delete(self.key)
-
     def clear(self):
         self.conn.delete(self.key)
         super(RedisValue, self).clear()
+
+    def delete(self):
+        self.clear()
+        del self
 
     def __nonzero__(self):
         return len(self) > 0 or self.conn.exists(self.key)

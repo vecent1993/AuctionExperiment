@@ -1,0 +1,55 @@
+<style>
+    .intro p{
+        font-size: 20px;
+        text-indent: 2em;
+    }
+
+</style>
+
+<div class="page-header col-md-offset-1 col-md-10">
+    <h2>实验说明<small></small></h2>
+</div>
+
+<div class="alert alert-info col-md-offset-1 col-md-10" role="alert">主持人正在努力分组，请耐心等待。。。</div>
+<div class="well col-md-offset-1 col-md-10 intro">
+    {% raw exp['exp_intro'] %}
+</div>
+
+<script type="text/javascript" language="javascript">
+
+function enableButton(){
+    $("button.next-stage").removeAttr("disabled");
+    $("button.next-stage").html("下一步");
+}
+
+$("button.next-stage").on("click", function(){
+    $("button.next-stage").attr("disabled", "disabled");
+    $("button.next-stage").html("准备");
+    send( {cmd:'ready'} );
+});
+
+$(document).ready(function(){
+
+    ws.handler.GroupReady = function(data, evt){
+        alert("是否准备好？");
+        send( {cmd:'ready'} );
+    };
+
+    ws.handler.Ready = function(data, evt){
+        $(".alert").removeClass("alert-info");
+        $(".alert").addClass("alert-warning");
+        $(".alert").html("等待其他人做好准备，注意：实验可能随时开始！");
+    };
+
+
+
+    {% if substage == 'GroupReady'%}
+     ws.handler.GroupReady();
+    {% elif substage == 'Ready' %}
+     ws.handler.Ready();
+    {% end %}
+
+});
+
+</script>
+

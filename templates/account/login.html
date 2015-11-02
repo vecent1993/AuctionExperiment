@@ -10,17 +10,17 @@
     <script src="/static/js/bootstrap.min.js"></script>
     <!-- self -->
 	<title>用户登录</title>
-<style TYPE="text/css">
-body {
-	background: url(/static/img/loginbg.jpg);
-	background-size: 100%;
-	background-repeat: no-repeat;
-}
+    <style TYPE="text/css">
+        body {
+            background: url(/static/img/loginbg.jpg);
+            background-size: 100%;
+            background-repeat: no-repeat;
+        }
 
-.input-form {
-	margin-top: 15%;
-}
-</style>
+        .input-form {
+            margin-top: 15%;
+        }
+    </style>
 </head>
 <body>
 
@@ -28,7 +28,7 @@ body {
 
 	<div class="container-fluid">
 		<div class="row">
-            <form method="post" class='col-md-2 col-md-offset-8 input-form'>
+            <form method="post" class='col-md-3 col-md-offset-8 input-form'>
                 {% module xsrf_form_html() %}
                 <div class="form-group">
 			        <label>邮箱</label>

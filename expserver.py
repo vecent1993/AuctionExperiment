@@ -39,11 +39,21 @@ class Server(Greenlet):
                 print str(traceback.format_exc())
 
     def loadExp(self, data):
-        settings = RedisExp(redisclient, data['id'])
-        if settings and settings['id'] not in explist:
-            exp = Experiment(settings['id'])
-            exp.start()
-            explist[settings['id']] = exp
+        expid = data
+        if expid in explist:
+            return
+
+        exp = Experiment(expid)
+        exp.start()
+        explist[expid] = exp
+
+    def closeExp(self, data):
+        expid = data
+        if expid not in explist:
+            return
+
+        explist[expid].close()
+        explist.pop(expid)
 
     def stop(self):
         self.sub.stop()
@@ -100,7 +110,7 @@ class Exp(Greenlet):
 class Experiment(Exp):
     def __init__(self, expid):
         super(Experiment, self).__init__(expid)
-        self.host = getHandler('group', 'AutoHost')(self.exp['host'], self.exp['id'])
+        self.host = getHandler('group', 'AutoHost')(self.exp['id'], self.exp['host'])
 
         Delay(2, self.init, None).start()
 
@@ -137,13 +147,20 @@ class Experiment(Exp):
         self.groups[groupkey].close()
         self.groups.pop(groupkey)
 
+    def close(self):
+        p = util.pool.Pool(self.redis, self.exp['id'])
+        p.delete()
+        h = util.pool.Host(self.redis, self.exp['id'], self.exp['host'])
+        h.delete()
+
+
 server = Server()
 server.start()
 time.sleep(1)
 
 runexps = db.query('select exp_id from exp where exp_status="1" limit 10')
 for exp in runexps:
-    redisclient.publish('experiment', json.dumps({'cmd': 'loadExp', 'data': {'id': exp['exp_id']}}))
+    redisclient.publish('experiment', json.dumps({'cmd': 'loadExp', 'data': exp['exp_id']}))
 
 while True:
     time.sleep(100000000)

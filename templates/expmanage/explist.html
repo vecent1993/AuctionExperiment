@@ -1,0 +1,61 @@
+{% extends '../main.html' %}
+
+{% block title %}
+    实验列表
+{% end %}
+
+{% block style %}
+    <style type="text/css">
+        .table th, .table td {
+            text-align: center;
+        }
+
+        .tips {
+            margin-top: 50px;
+            margin-left: 100px;
+        }
+
+        .tips li {
+            margin-bottom: 20px;
+        }
+    </style>
+{% end %}
+
+{% block row %}
+    <div class="col-md-6 col-md-offset-1 experiments">
+        <div class="page-header">
+            <h3>实验列表</h3>
+        </div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>实验标题</th>
+                <th>主持人</th>
+                <th>创建时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for exp in explist %}
+            <tr class="{% if exp['exp_status'] == '0' %}info
+                                {% elif exp['exp_status'] == '1' %}success
+                                {% else %}{% end %}">
+                <td>{{ exp['exp_id'] }}</td>
+                <td><a href="/exp/{{ exp['exp_id'] }}">{{ exp['exp_title'] }}</a></td>
+                <td><a href="/account/{{ exp['host_id'] }}">{{ exp['user_name'] }}</a></td>
+                <td>{{ exp['exp_setuptime'] }}</td>
+            </tr>
+            {% end %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="well col-md-3 tips">
+        <p>提示</p>
+        <ul>
+            <li>点击实验，查看实验详情。</li>
+            <li>想要创建自己的试验？请<a>申请成为主持人</a>并在<a href="/self">个人主页</a>中开始创建。</li>
+        </ul>
+    </div>
+{% end %}

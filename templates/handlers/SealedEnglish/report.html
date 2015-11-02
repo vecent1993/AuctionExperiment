@@ -1,0 +1,134 @@
+
+<style type="text/css">
+    body {
+        background-color: #c0c0c0;
+    }
+
+    .shuffle {
+        margin-top: 40px;
+    }
+
+    div.players {
+        width: 100%;
+    }
+
+    .player, .agent {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 1px solid silver;
+        margin: 5px 10px;
+        height: 60px;
+        max-width: 150px;
+    }
+
+    .player.online {
+        color: green;
+    }
+
+    .player.offline {
+        color: gray;
+    }
+
+    .pool {
+        min-height: 80px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .badge {
+        float: right;
+        margin-left: 10px;
+    }
+
+    .empty {
+        display: none;
+    }
+
+</style>
+
+<div class="panel panel-primary shuffle">
+    <div class="panel-heading">
+        <h3 class="panel-title">确认报到</h3>
+    </div>
+    <div class="panel-body">
+        <div class="players well well-sm">
+            <div class="well-title">用户池<span class="badge"></span></div>
+            <div class="well-content pool">
+
+                {% for pid in pool['pool'] %}
+                    {% if pid in players %}
+                    <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        <span class="playername">{{ players[pid]['username'] }}</span>
+                    </div>
+                    {% end %}
+                {% end %}
+
+            </div>
+            <div class="well player empty online">
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                <span class="playername"></span>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <a class="btn btn-primary start" href="javascript:void(0)">确认</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+String.prototype.startsWith = function(compareStr){
+    return this.indexOf(compareStr) == 0;
+}
+
+function updateCounts(){
+    $(".players").each(function(){
+        var player_count = parseInt($(this).find(".pool .player, .pool .agent").length);
+        $(this).find(".badge").html(player_count);
+    });
+}
+
+Array.prototype.sum = function () {
+    for(var sum = i = 0; i < this.length; i++)
+        sum += parseInt(this[i]);
+    return sum;
+};
+
+function newPlayer(player){
+    var p = $(".player.empty").clone(true);
+    p.attr("player", player.pid);
+    p.find("span.playername").html(player.username);
+    p.removeClass("empty");
+    return p;
+}
+
+$(document).ready(function(){
+    updateCounts();
+
+    ws.handler.addplayer = function(data, evt){
+        if(data.pid != undefined){
+            $("div.pool").append( newPlayer(data) );
+        }
+        updateCounts();
+    };
+
+    ws.handler.online = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("offline");
+        player.addClass("online");
+    };
+
+    ws.handler.offline = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("online");
+        player.addClass("offline");
+    };
+
+    $("a.start").on("click", function(){
+        send( {cmd: 'start'} );
+    });
+
+});
+
+</script>

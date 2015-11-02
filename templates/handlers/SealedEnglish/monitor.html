@@ -1,0 +1,200 @@
+<style type="text/css">
+    body {
+        background-color: #c0c0c0;
+    }
+
+    .monitor {
+        margin-top: 50px;
+    }
+
+    .page-header {
+        margin-top: 0px;
+    }
+
+    .session {
+        min-height: 100px;
+    }
+
+    .group {
+        margin: 2%;
+        width: 12%;
+        float: left;
+    }
+
+    .group.empty {
+        display: none;
+    }
+
+    .player.online {
+        color: green;
+    }
+
+    .player.offline {
+        color: gray;
+    }
+
+    .player.empty {
+        display: none;
+    }
+
+    .info {
+        position: fixed;
+        width: 500px;
+        max-height: 700px;
+        border: 1px solid silver;
+        display: none;
+    }
+
+    .info .panel-body{
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .info:after, .info:before {
+        border: 10px solid transparent;
+        border-right: 10px solid #fff;
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 30px;
+        left: -20px;
+        content: ' ';
+    }
+
+    .info:before {
+        border-right-color: silver;
+        left: -21px;
+    }
+
+</style>
+<div class="panel panel-primary monitor">
+    <div class="panel-heading">
+        <h3 class="panel-title">监控</h3>
+    </div>
+
+    <div class="panel-body">
+        <div role="tabpanel">
+
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                {% for i, session in enumerate(pool['sessions']) %}
+                <li role="presentation" class="{% if i == 0 %}active{% end %}">
+                    <a href="#session{{ i }}" aria-controls="session{{ i }}" role="tab" data-toggle="tab">session{{ session['id'] }}</a>
+                </li>
+                {% end %}
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                {% for i, session in enumerate(pool['sessions']) %}
+                <div role="tabpanel" class="tab-pane session {% if i == 0 %}active{% end %}" id="session{{ i }}" session="{{ i }}">
+                    <div class="groups">
+                        {% for i, group in enumerate(session['groups']) %}
+                        <div class="well well-sm group" group="{{ i }}">
+                            {% for pid in group %}
+                            {% if pid.startswith('agent') %}
+                            <div class="player online agent" player="{{ pid }}">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                                <span class="playername">AGENT</span>
+                            </div>
+                            {% elif pid in players %}
+                            <div class="player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                                <span class="playername">{{ players[pid]['username'] }}</span>
+                            </div>
+                            {% end %}
+                            {% end %}
+                        </div>
+                        {% end %}
+                    </div>
+
+                </div>
+                {% end %}
+            </div>
+
+            <div class="well well-sm group empty">
+
+            </div>
+
+            <div class="player empty online">
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                <span class="playername"></span>
+            </div>
+
+            <div class="panel panel-info info">
+                <div class="panel-heading">组信息</div>
+                <div class="panel-body">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+function newPlayer(player){
+    var p = $(".player.empty").clone(true);
+    p.attr("player", player.pid);
+    p.find("span.playername").html(player.username);
+    p.removeClass("empty");
+    return p;
+}
+
+function newGroup(group){
+    var g = $(".group.empty").clone(true);
+    g.attr('group', group.gid);
+    for(var i=0;i < group.players.length; i++){
+        g.append(newPlayer(group.players[i]));
+    }
+    g.removeClass("empty");
+    return g;
+}
+
+$(document).ready(function(){
+    $(".group").on("click", function(){
+        var top = $(this).offset().top - 20;
+        var left = $(this).offset().left + $(this).width() - 20;
+        $(".info").css("left", left);
+        $(".info").css("top", top);
+        var sid = $(this).parents("div.session").attr("session");
+        send({cmd: 'getInfo', data: {sid: sid,  gid: $(this).attr('group')}});
+        return false;
+    });
+
+    $(".info").on("click", function(){
+        return false;
+    });
+
+    $("body:not(.group, .info)").on("click", function(){
+        $(".info").hide();
+    });
+
+    ws.handler.online = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("offline");
+        player.addClass("online");
+    };
+
+    ws.handler.offline = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("online");
+        player.addClass("offline");
+    };
+
+    ws.handler.addgroup = function(data, evt){
+        if(data.gid != undefined & data.sid != undefined){
+            $("#session"+data.sid+" div.groups").append(
+                newGroup(data)
+            );
+        }
+    };
+
+    ws.handler.showInfo = function(data, evt){
+        $(".info .panel-body").html(data);
+        $(".info").show();
+    };
+
+});
+
+</script>

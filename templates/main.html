@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    {% block css %}
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    {% end %}
+
+    {% block js %}
+    <script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    {% end %}
+
+	<title>
+        {% block title %}
+        {% end %}
+    </title>
+
+    <style type="text/css">
+        .footer {
+            height: 70px;
+            margin: 10px 50px 0px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+    </style>
+
+    {% block style %}
+        <style type="text/css">
+
+        </style>
+    {% end %}
+</head>
+<body>
+{% block body %}
+
+    {% block nav %}
+        {% include 'nav.html' %}
+    {% end %}
+
+    {% block main %}
+        <div class="container-fluid">
+            <div class="row">
+
+                {% block row %}
+                {% end %}
+
+            </div>
+        </div>
+    {% end %}
+
+    {% block footer %}
+        <div class="footer">
+            <span>2015@Copyright Powered by ISE-JKiriS</span>&nbsp;
+            <a href="/help">帮助</a>&nbsp;
+            <a>关于</a>&nbsp;
+            <a>联系我们</a>
+        </div>
+    {% end %}
+
+    <script>
+        // 调整footer使得其始终在页面底部
+        $(document).ready(function(){
+            var footer = $("body").children(".footer");
+            if(footer) {
+                var height = $(window).innerHeight();
+                var main = $("body").children(".container-fluid");
+                if(main){
+                    height -= main.offset().top + footer.outerHeight(true) + main.outerHeight(true) - main.height();
+                    main.css("min-height", height + "px");
+                }
+            }
+        });
+    </script>
+
+{% end %}
+</body>
+</html>

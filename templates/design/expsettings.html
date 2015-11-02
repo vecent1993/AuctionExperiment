@@ -1,0 +1,364 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script type="text/javascript" language="javascript" src="../../static/js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" language="javascript" src="../../static/js/jquery-ui.js"></script>
+    <link href="../../static/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../..//static/js/bootstrap.min.js"></script>
+    <title>实验配置</title>
+    <style type="text/css">
+
+        body {
+            background-color: #c0c0c0;
+        }
+
+        .treatments {
+            min-height: 200px;
+            padding: 30px 0px;
+        }
+
+        .treatment {
+            background-color: white;
+        }
+
+        .treatment .remove-treatment {
+            float: right;
+            color: #C50202;
+        }
+
+        .empty {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-7 col-md-push-1">
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <span class="panel-title">实验设置</span>
+                    <a href="/help" target="_blank">
+                        <span class="glyphicon glyphicon-question-sign" aria-hidden="true" style="float:right; color:white;"></span>
+                    </a>
+                </div>
+                <form class="form-horizontal new-exp" action="" method="post">
+                    <div class="panel-body" form-domain="experiment">
+
+                        <div class="exp-baseinfo">
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">实验标题</label>
+                                <div class="col-md-8"><input type="text" class="form-control" form-domain="title" value="" required></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">实验描述</label>
+                                <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="description" required></textarea></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">实验说明</label>
+                                <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="introduction" required></textarea></div>
+                            </div>
+                        </div>
+
+                        <div class="treatments">
+
+                            <div class="well treatment empty">
+                                <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                                <span class="treatment-title"></span>
+                                <div class="treatment-content">
+                                    <span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color: green;" title="加载中。。。"></span>
+                                </div>
+                            </div>
+
+                            <div class="well treatment">
+                                <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                                <span class="treatment-title"></span>
+
+                                <div class="treatment-content">
+                                    <div role="tabpanel">
+
+                                        <ul class="nav nav-tabs tab-presentation-list" role="tablist" class="">
+
+                                            <li role="presentation" class="active">
+                                                <a href="#0" aria-controls="0" role="tab" data-toggle="tab">
+                                                    <span class="session-id">session</span>
+                                                </a>
+                                            </li>
+
+                                            <li role="presentation" class="add-session-presentation">
+                                                <a href="javascript:void(0)" aria-controls="" role="tab" data-toggle="tab">
+                                                    <span class="session-id">*</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+
+                                        <div class="tab-content session-list">
+
+                                            <div role="tabpanel" class="tab-pane session active" id="0" form-domain="[]sessions">
+                                                <br/>
+                                                <div class="form-group">
+                                                    <label class="col-md-2 control-label">session名称</label>
+                                                    <div class="col-md-8"><textarea class="form-control" rows="1" form-domain="description"></textarea></div>
+                                                </div>
+
+                                                <div class="treatments">
+                                                    
+                                                </div>
+                                            </div>
+
+                                            <div role="tabpanel" class="tab-pane session empty" id="" form-domain="[]sessions">
+                                                <br/>
+                                                <div class="form-group">
+                                                    <label class="col-md-2 control-label">session名称</label>
+                                                    <div class="col-md-8"><textarea class="form-control" rows="1" form-domain="description"></textarea></div>
+                                                </div>
+
+                                                <div class="treatments">
+                                                    
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-footer">
+                        <button type="submit" class="btn btn-primary" disabled>确认修改</button>
+                        <a type="cancel" class="btn btn-default" href="#">取消</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="col-md-3 col-md-pull-1" style="position: fixed;">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <span class="panel-title">组件</span>
+                </div>
+                <div class="panel-body">
+                    <div class="list-group">
+                        <a class="list-group-item component" href="javascript:void(0)" target="Report">Report</a>
+                    </div>
+                    <div class="list-group">
+                        <a class="list-group-item component" href="javascript:void(0)" target="Intro">Intro</a>
+                    </div>
+                    <div class="list-group">
+                        <a class="list-group-item component" href="javascript:void(0)" target="SealedEnglish">SealedEnglish</a>
+                    </div>
+                    <div class="list-group">
+                        <a class="list-group-item component" href="javascript:void(0)" target="Sessions">Sessions</a>
+                    </div>
+                    <div class="list-group">
+                        <a class="list-group-item component" href="javascript:void(0)" target="End">End</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<script type="text/javascript" language="javascript">
+
+function initDropDrag(){
+    $(".component").draggable({
+        appendTo: "body",
+        helper: "clone"
+    });
+
+    $(".treatments").droppable({
+        activeClass: "ui-state-default",
+        hoverClass: "ui-state-hover",
+        accept: ":not(.ui-sortable-helper)",
+        greedy: true,
+        drop: function( event, ui ) {
+            var target = $(ui.helper.context).attr('target');
+
+            var new_treatment = $(".treatments .treatment.empty").clone(true);
+            new_treatment.removeClass("empty");
+            $(this).append(new_treatment);
+
+            $.post("/exp/newtreatment", data=target, function(res){
+                new_treatment.find("span.treatment-title").html(res.title);
+                new_treatment.find("span.treatment-content").html(res.content);
+            });
+        }
+    });
+
+    $(".treatments").sortable();
+}
+
+$(document).ready(function(){
+
+    initDropDrag();
+
+    // handle add treatment post from server
+    $("a.new-treatment").on("click", function(){
+        var type = $(this).attr("code");
+        $.post("/exp/newtreatment", data={code:type}, function(result){
+            $(".session.active").children("ul.treatment-list").append(result);
+            $("#new-treatment-modal").modal('hide');
+            adjustForm();
+        });
+    });
+
+    // handle remove treatment
+    $(".treatments").on("click", "a.remove-treatment", function(){
+        $(this).parents(".treatment:first").remove();
+    });
+
+    // handle add session
+    $(".nav-tabs").on("click", ".add-session-presentation a", function(){
+        var session_count = $("div.session").length;
+
+        var session_presentation = $("li.add-session-presentation");
+        var new_session_presentation = session_presentation.clone(true);
+
+        session_presentation.removeClass("add-session-presentation");
+        session_presentation.children("a").attr("href", "#session" + session_count);
+        session_presentation.children("a").attr("aria-controls", "session" + session_count);
+        session_presentation.find("span.session-id").html("session");
+        new_session_presentation.appendTo("ul.tab-presentation-list");
+
+        var empty_session = $("div.session.empty");
+        var new_session = empty_session.clone(true);
+
+        empty_session.removeClass("empty");
+        empty_session.attr("id", "session" + session_count);
+
+        new_session.appendTo("div.session-list");
+        empty_session.tab('show');
+    });
+
+});
+</script>
+</body>
+</html>
+
+<!-- // for form name adjust
+adjustForm = function(){
+    // remove form name
+    $("form").find("[form-name]").each(function(i){
+        $(this).removeAttr("form-name");
+    });
+
+    // adjust list form domains
+    $("form").find("[form-domain]").each(function(i){
+        var form_domain = $(this).attr("form-domain");
+        if(form_domain.startsWith("[]")){
+            $("form").find("[form-domain='"+form_domain+"']:not([form-name])").each(function(i){
+                $(this).attr("form-name", i + form_domain);
+            });
+        }
+    });
+
+    // adjust form names
+    $("form").find("input:not([name='_xsrf']), textarea").each(function(i){
+        var prefix = "";
+        var isEmpty = false;
+        $(this).parents("[form-name]").each(function(i){
+            if($(this).hasClass("empty"))
+                isEmpty = true;
+            prefix = $(this).attr("form-name")+ "-" + prefix;
+        });
+        if(! isEmpty){
+            prefix += $(this).attr("form-domain");
+            $(this).attr("name", prefix);
+         }
+    });
+};
+
+function parseExpSettingsForm(data, domains, value){
+    if(domains.length == 1){
+        data[domains[0]] = value;
+    } else {
+    if(domains[0].indexOf("[]") >= 0){
+        var tmp = domains[0].split("[]");
+        var index = parseInt(tmp[0]);
+        var list_name = tmp[1];
+        if(! data[list_name])
+            data[list_name] = new Array();
+            var i = 0;
+            for(; i < data[list_name].length; i++){
+                if(data[list_name][i].id == index)
+                    break;
+            }
+            if(i == data[list_name].length){
+                data[list_name].push({id:index});
+            }
+            data[list_name].sort(function(a, b){return a.id>b.id?1:-1});
+            domains.shift();
+            parseExpSettingsForm(data[list_name][i], domains, value);
+        }else {
+            if(! data[domains[0]])
+                data[domains[0]] = {};
+        parseExpSettingsForm(data[domains[0]], domains, value);
+        }
+    }
+}; 
+
+$("form").submit(function(e){
+        e.preventDefault();
+        adjustForm();
+
+        console.log($("form").serialize());
+        
+        var arguments = $("form").serializeArray();
+        var data = {};
+        for(var i=0; i < arguments.length; i++){
+            parseExpSettingsForm(data, arguments[i].name.split("-"), arguments[i].value);
+        }
+
+        // remove empty sessions(sessions without any treatment)
+        var session_list = new Array();
+        var total_ratio = 0;
+        for(var i=0; i < data.sessions.length; i++){
+            var s = data.sessions[i];
+            if(! s.treatments)
+                continue;
+            // remove treatment which has no items
+            var treatment_list = new Array();
+            for(var j=0; j < s.treatments.length; j++){
+                if(s.treatments[j].items.length > 0){
+                    s.treatments[j].id = treatment_list.length;
+                    treatment_list.push(s.treatments[j])
+                }
+            }
+            s.treatments = treatment_list;
+            if(s.treatments.length > 0){
+                s.id = session_list.length;
+                session_list.push(s);
+                total_ratio += parseFloat(s.ratio);
+            }
+        }
+        data.sessions = session_list;
+
+        // change ratio
+        for(var i=0; i < data.sessions.length; i++){
+            data.sessions[i].ratio = data.sessions[i].ratio / total_ratio * 100;
+        }
+
+        delete data._xsrf
+
+        // alert when no session exists
+        if(data.sessions.length == 0){
+            alert("您并未为实验添加任何treatment");
+        } else{  // post setting to server
+            $.post("", {data: JSON.stringify(data)}, function(result){
+
+            });
+        }
+    });
+
+-->

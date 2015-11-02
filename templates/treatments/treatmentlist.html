@@ -1,0 +1,46 @@
+{% extends '../main.html' %}
+
+{% block title %}
+    treatment列表
+{% end %}
+
+{% block style %}
+    <style type="text/css">
+        .tips {
+            margin-left: 50px;
+        }
+
+        .tips li {
+            margin-bottom: 20px;
+        }
+    </style>
+{% end %}
+
+{% block row %}
+    <div class="col-md-5 col-md-offset-2">
+        <div class="list-group">
+            <a class="list-group-item component" href="/treatment/Report" target="Report">Report</a>
+        </div>
+        <div class="list-group">
+            <a class="list-group-item component" href="/treatment/Intro" target="Intro">Intro</a>
+        </div>
+        <div class="list-group">
+            <a class="list-group-item component" href="/treatment/SealedEnglish" target="SealedEnglish">SealedEnglish</a>
+        </div>
+        <div class="list-group">
+            <a class="list-group-item component" href="/treatment/Sessions" target="Sessions">Sessions</a>
+        </div>
+        <div class="list-group">
+            <a class="list-group-item component" href="/treatment/End" target="End">End</a>
+        </div>
+    </div>
+
+    <div class="well col-md-3 tips">
+        <p>提示:</p>
+        <ul>
+            <li>共5种treatment，点击查看详情。</li>
+            <li>这些treatment作为实验的基本组件，可用于创建新实验。</li>
+            <li>需要新式的treatment？请<a>联系我们</a>。</li>
+        </ul>
+    </div>
+{% end %}

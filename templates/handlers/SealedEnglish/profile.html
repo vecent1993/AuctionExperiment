@@ -1,0 +1,52 @@
+<style>
+    form {
+        margin-top: 40px;
+    }
+</style>
+
+<div class="page-header col-md-offset-1 col-md-10">
+    <h3>填写个人信息</h3>
+</div>
+
+<form method="post" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-md-2 control-label">学号</label>
+        <div class="col-md-5"><input type="text" class="form-control" name="studentno" placeholder="学号" required
+                pattern="^[a-zA-Z]\d{3,10}" oninput="setCustomValidity('');" oninvalid="setCustomValidity('必须输入格式正确的学号');"></div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2">
+            <div class="checkbox">
+                <label><input type="checkbox" name="skilled">之前有接触过拍卖或彩票一类实验</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2">
+            <button class="btn btn-primary" type="submit" role="button">确认</button>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" language="javascript">
+
+$(document).ready(function(){
+    $("form").submit( function(e){
+        event.preventDefault();
+        $("form button[type='submit']").attr("disabled", "disabled");
+        $("form button[type='submit']").html("提交中");
+        var form_array = $(this).serializeArray();
+        var data = {};
+        for(var i = 0; i < form_array.length; i++)
+            data[form_array[i].name] = form_array[i].value;
+        send({'cmd': 'profile', 'data': data});
+    });
+
+    ws.handler.deny = function(data, evt){
+        alert(data);
+        $("form button[type='submit']").html(data);
+    };
+});
+
+</script>
+

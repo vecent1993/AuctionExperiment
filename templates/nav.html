@@ -1,4 +1,3 @@
-
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
@@ -9,18 +8,18 @@
         <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand" href="/"><img src="/static/img/auction.png" style="width: 20px;"></a>
+      <a class="navbar-brand" href="/"><span>拍卖实验系统</span></a>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav navbar-right">
           <li><a href="/self">个人主页</a></li>
-          <li><a href="/explist">实验列表</a></li>
-          <li><a href="/baseexplist">基本实验列表</a></li>
+          <li><a href="/treatmentlist">treatment列表</a></li>
           <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">账户<span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
                 {% if not current_user %}
-                  <li><a href="/account/login?next={{ request.uri }}">登录</a></li>
+                  <li><a href="/?next={{ request.uri }}">登录</a></li>
                   <li><a href="/account/register">注册</a></li>
                 {% else %}
                   <li><a href="/account/">{{ current_user['user_name'] }}</a></li>

@@ -1,0 +1,252 @@
+{% extends '../main.html' %}
+
+{% block title %}
+    {% if train %}训练{% else %}正式试验{% end %}-{{ exp['exp_title'] }}
+{% end %}
+
+{% block style %}
+    <style type="text/css">
+        .timer span.countdown {
+            font-family: Helvetica, Microsoft YaHei, Arial, sans-serif;
+            font-size: 20px;
+            color: #151515;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            font-size: 20px;
+            float: right;
+            margin-right: 100px;
+        }
+
+        .toolbar a {
+            /* margin-right: 10px; */
+        }
+
+        .info {
+            padding: 0px 30px;
+            border-left: 1px solid #eee;
+        }
+
+        .info h4 {
+            background-color: #F3F3F3;
+            padding: 8px;
+        }
+
+        p {
+            text-indent: 2em;
+        }
+
+        .account-info {
+            margin-bottom: 20px;
+        }
+
+        /*.chat {
+            position: fixed;
+            right: 50px;
+            bottom: 10px;
+            width: 20%;
+        }
+
+        .chat ul {
+            overflow-y: auto;
+            height: 200px;
+        }
+
+        .empty {
+            display: none;
+        }*/
+
+    </style>
+{% end %}
+
+{% block row %}
+    <div class="toolbar">
+        <a href="javascript:void(0)" title="聊天室">
+            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+        </a>
+        <a href="/help" target="_blank" title="FAQ">
+            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+        </a>
+        <a href="javascript:void(0)" class="show-introduction" title="实验说明">
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+        </a>
+        <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
+            <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
+        </a>
+    </div>
+
+    <div class="col-md-7 col-md-offset-1" id="main">
+        {% module xsrf_form_html() %}
+    </div>
+
+    <div class="info col-md-3">
+        <div class="account-info">
+            <h4>账户信息</h4>
+            <p>邮箱: {{ current_user['user_email'] }}</p>
+            <p>用户名: {{ current_user['user_name'] }}</p>
+            <p>性别: {% if current_user['user_gender'] == '0' %}男
+                {% else %}女{% end %}</p>
+            <p>年龄: {{ current_user['user_age'] }}</p>
+            <p>身份: {% if current_user['user_identity'] == '0' %}学生
+                {% else %}其他{% end %}</p>
+        </div>
+        <div class="exp-info">
+            <h4>实验信息</h4>
+            <p>标题: {{ exp['exp_title'] }}</p>
+            <p style="overflow-y: auto; max-height: 120px; width: 90%">{{ exp['exp_des'] }}</p>
+            <p>
+                对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
+            </p>
+            <p>
+                {% if not train%}还不熟悉流程？<a href="/exp/{{ exp['exp_id'] }}/train" target="_blank">前往训练</a>{% end %}
+                或者查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="modal fade introduction" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">实验说明</h4>
+                </div>
+                <div class="modal-body">
+                    {% raw exp['exp_intro'] %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--<div class="chat">-->
+        <!--<ul class="list-unstyled well well-sm">-->
+            <!--<li class="chat-msg empty"></li>-->
+        <!--</ul>-->
+        <!--<form>-->
+            <!--<input type="text"value="">-->
+            <!--<button class="btn btn-primary send-chat-msg" type="submit">提交</button>-->
+        <!--</form>-->
+    <!--</div>-->
+
+    <script type="text/javascript" language="javascript">
+
+        function getCookie(name) {
+            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+            return r ? r[1] : undefined;
+        };
+
+        $.post = function(url, args, callback) {
+            args._xsrf = getCookie("_xsrf");
+            $.ajax({url: url, data: $.param(args), dataType: "text", type: "POST",
+                success: function(response) {
+                    callback(response);
+                }
+            });
+        };
+
+        function Timer(seconds, id, func){
+            this.seconds = seconds;
+            this.elementId = id;
+            this.func = func;
+            this.start = function(){
+                that.countDown();
+                that.timer = setInterval(that.countDown, 1000);
+            };
+            this.timeout = function(){
+                if(that.func)
+                    that.func();
+            };
+            var that = this;
+            this.countDown = function(){
+                $("#"+that.elementId+" span.countdown").html(that.seconds);
+                if(that.seconds == 0){
+                    that.stop();
+                    that.timeout();
+                } else {
+                    that.seconds--;
+                }
+            }
+            this.stop = function(){
+                clearInterval(that.timer);
+            };
+            this.set = function(seconds){
+                that.stop();
+                that.seconds = seconds;
+                that.start();
+            };
+            this.hide = function(){
+                $("#"+that.elementId).hide();
+            };
+            this.show = function(){
+                $("#"+that.elementId).show();
+            }
+        }
+
+
+        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket/{% if train %}train{% else %}official{% end %}");
+
+        var send = function (data, callback) {
+            waitForConnection(function () {
+                ws.send( JSON.stringify(data) );
+                if (typeof callback !== 'undefined') {
+                    callback();
+                }
+            }, 5);
+        };
+
+        var waitForConnection = function (callback, interval) {
+            if (ws.readyState === 1) {
+                callback();
+            } else {
+                setTimeout(function () {
+                    waitForConnection(callback, interval);
+                }, interval);
+            }
+        };
+
+        function msgHandler(ws){
+            var that = this;
+            ws.onmessage = function (evt) {
+                msg = JSON.parse(evt.data);
+                if( that[msg.cmd] ){
+                    that[msg.cmd](msg.data, evt);
+                }
+            };
+        };
+
+        ws.handler = new msgHandler(ws)
+
+        $(document).ready(function(){
+            $("a.show-introduction").on("click", function(){
+                $(".modal.introduction").modal('toggle');
+            });
+
+            ws.handler.replace = function(data, evt){
+                $("#main").html(data);
+            };
+
+            ws.handler.refresh = function(data, evt) {
+                send( {cmd: 'get'} );
+            };
+
+            ws.handler.redirect = function(data, evt){
+                document.location.href = data;
+            };
+
+            ws.handler.error = function(data, evt){
+                console.log(data);
+            }
+
+            send( {cmd: 'get'} );
+
+            var heartbeat = setInterval(send, 30000, {'cmd': 'heartbeat'});
+        });
+
+    </script>
+{% end %}

@@ -1,0 +1,86 @@
+{% extends 'main.html' %}
+
+{% block title %}
+    拍卖实验
+{% end %}
+
+{% block style %}
+    <style type="text/css">
+        body {
+            background: url(/static/img/loginbg.jpg);
+            background-size: 100%;
+            background-repeat: no-repeat;
+        }
+
+        .input-form {
+            margin-top: 15%;
+        }
+    </style>
+{% end %}
+
+{% block row %}
+    {% if not current_user %}
+    <form method="post" class='col-md-3 col-md-offset-8 input-form'>
+        {% module xsrf_form_html() %}
+        <div class="form-group">
+            <label>邮箱</label>
+            <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
+        </div>
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">登陆</button>
+            <label>还没有账号？请<a href="/account/register">注册</a></label>
+        </div>
+    </form>
+    {% end %}
+
+    <script>
+        function getCookie(name) {
+            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+            return r ? r[1] : undefined;
+        };
+
+        $.post = function(url, args, callback) {
+            args._xsrf = getCookie("_xsrf");
+            $.ajax({url: url, data: $.param(args), dataType: "json", type: "POST",
+                success: function(response) {
+                    callback(response);
+                }
+            });
+        };
+
+        function formData(selector){
+            var args = $(selector).serializeArray();
+            var data = {};
+            for(var i=0; i < args.length; i++){
+                data[args[i].name] = args[i].value;
+            }
+            return data;
+        };
+
+        $(document).ready(function(){
+            $("form").submit(function(){
+                $("form button[type='submit']").attr("disabled", "disabled");
+                $("form button[type='submit']").html("正在登陆");
+                $.post("", formData("form"), function(res){
+                    $("form button[type='submit']").removeAttr("disabled");
+                    $("form button[type='submit']").html("登陆");
+                    if(res.errors){
+                        for(var i=0; i < res.errors.length; i++){
+                            var field = document.getElementsByName(res.errors[i].name)[0];
+                            field.setCustomValidity(res.errors[i].reason);
+                            field.reportValidity();
+                        }
+                    }
+                    else{
+                        document.location.href = res.redirect;
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+{% end %}

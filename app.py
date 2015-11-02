@@ -10,16 +10,11 @@ from tornado.options import define, options
 import torndb
 
 from account import *
-from baseexps import *
+from treatments import *
 from expmanage import *
 from expon import *
 from self import *
 from help import *
-
-
-class IndexHandler(BaseHandler):
-    def get(self):
-        self.render('index.html')
 
 
 class Application(tornado.web.Application):
@@ -34,8 +29,8 @@ class Application(tornado.web.Application):
 
             (r"/self", SelfHandler),
 
-            (r"/baseexplist", BaseExpListHandler),
-            (r"/baseexp/(.*)", BaseExpHandler),
+            (r"/treatmentlist", TreatmentListHandler),
+            (r"/treatment/(.*)", TreatmentHandler),
 
             (r"/exp/new", NewExpHandler),
             (r"/exp/newtreatment", NewTreatmentHandler),
@@ -53,15 +48,14 @@ class Application(tornado.web.Application):
             (r"/exp/(\d+)/inprogress", ExpInProgressHandler),
             (r"/exp/(\d+)/train", ExpInProgressHandler, dict(train=True)),
 
-            (r"/help/exp", ExpHelpHandler),
-            (r"/help/newexp", NewExpHelpHandler),
+            (r"/help", HelpHandler),
         ]
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             xsrf_cookies=True,
             cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
-            login_url="/account/login",
+            login_url="/",
             autoload=False,
         )
         super(Application, self).__init__(handlers, **settings)

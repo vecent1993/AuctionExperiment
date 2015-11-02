@@ -1,0 +1,312 @@
+{% extends '../main.html' %}
+
+{% block title %}
+    {{ exp['exp_title'] }}--实验配置
+{% end %}
+
+{% block js %}
+    <script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" language="javascript" src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+{% end %}
+
+{% block style %}
+    <style type="text/css">
+        body {
+            background-color: #c0c0c0;
+        }
+
+        .treatments {
+            min-height: 200px;
+            padding-bottom: 30px;
+            padding-top: 30px;
+        }
+
+        .treatment {
+            background-color: white;
+        }
+
+        .treatment .remove-treatment {
+            float: right;
+            color: #C50202;
+        }
+
+        .treatment .treatment-content {
+            margin-top: 10px;
+        }
+
+        .empty {
+            display: none;
+        }
+
+    </style>
+{% end %}
+
+{% block row %}
+    <div class="col-md-7 col-md-push-1">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="panel-title">实验设置</span>
+                <a href="/help" target="_blank">
+                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" style="float:right; color:white;"></span>
+                </a>
+            </div>
+            <form class="form-horizontal new-exp" action="" method="post">
+                <div class="panel-body" form-domain="exp">
+                    {% module xsrf_form_html() %}
+
+                    {% block baseinfo %}
+                    <div class="exp-info">
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">实验标题</label>
+                            <div class="col-md-8"><input type="text" class="form-control" form-domain="title" value="{{ settings['title'] }}" required></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">实验描述</label>
+                            <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="des" required>{{ settings['des'] }}</textarea></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">实验说明</label>
+                            <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="intro">{{ settings['intro'] }}</textarea></div>
+                        </div>
+                    </div>
+                    {% end %}
+
+                    <div class="treatments">
+
+                        <div class="well treatment empty" form-domain="[]treatments">
+                            <input type="hidden" form-domain="code" value="">
+                            <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                            <span class="treatment-title"></span>
+                            <div class="treatment-content" form-domain="data">
+                                <span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color: green;" title="加载中。。。"></span>
+                            </div>
+                        </div>
+
+                        {% for treatment in settings['treatments'] %}
+                        <div class="well treatment" form-domain="[]treatments">
+                            {% set t = getTreatment(treatment['code'])(treatment) %}
+                            <input type="hidden" form-domain="code" value="{{ treatment['code'] }}">
+                            <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                            <span class="treatment-title">{{ t['title'] }}</span>
+                            <div class="treatment-content" form-domain="data">
+                                {% raw t.content %}
+                            </div>
+                        </div>
+                        {% end %}
+
+                    </div>
+
+                </div>
+
+                <div class="panel-footer">
+                    {% block footer_buttons%}
+                        <button type="submit" class="btn btn-primary">确认修改</button>
+                        <a type="cancel" class="btn btn-default" href="/exp/{{ exp['exp_id'] }}">取消</a>
+                    {% end %}
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <div class="col-md-3 col-md-pull-1" style="position: fixed;">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="panel-title">组件</span>
+            </div>
+            <div class="panel-body">
+                <div class="list-group">
+                    <a class="list-group-item component" href="javascript:void(0)" target="Report">Report</a>
+                </div>
+                <div class="list-group">
+                    <a class="list-group-item component" href="javascript:void(0)" target="Intro">Intro</a>
+                </div>
+                <div class="list-group">
+                    <a class="list-group-item component" href="javascript:void(0)" target="SealedEnglish">SealedEnglish</a>
+                </div>
+                <div class="list-group">
+                    <a class="list-group-item component" href="javascript:void(0)" target="Sessions">Sessions</a>
+                </div>
+                <div class="list-group">
+                    <a class="list-group-item component" href="javascript:void(0)" target="End">End</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" language="javascript">
+        // add startsWith function to javascript Strings
+        String.prototype.startsWith = function(compareStr){
+            return this.indexOf(compareStr) == 0;
+        }
+
+        // for get value from cookies
+        function getCookie(name) {
+          var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+          return r ? r[1] : undefined;
+        };
+
+        // add _xsrf when ajax post
+        $.post = function(url, args, callback) {
+            args._xsrf = getCookie("_xsrf");
+            $.ajax({url: url, data: args, dataType: "json", type: "POST",
+                success: function(response) {
+                callback(response);
+            }});
+        };
+
+        function initDropDrag(){
+            $(".component").draggable({
+                appendTo: "body",
+                helper: "clone"
+            });
+
+            $(".treatments").droppable({
+                activeClass: "ui-state-default",
+                hoverClass: "ui-state-hover",
+                accept: ":not(.ui-sortable-helper)",
+                greedy: true,
+                drop: function( event, ui ) {
+                    var target = $(ui.helper.context).attr('target');
+
+                    var new_treatment = $(".treatments .treatment.empty").clone(true);
+                    new_treatment.removeClass("empty");
+                    $(this).append(new_treatment);
+
+                    $.post("/exp/newtreatment", data={target: target}, function(res){
+                        new_treatment.find("input:first").val(res.code);
+                        new_treatment.find("span.treatment-title").html(res.title);
+                        new_treatment.find("div.treatment-content").html(res.content);
+                        initDropDrag();
+                        adjustForm();
+                    });
+                }
+            });
+
+            $(".treatments").sortable();
+        }
+
+        function adjustForm(){
+
+            // remove form name
+            $("form").find("[form-name]").each(function(i){
+                $(this).removeAttr("form-name");
+            });
+
+            // adjust list form domains
+            $("form").find("[form-domain]:not('.empty')").each(function(i){
+                var form_domain = $(this).attr("form-domain");
+                if(form_domain.startsWith("[]")){
+                    $(this).parent().children("[form-domain='"+form_domain+"']:not('.empty')").each(function(i){
+                        $(this).attr("form-name", i + form_domain);
+                    });
+                }
+            });
+
+            // adjust form names
+            $("form").find("input:not([name='_xsrf']), textarea, select").each(function(i){
+                var prefix = "";
+                var isEmpty = false;
+                $(this).parents("[form-name]").each(function(i){
+                    if($(this).hasClass("empty"))
+                        isEmpty = true;
+                    prefix = $(this).attr("form-name")+ "-" + prefix;
+                });
+                if(! isEmpty){
+                    prefix += $(this).attr("form-domain");
+                    $(this).attr("name", prefix);
+                 }
+            });
+
+            //
+            $("form .empty input").removeAttr("name");
+        }
+
+        function parseExpSettingsForm(data, domains, value){
+            if(domains.length == 1){
+                data[domains[0]] = value;
+            } else {
+            if(domains[0].indexOf("[]") >= 0){
+                var tmp = domains[0].split("[]");
+                var index = parseInt(tmp[0]);
+                var list_name = tmp[1];
+                if(! data[list_name])
+                    data[list_name] = new Array();
+                    var i = 0;
+                    for(; i < data[list_name].length; i++){
+                        if(data[list_name][i].id == index)
+                            break;
+                    }
+                    if(i == data[list_name].length){
+                        data[list_name].push({id:index});
+                    }
+                    data[list_name].sort(function(a, b){return a.id>b.id?1:-1});
+                    domains.shift();
+                    parseExpSettingsForm(data[list_name][i], domains, value);
+                }else {
+                    if(! data[domains[0]])
+                        data[domains[0]] = {};
+                    parseExpSettingsForm(data[domains[0]], domains, value);
+                }
+            }
+        };
+
+        $(document).ready(function(){
+
+            initDropDrag();
+
+            // handle remove treatment
+            $(".treatments").on("click", "a.remove-treatment", function(){
+                adjustForm();
+                $(this).parents(".treatment:first").remove();
+            });
+
+            // handle add session
+            $(".treatments").on("click", ".add-session-presentation a", function(){
+                var session_count = $("div.session").length;
+
+                var session_presentation = $("li.add-session-presentation");
+                var new_session_presentation = session_presentation.clone(true);
+
+                session_presentation.removeClass("add-session-presentation");
+                session_presentation.children("a").attr("href", "#session" + session_count);
+                session_presentation.children("a").attr("aria-controls", "session" + session_count);
+                session_presentation.find("span.session-id").html("session");
+                new_session_presentation.appendTo("ul.tab-presentation-list");
+
+                var empty_session = $("div.session.empty");
+                var new_session = empty_session.clone(true);
+
+                empty_session.removeClass("empty");
+                empty_session.attr("id", "session" + session_count);
+
+                new_session.appendTo("div.session-list");
+                empty_session.tab('show');
+            });
+
+            $("form").submit(function(e){
+                e.preventDefault();
+                adjustForm();
+
+                var arguments = $("form").serializeArray();
+                var data = {};
+                for(var i=0; i < arguments.length; i++){
+                    parseExpSettingsForm(data, arguments[i].name.split("-"), arguments[i].value);
+                }
+
+                delete data._xsrf
+
+                $.post("", {data: JSON.stringify(data)}, function(res){
+                    if(res.redirect)
+                        window.location.href = res.redirect;
+                    else if(res.error)
+                        alert(res.error);
+                });
+
+            });
+
+        });
+    </script>
+{% end %}
