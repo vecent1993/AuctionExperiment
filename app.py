@@ -19,8 +19,19 @@ from help import *
 
 class Application(tornado.web.Application):
     def __init__(self):
+        settings = dict(
+            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            xsrf_cookies=True,
+            cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+            login_url="/",
+            autoload=False,
+        )
+
         handlers = [
             (r"/", IndexHandler),
+
+            (r"/(favicon\.ico)", tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
 
             (r"/account/login", LoginHandler),
             (r"/account/logout", LogoutHandler),
@@ -50,14 +61,7 @@ class Application(tornado.web.Application):
 
             (r"/help", HelpHandler),
         ]
-        settings = dict(
-            template_path=os.path.join(os.path.dirname(__file__), "templates"),
-            static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=True,
-            cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
-            login_url="/",
-            autoload=False,
-        )
+
         super(Application, self).__init__(handlers, **settings)
 
         self.redis = client.Redis()

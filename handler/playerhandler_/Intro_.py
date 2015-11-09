@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from tornado.template import Template
-
 from playerhandler import PlayerHandler, onWs, onRedis
 
 
@@ -28,16 +26,6 @@ class Intro(PlayerHandler):
         self.writeCmd('replace', self.env.render('handlers/SealedEnglish/intro.html',
                                                           exp=exp, substage=substage))
 
-    @onWs
-    def register(self, data):
-        try:
-            self.env.db.insert('insert into player(user_id,exp_id) '
-                               'values(%s,%s)', self.player.pid, self.player.expid,
-                               )
-        except:
-            pass
-        self.publish('addPlayer', 'pool', dict(pid=self.player.pid, username=self.player['username']))
-
     @onRedis('player')
     def changeStage(self, data):
         stage = self.player.get('stage', refresh=True)
@@ -49,13 +37,3 @@ class Intro(PlayerHandler):
         stages = stage.split(':')
         if len(stages) > 1:
             self.writeCmd(stages[1])
-
-    @onRedis('player')
-    def deny(self, data):
-        self.writeCmd('deny', '实验已开始')
-
-    @staticmethod
-    def renderInfo(player):
-        return Template("""
-            用户名：{{ player['username'] }}<br/>
-        """).generate(player=player)

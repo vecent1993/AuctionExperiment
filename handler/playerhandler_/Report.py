@@ -43,6 +43,4 @@ class Report(PlayerHandler):
     def renderInfo(player):
         return Template("""
             用户名：{{ player['username'] }}<br/>
-            学号：{{ player['studentno'] }}<br/>
-            之前接触到此类实验：{% if 'skilled' in player %}是{% else %}否{% end %}<br/>
         """).generate(player=player)

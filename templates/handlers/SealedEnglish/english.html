@@ -1,18 +1,7 @@
 <style type="text/css">
 
-    .problem {
-        margin-top: 10px;
-        margin-bottom: 80px;
-    }
-
-    .problem p{
+    .problem{
         font-size: 20px;
-        text-indent: 2em;
-    }
-
-    .bid-msg-list {
-        margin-top: 10px;
-        margin-left: 20px;
     }
 
     .bid-msg-list ul {
@@ -30,7 +19,6 @@
     }
 
     .timer {
-        margin-left: 10px;
         display: none;
     }
 
@@ -38,7 +26,6 @@
         margin-top: 10px;
         display: inline-block;
         float: right;
-        margin-right: 20px;
     }
 
     .page-header h3 {
@@ -47,13 +34,19 @@
 
     .result {
         display: none;
+        font-size: 20px;
+    }
+
+    .highlight {
+        color: red;
     }
 
 </style>
 
 <div class="page-header col-md-offset-1 col-md-10">
     <h3>
-        {% if q is None %}第二阶段{% else %}第三阶段{% end %}（英式公开拍卖阶段）{% if train %}<a class="back" href="javascript:void(0)"><small>返回</small></a>{% end %}
+        {% if q is None %}第二阶段{% else %}第三阶段{% end %}（英式公开拍卖）
+        {% if train %}<a class="back" href="javascript:void(0)"><small>返回</small></a>{% end %}
     </h3>
     <div class="timers col-md-2">
         <div class="timer" id="totalT">
@@ -68,7 +61,30 @@
     </div>
 </div>
 
-<div class=" col-md-offset-1 col-md-10">
+<div class="col-md-offset-1 col-md-10">
+
+    <div class="box effect7 problem">
+        <ul>
+            <li>
+                竞拍者公开相互叫价，每次出价都要比前一次的出价更高（规定至少要比前一个价格高0.1），
+                当30秒没有人再出更高的价或者到达拍卖截止时间（3分钟）时，拍卖结束，当前出价最高者成为的赢家，赢家需支付其报出的价格。</li>
+            <li>
+                本次阶段拍卖物<span class="highlight">价值q{% if q is None %}服从6-10的均匀分布{% else %}={{ q }}{% end %}</span>，
+                所有竞拍者的成本c均服从0-4的均匀分布。也就是说，物品对您的真实价值为q-c。
+                如果实验结束后，是你最后报价（记为b），那么你将支付b并赢得物品，你的收益为(q-c)-b；
+                否则，你的收益是0。
+            </li>
+            <li>请在下面的输入框写上您对物品的报价，并进行提交。</li>
+        </ul>
+    </div>
+
+    <div class="well well-sm problem">
+        <ul>
+            <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>，也就是说该物品对你的<span class="highlight">真实价值
+               q-c{% if q is None %}在{{ 6-player['cost'] }}到{{ 10-player['cost'] }}之间{% else %}为{{ q-player['cost'] }}{% end %}</span>。
+            </li>
+        </ul>
+    </div>
 
     <div class="list-unstyled bid-msg-list">
         <p>竞价历史：</p>
@@ -80,32 +96,33 @@
         </ul>
     </div>
 
-    <form class="form-inline problem">
-        {% if q is None %}
-            <p>一物品的价值q服从6-10的均匀分布，所有竞拍者使用这一物品的成本c均服从0-4的均匀分布。特别的，您使用这个物品的成本为{{ player['cost'] }}。
-            现在开始拍卖该物品，报价步长为0.1，拍卖总时间为3分钟</p>
-        {% else %}
-            <p>一物品的价值为{{ q }}，所有竞拍者使用这一物品的成本c均服从0-4的均匀分布。特别的，您使用这个物品的成本为{{ player['cost'] }}。
-            现在开始拍卖该物品，报价步长为0.1，拍卖总时间为3分钟。</p>
-        {% end %}
-        <div class="form-group col-md-3">
-            <div class="input-group">
-                <input type="number" class="form-control" aria-describedby="addon" name="bid" required oninput="setCustomValidity('');" value="{% if bids %}{{ bids[-1]['bid']+0.1 }}{% else %}0.1{% end %}"
-                       min="{% if bids %}{{ bids[-1]['bid']+0.1 }}{% else %}0.1{% end %}" max="10" step="0.1" oninvalid="setCustomValidity('必须输入'+this.min+'到'+this.max+'整数或一位小数');">
-                <span class="input-group-addon" id="addon">点</span>
+    <div  style="margin-bottom: 20px;">
+        <form class="form-inline">
+            <div class="form-group col-md-3 has-success">
+                <div class="input-group">
+                    <input type="number" class="form-control input-lg" aria-describedby="addon" name="bid" required oninput="setCustomValidity('');" value="{% if bids %}{{ bids[-1]['bid']+0.1 }}{% else %}0.1{% end %}"
+                           min="{% if bids %}{{ bids[-1]['bid']+0.1 }}{% else %}0.1{% end %}" max="10" step="0.1" oninvalid="setCustomValidity('必须输入'+this.min+'到'+this.max+'整数或一位小数');">
+                    <span class="input-group-addon" id="addon">点</span>
+                </div>
             </div>
-        </div>
-        <div class="col-md-1"><button class="btn btn-primary" type="submit" role="button">提交</button></div>
-    </form>
+            <div class="form-group">
+                <div class="col-sm-1">
+                    <button class="btn btn-primary" type="submit" role="button">提交</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-    <div class="well well-lg result">
+    <div class="well result">
 
     </div>
 
 </div>
 
 {% if train %}
-<div class="alert alert-warning col-md-offset-1 col-md-10" role="alert">欢迎您进行训练，注意：此时您的对手是一个AGENT。</div>
+<div class="alert alert-warning col-md-offset-1 col-md-10" role="alert" style="margin-top: 20px;">
+    欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
+</div>
 {% end %}
 
 <script type="text/javascript" language="javascript">
@@ -141,6 +158,7 @@ $(document).ready(function(){
             enableForm("form");
         }
         $(".message.empty").before(new_message);
+        $(".bid-msg-list ul").scrollTop( $('.bid-msg-list ul')[0].scrollHeight );
         send( {cmd:'gettimeout', data:{'name': 'englisheach'}} );
     };
 

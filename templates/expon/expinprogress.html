@@ -1,5 +1,10 @@
 {% extends '../main.html' %}
 
+{% block css %}
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/css/custom.css" rel="stylesheet">
+{% end %}
+
 {% block title %}
     {% if train %}训练{% else %}正式试验{% end %}-{{ exp['exp_title'] }}
 {% end %}
@@ -16,16 +21,13 @@
         .toolbar {
             font-size: 20px;
             float: right;
-            margin-right: 100px;
-        }
-
-        .toolbar a {
-            /* margin-right: 10px; */
+            margin-right: 50px;
         }
 
         .info {
             padding: 0px 30px;
             border-left: 1px solid #eee;
+            margin-top: 40px
         }
 
         .info h4 {
@@ -36,6 +38,10 @@
         p {
             text-indent: 2em;
         }
+
+        /* .well {
+            background-color: #F5F5DC;
+        } */
 
         .account-info {
             margin-bottom: 20px;
@@ -94,7 +100,9 @@
         <div class="exp-info">
             <h4>实验信息</h4>
             <p>标题: {{ exp['exp_title'] }}</p>
-            <p style="overflow-y: auto; max-height: 120px; width: 90%">{{ exp['exp_des'] }}</p>
+            <div style="overflow-y: auto; max-height: 250px;">
+                {% raw exp['exp_des'] %}
+            </div>
             <p>
                 对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
             </p>
@@ -115,7 +123,9 @@
                     <h4 class="modal-title">实验说明</h4>
                 </div>
                 <div class="modal-body">
-                    {% raw exp['exp_intro'] %}
+                    <div class="box effect7">
+                        {% raw exp['exp_intro'] %}
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>

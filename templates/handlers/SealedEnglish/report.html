@@ -1,13 +1,5 @@
 
 <style type="text/css">
-    body {
-        background-color: #c0c0c0;
-    }
-
-    .shuffle {
-        margin-top: 40px;
-    }
-
     div.players {
         width: 100%;
     }
@@ -46,32 +38,34 @@
 
 </style>
 
-<div class="panel panel-primary shuffle">
-    <div class="panel-heading">
-        <h3 class="panel-title">确认报到</h3>
+<div class="">
+    <div class="page-header">
+        <h3>
+            确认报到
+        </h3>
     </div>
-    <div class="panel-body">
-        <div class="players well well-sm">
-            <div class="well-title">用户池<span class="badge"></span></div>
-            <div class="well-content pool">
 
-                {% for pid in pool['pool'] %}
-                    {% if pid in players %}
-                    <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
-                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                        <span class="playername">{{ players[pid]['username'] }}</span>
-                    </div>
-                    {% end %}
-                {% end %}
+    <div class="players well well-sm">
+        <div class="well-title">用户池<span class="badge"></span></div>
+        <div class="well-content pool">
 
-            </div>
-            <div class="well player empty online">
+            {% for pid in pool['pool'] %}
+            {% if pid in players %}
+            <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
                 <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                <span class="playername"></span>
+                <span class="playername">{{ players[pid]['username'] }}</span>
             </div>
+            {% end %}
+            {% end %}
+
+        </div>
+        <div class="well player empty online">
+            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+            <span class="playername"></span>
         </div>
     </div>
-    <div class="panel-footer">
+
+    <div class="">
         <a class="btn btn-primary start" href="javascript:void(0)">确认</a>
     </div>
 </div>

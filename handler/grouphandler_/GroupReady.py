@@ -17,7 +17,7 @@ class GroupReady(GroupHandler):
 
         for pid in filter(lambda pid: not pid.startswith('agent'),  self.value['players'].keys()):
             player = util.pool.Player(self.redis, self.expid, pid)
-            stage = player['stage']
+            stage = player['stage'].split(':')[0]
             player.set('stage', stage+':GroupReady')
             self.publish('changeStage', ':'.join(('player', self.expid, pid)))
 

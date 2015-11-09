@@ -1,5 +1,5 @@
 <style>
-    .intro p{
+    .intro{
         font-size: 20px;
         text-indent: 2em;
     }
@@ -10,16 +10,23 @@
 </div>
 
 <div class="intro col-md-offset-1 col-md-10">
-    <p>
-        每轮实验总共有三个部分组成，分别是第二价格密封拍卖，英式升价拍卖（价值隐藏），英式升价拍卖（价值公开）。请选择
-        需要训练的部分。注意，训练旨在让您熟悉相应的操作和概念，训练时，系统会自动为您分配一个AGENT。训练与正式试验并不完全一致。
-    </p>
+
+    <div class="well">
+        <p>训练旨在让您熟悉相应的操作和概念，与正式实验并不完全一致。训练时你的对手是一个智能agent，而正式实验时你将面对真实报价人。</p>
+        <p>本实验包含三个阶段，请在仔细阅读实验说明之后选择需要训练的阶段进行练习。</p>
+    </div>
+
+    <div class="box effect7">
+        {% raw exp['exp_intro'] %}
+    </div>
+
     <div class="btn-group btn-group-lg" role="group">
-        <button type="button" class="btn btn-default sealed">第二价格密封</button>
-        <button type="button" class="btn btn-default english">公开（价值隐藏）</button>
-        <button type="button" class="btn btn-default englishopen">公开（价值公开）</button>
+        <button type="button" class="btn btn-default sealed">第一阶段</button>
+        <button type="button" class="btn btn-default english">第二阶段</button>
+        <button type="button" class="btn btn-default englishopen">第三阶段</button>
     </div>
 </div>
+
 <script type="text/javascript" language="javascript">
 
 $("button.sealed").on("click", function(){

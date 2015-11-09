@@ -4,6 +4,19 @@
     拍卖实验
 {% end %}
 
+{% block css %}
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/owl.carousel.css">
+<link rel="stylesheet" href="/static/css/captionss.min.css">
+<link rel="stylesheet" href="/static/css/owl.theme.css">
+{% end %}
+
+{% block js %}
+<script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/owl.carousel.min.js"></script>
+{% end %}
+
 {% block style %}
     <style type="text/css">
         body {
@@ -15,26 +28,90 @@
         .input-form {
             margin-top: 15%;
         }
+
+        .home {
+            margin-top: 3%;
+        }
+
+
     </style>
 {% end %}
 
 {% block row %}
+    <div class="{% if not current_user %}col-md-offset-1 col-md-7
+                {% else %}col-md-offset-2 col-md-8 {% end %} home">
+
+        <!--<div class="fade">-->
+            <!--<div align="center">-->
+                <!--<figure class="embed hide-smooth dark small">-->
+                    <!--<img src="/static/img/expon.png" alt=""/>-->
+                    <!--<figcaption>-->
+                        <!--参与拍卖实验-->
+                    <!--</figcaption>-->
+                <!--</figure>-->
+            <!--</div>-->
+            <!--<div align="center">-->
+                <!--<figure class="embed hide-smooth dark">-->
+                    <!--<img src="/static/img/train.png" alt=""/>-->
+                    <!--<figcaption>-->
+                        <!--在线训练-->
+                    <!--</figcaption>-->
+                <!--</figure>-->
+            <!--</div>-->
+            <!--<div align="center">-->
+                <!--<figure class="embed hide-smooth dark">-->
+                    <!--<img src="/static/img/newexp.png" alt=""/>-->
+                    <!--<figcaption>-->
+                        <!--创建新实验-->
+                    <!--</figcaption>-->
+                <!--</figure>-->
+            <!--</div>-->
+            <!--<div align="center">-->
+                <!--<figure class="embed hide-smooth dark">-->
+                    <!--<img src="/static/img/shuffle.png" alt=""/>-->
+                    <!--<figcaption>-->
+                        <!--分组-->
+                    <!--</figcaption>-->
+                <!--</figure>-->
+            <!--</div>-->
+            <!--<div align="center">-->
+                <!--<figure class="embed hide-smooth dark">-->
+                    <!--<img src="/static/img/monitor.png" alt=""/>-->
+                    <!--<figcaption>-->
+                        <!--实时监控-->
+                    <!--</figcaption>-->
+                <!--</figure>-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<script type="text/javascript">-->
+            <!--$(document).ready(function(){-->
+               <!--$('.fade').owlCarousel({-->
+                   <!--'singleItem': true,-->
+                   <!--'stopOnHover': true,-->
+                   <!--'autoPlay': 3000,-->
+               <!--});-->
+            <!--});-->
+        <!--</script>-->
+
+    </div>
     {% if not current_user %}
-    <form method="post" class='col-md-3 col-md-offset-8 input-form'>
-        {% module xsrf_form_html() %}
-        <div class="form-group">
-            <label>邮箱</label>
-            <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
-        </div>
-        <div class="form-group">
-            <label>密码</label>
-            <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">登陆</button>
-            <label>还没有账号？请<a href="/account/register">注册</a></label>
-        </div>
-    </form>
+    <div  class='col-md-2 col-md-offset-1 input-form'>
+        <form method="post">
+            {% module xsrf_form_html() %}
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">登陆</button>
+                <label>还没有账号？请<a href="/account/register">注册</a></label>
+            </div>
+        </form>
+    </div>
     {% end %}
 
     <script>

@@ -172,7 +172,7 @@ class SealedEnglish(GroupHandler):
 
         if stages[2] == 'english':
             sql = 'insert into result(exp_id,user_id,session,type,win,win_price,strike_price,profit) ' \
-                    'values({},%s,{},1,%s,%s)'.format(self.expid, self.sid)
+                    'values({},%s,{},1,%s,%s,%s,%s)'.format(self.expid, self.sid)
             bidshistory = self.value.get('englishbids', [], True)
         elif stages[2] == 'englishopen':
             sql = 'insert into result(exp_id,user_id,session,type,win,win_price,strike_price,profit) ' \

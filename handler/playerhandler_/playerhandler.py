@@ -90,7 +90,7 @@ class PlayerHandler(WSMessageHandler):
     @staticmethod
     def nextStage(redis, expid, userid):
         player = Player(redis, expid, userid)
-        handlers = ['Report', 'Intro', 'SealedEnglish', 'End']
+        handlers = ['Intro', 'SealedEnglish', 'End']
         if not 'stage' in player:
             player.set('stage', handlers[0])
         else:

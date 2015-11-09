@@ -1,11 +1,7 @@
 
 <style type="text/css">
-    body {
-        background-color: #c0c0c0;
-    }
-
-    .shuffle {
-        margin-top: 40px;
+    .panel-footer{
+        background-color: white;
     }
 
     div.players {
@@ -115,22 +111,23 @@
 
 </style>
 
-<div class="panel panel-primary shuffle">
-    <div class="panel-heading">
-        <h3 class="panel-title">分组</h3>
+<div class="panel shuffle">
+    <div class="page-header">
+        <h3>分组</h3>
     </div>
+
     <div class="panel-body">
         <div class="players well well-sm">
             <div class="well-title">用户池<span class="badge">4</span></div>
             <div class="well-content pool">
 
                 {% for pid in pool['pool'] %}
-                    {% if pid in players %}
-                    <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
-                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                        <span class="playername">{{ players[pid]['username'] }}</span>
-                    </div>
-                    {% end %}
+                {% if pid in players %}
+                <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                    <span class="playername">{{ players[pid]['username'] }}</span>
+                </div>
+                {% end %}
                 {% end %}
 
             </div>
@@ -204,6 +201,7 @@
         <a class="btn btn-primary submit-shuffle" href="javascript:void(0)">确认</a>
         <a class="btn btn-default random-shuffle" href="javascript:void(0)">随机分组</a>
     </div>
+
 </div>
 
 <div class="modal fade params" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">

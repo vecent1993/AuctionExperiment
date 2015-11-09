@@ -21,7 +21,6 @@
         .description {
             background: #F5F5DC;
             font-size: 20px;
-            text-indent: 2em;
         }
     </style>
 {% end %}
@@ -35,31 +34,32 @@
         {% if current_user and current_user.get('user_id') == exp['host_id'] %}
         <ul class="nav nav-pills" style="margin-bottom:20px;">
             <li role="presentation">
-                <a href="/exp/{{ exp['exp_id'] }}/settings"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span>配置
+                <a href="/exp/{{ exp['exp_id'] }}/settings">
+                    <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>配置
                 </a>
             </li>
             <li role="presentation">
                 <a {% if exp['exp_status']=='0' %}href="/exp/{{ exp['exp_id'] }}/activate"
                 {% else %}title="实验已被激活"{% end %}>
-                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>激活
+                    <span class="glyphicon glyphicon-off" aria-hidden="true"></span>激活
                 </a>
             </li>
             <li role="presentation">
                 <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/close"
                 {% else %}title="实验尚未被激活或已结束"{% end %}>
-                <span class="glyphicon glyphicon-off" aria-hidden="true" style="color: #c0c0c0"></span>关闭
+                    <span class="glyphicon glyphicon-off" aria-hidden="true" style="color: #c0c0c0"></span>关闭
                 </a>
             </li>
             <li role="presentation">
                 <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/inprogress" target="_blank"
                 {% else %}title="实验尚未被激活或已结束"{% end %}>
-                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>监控
+                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>监控
                 </a>
             </li>
             <li role="presentation">
                 <a {% if exp['exp_status']=='2' %}href="/exp/{{ exp['exp_id'] }}/result"
                 {% else %}title="实验尚未结束"{% end %}>
-                <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>结果
+                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>结果
                 </a>
             </li>
         </ul>
@@ -68,19 +68,19 @@
             <li role="presentation">
                 <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/inprogress" target="_blank"
                 {% else %}title="实验尚未被激活"{% end %}>
-                <span class="glyphicon glyphicon-hand-up" aria-hidden="true"></span>正式试验
+                    <span class="glyphicon glyphicon-hand-up" aria-hidden="true"></span>正式试验
                 </a>
             </li>
             <li role="presentation">
                 <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/train" target="_blank"
                 {% else %}title="实验尚未被激活"{% end %}>
-                <span class="glyphicon glyphicon-education" aria-hidden="true"></span>训练
+                    <span class="glyphicon glyphicon-education" aria-hidden="true"></span>训练
                 </a>
             </li>
             <li role="presentation">
                 <a {% if exp['exp_status']=='1' %}title="实验尚未结束"
                 {% else %}href="/exp/{{ exp['exp_id'] }}/result"{% end %}>
-                <span class="glyphicon glyphicon-usd" aria-hidden="true"></span>查看收益
+                    <span class="glyphicon glyphicon-usd" aria-hidden="true"></span>查看收益
                 </a>
             </li>
         </ul>

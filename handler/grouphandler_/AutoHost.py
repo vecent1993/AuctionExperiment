@@ -40,8 +40,9 @@ class AutoHost(GroupHandler):
             self.pool.save('pool')
 
         self.publish('newPlayer', ':'.join(('host', self.expid)), data)
-        PlayerHandler.nextStage(self.redis, self.expid, pid)
-        self.publish('switchHandler', ':'.join(('player', self.expid, pid)), dict(cmd='get'))
+        player = util.pool.Player(self.redis, self.expid, pid)
+        player.set('stage', 'Intro:Inpool')
+        self.publish('changeStage', ':'.join(('player', self.expid, pid)), dict(cmd='get'))
 
     def checkPlayer(self, data=None):
         now = time.time()

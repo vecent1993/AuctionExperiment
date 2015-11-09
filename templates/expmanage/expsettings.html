@@ -12,17 +12,13 @@
 
 {% block style %}
     <style type="text/css">
-        body {
-            background-color: #c0c0c0;
-        }
-
         .treatments {
             min-height: 200px;
             padding-bottom: 30px;
             padding-top: 30px;
         }
 
-        .treatment {
+        .well {
             background-color: white;
         }
 
@@ -45,65 +41,65 @@
 {% block row %}
     <div class="col-md-7 col-md-push-1">
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <span class="panel-title">实验设置</span>
+        <div class="page-header">
+            <h3>
+                <span>实验设置</span>
                 <a href="/help" target="_blank">
                     <span class="glyphicon glyphicon-question-sign" aria-hidden="true" style="float:right; color:white;"></span>
                 </a>
-            </div>
-            <form class="form-horizontal new-exp" action="" method="post">
-                <div class="panel-body" form-domain="exp">
-                    {% module xsrf_form_html() %}
+            </h3>
+        </div>
 
-                    {% block baseinfo %}
-                    <div class="exp-info">
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">实验标题</label>
-                            <div class="col-md-8"><input type="text" class="form-control" form-domain="title" value="{{ settings['title'] }}" required></div>
+        <div class="well">
+            <form class="form-horizontal new-exp" action="" method="post">
+                {% module xsrf_form_html() %}
+
+                {% block baseinfo %}
+                <div class="exp-info">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">实验标题</label>
+                        <div class="col-md-8"><input type="text" class="form-control" form-domain="title" value="{{ settings['title'] }}" required></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">实验描述</label>
+                        <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="des" required>{{ settings['des'] }}</textarea></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">实验说明</label>
+                        <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="intro">{{ settings['intro'] }}</textarea></div>
+                    </div>
+                </div>
+                {% end %}
+
+                <div class="treatments">
+
+                    <div class="well treatment empty" form-domain="[]treatments">
+                        <input type="hidden" form-domain="code" value="">
+                        <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                        <span class="treatment-title"></span>
+                        <div class="treatment-content" form-domain="data">
+                            <span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color: green;" title="加载中。。。"></span>
                         </div>
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">实验描述</label>
-                            <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="des" required>{{ settings['des'] }}</textarea></div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">实验说明</label>
-                            <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="intro">{{ settings['intro'] }}</textarea></div>
+                    </div>
+
+                    {% for treatment in settings['treatments'] %}
+                    <div class="well treatment" form-domain="[]treatments">
+                        {% set t = getTreatment(treatment['code'])(treatment) %}
+                        <input type="hidden" form-domain="code" value="{{ treatment['code'] }}">
+                        <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                        <span class="treatment-title">{{ t['title'] }}</span>
+                        <div class="treatment-content" form-domain="data">
+                            {% raw t.content %}
                         </div>
                     </div>
                     {% end %}
 
-                    <div class="treatments">
-
-                        <div class="well treatment empty" form-domain="[]treatments">
-                            <input type="hidden" form-domain="code" value="">
-                            <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
-                            <span class="treatment-title"></span>
-                            <div class="treatment-content" form-domain="data">
-                                <span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color: green;" title="加载中。。。"></span>
-                            </div>
-                        </div>
-
-                        {% for treatment in settings['treatments'] %}
-                        <div class="well treatment" form-domain="[]treatments">
-                            {% set t = getTreatment(treatment['code'])(treatment) %}
-                            <input type="hidden" form-domain="code" value="{{ treatment['code'] }}">
-                            <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
-                            <span class="treatment-title">{{ t['title'] }}</span>
-                            <div class="treatment-content" form-domain="data">
-                                {% raw t.content %}
-                            </div>
-                        </div>
-                        {% end %}
-
-                    </div>
-
                 </div>
 
-                <div class="panel-footer">
+                <div class="">
                     {% block footer_buttons%}
-                        <button type="submit" class="btn btn-primary">确认修改</button>
-                        <a type="cancel" class="btn btn-default" href="/exp/{{ exp['exp_id'] }}">取消</a>
+                    <button type="submit" class="btn btn-primary">确认修改</button>
+                    <a type="cancel" class="btn btn-default" href="/exp/{{ exp['exp_id'] }}">取消</a>
                     {% end %}
                 </div>
             </form>

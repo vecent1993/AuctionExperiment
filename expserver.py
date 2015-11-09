@@ -144,8 +144,9 @@ class Experiment(Exp):
 
     def closeGroup(self, data=None):
         groupkey = ':'.join(('group', str(self.exp['id']), str(data['sid']), str(data['gid'])))
-        self.groups[groupkey].close()
-        self.groups.pop(groupkey)
+        if groupkey in self.groups:
+            self.groups[groupkey].close()
+            self.groups.pop(groupkey)
 
     def close(self):
         p = util.pool.Pool(self.redis, self.exp['id'])

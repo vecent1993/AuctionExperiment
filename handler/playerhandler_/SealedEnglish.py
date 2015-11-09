@@ -69,11 +69,11 @@ class SealedEnglish(PlayerHandler):
 
     def _anonymous(self, data):
         if data.get('pid') == str(self.player.pid):
-            data['username'] = '您'
+            data['username'] = '你'
             data['self'] = True
             data['pid'] = ''
         else:
-            data['username'] = '某竞拍者'
+            data['username'] = '其他竞拍者'
             data['pid'] = ''
         return data
 

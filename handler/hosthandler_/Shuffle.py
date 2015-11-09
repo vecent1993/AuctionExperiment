@@ -36,7 +36,7 @@ class Shuffle(HostHandler):
 
         if 'sessions' not in self.pool:
             self.pool['sessions'] = []
-            for i, _ in enumerate(self.exp['settings']['treatments'][2]['sessions']):
+            for i, _ in enumerate(self.exp['settings']['treatments'][1]['sessions']):
                 self.pool['sessions'].append(dict(id=i))
             self.pool.save('sessions')
 
@@ -70,5 +70,5 @@ class Shuffle(HostHandler):
                 self.writeCmd('error', 'player not exists')
                 return
 
-        info = getHandler('player', 'Report').renderInfo(self.players[pid])
+        info = getHandler('player', 'Intro').renderInfo(self.players[pid])
         self.writeCmd('showInfo', info)
