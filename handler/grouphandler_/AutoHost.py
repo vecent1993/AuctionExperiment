@@ -20,6 +20,11 @@ class AutoHost(GroupHandler):
         self.value = util.pool.Host(self.redis, self.expid, self.hid)
         self.pool = util.pool.Pool(self.redis, self.expid)
 
+        if 'pool' not in self.pool:
+            self.pool.set('pool', [])
+        if 'players' not in self.pool:
+            self.pool.set('players', [])
+
         self.initTasks()
         self.checkPlayer()
 
@@ -37,7 +42,9 @@ class AutoHost(GroupHandler):
 
         if pid not in self.pool['pool']:
             self.pool['pool'].append(pid)
+            self.pool['players'].append(pid)
             self.pool.save('pool')
+            self.pool.save('players')
 
         self.publish('newPlayer', ':'.join(('host', self.expid)), data)
         player = util.pool.Player(self.redis, self.expid, pid)

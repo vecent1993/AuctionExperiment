@@ -39,7 +39,7 @@ $(document).ready(function(){
         var data = {};
         for(var i = 0; i < form_array.length; i++)
             data[form_array[i].name] = form_array[i].value;
-        send({'cmd': 'profile', 'data': data});
+        sendCmd('profile', data});
     });
 
     ws.handler.deny = function(data, evt){

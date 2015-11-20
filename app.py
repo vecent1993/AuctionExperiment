@@ -53,11 +53,12 @@ class Application(tornado.web.Application):
             (r"/exp/(\d+)/result", ExpResultHandler),
             (r"/exp/(\d+)/close", CloseExpHandler),
 
-            (r"/exp/(\d+)/websocket/([a-zA-Z0-9]*)", ExpSocketHandler),
-            (r"/exp/(\d+)/websocket/official", ExpSocketHandler),
-
             (r"/exp/(\d+)/inprogress", ExpInProgressHandler),
-            (r"/exp/(\d+)/train", ExpInProgressHandler, dict(train=True)),
+            (r"/exp/(\d+)/train", ExpTrainHandler),
+            (r"/exp/(\d+)/train/([\s\S]*)", ExpTrainHandler),
+
+            (r"/exp/(\d+)/websocket", ExpSocketHandler),
+            (r"/exp/(\d+)/websocket/train/([\s\S]*)", TrainSocketHandler),
 
             (r"/help", HelpHandler),
         ]

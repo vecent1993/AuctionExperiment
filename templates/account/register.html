@@ -1,206 +1,201 @@
 {% extends '../main.html' %}
 
 {% block title %}
-    用户注册
+用户注册
 {% end %}
 
 {% block style %}
-    <style type="text/css">
-        .split-line {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-    </style>
+<style type="text/css">
+    .split-line {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+</style>
 {% end %}
 
 {% block row %}
 
-    <form method="post" class='col-md-7 col-md-offset-2 form-horizontal' action="/account/register">
-        {% module xsrf_form_html() %}
-        <div class="form-group">
-            <label class="col-md-2 control-label">邮箱</label>
-            <div class="col-md-4">
-                <input type="email" class="form-control" name="email" placeholder="邮箱" required  oninput="setCustomValidity('');">
-            </div>
+<form method="post" class='col-md-7 col-md-offset-2 form-horizontal' action="/account/register">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+        <label class="col-md-2 control-label">邮箱</label>
+        <div class="col-md-4">
+            <input type="email" class="form-control" name="email" placeholder="邮箱" required  oninput="setCustomValidity('');">
         </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">用户名</label>
-            <div class="col-md-4">
-                <input type="text" class="form-control" name="username" placeholder="用户名" required aria-describedby="userNameHelpBlock"
-                       pattern="^[A-Za-z0-9]{6,22}$" oninvalid="setCustomValidity('用户名必须6位以上大小写英文或者数字组成');" oninput="setCustomValidity('');">
-                <span id="userNameHelpBlock" class="help-block">6位以上大(小)写英文或者数字组成。</span>
-            </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label">用户名</label>
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="username" placeholder="用户名" required aria-describedby="userNameHelpBlock"
+                   pattern="^[A-Za-z0-9]{6,22}$" oninvalid="setCustomValidity('用户名必须6位以上大小写英文或者数字组成');" oninput="setCustomValidity('');">
+            <span id="userNameHelpBlock" class="help-block">6位以上大(小)写英文或者数字组成。</span>
         </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">密码</label>
-            <div class="col-md-4">
-                <input type="password" class="form-control" name="password" placeholder="密码" required aria-describedby="passwordHelpBlock"
-                       pattern="^[\@A-Za-z0-9\!\#\$\%\^\&\*\.\~]{6,22}$" oninvalid="setCustomValidity('密码必须6-22位字符');" oninput="setCustomValidity('');">
-                <span id="passwordHelpBlock" class="help-block">6位以上22位以下字符组成。</span>
-            </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label">密码</label>
+        <div class="col-md-4">
+            <input type="password" class="form-control" name="password" placeholder="密码" required aria-describedby="passwordHelpBlock"
+                   pattern="^[\@A-Za-z0-9\!\#\$\%\^\&\*\.\~]{6,22}$" oninvalid="setCustomValidity('密码必须6-22位字符');" oninput="setCustomValidity('');">
+            <span id="passwordHelpBlock" class="help-block">6位以上22位以下字符组成。</span>
         </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">重复密码</label>
-            <div class="col-md-4">
-                <input type="password" class="form-control" name="re-password" placeholder="密码" required aria-describedby="rePasswordHelpBlock"
-                       oninvalid="setCustomValidity('密码必须一致');" oninput="setCustomValidity('');">
-                <span id="rePasswordHelpBlock" class="help-block">必须与上面填的密码一致</span>
-            </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label">重复密码</label>
+        <div class="col-md-4">
+            <input type="password" class="form-control" name="re-password" placeholder="密码" required aria-describedby="rePasswordHelpBlock"
+                   oninvalid="setCustomValidity('密码必须一致');" oninput="setCustomValidity('');">
+            <span id="rePasswordHelpBlock" class="help-block">必须与上面填的密码一致</span>
         </div>
+    </div>
 
-        <div class="split-line form-group"></div>
+    <div class="split-line form-group"></div>
 
+    <div class="form-group">
+        <label class="col-md-2 control-label">性别</label>
+        <div class="col-md-4">
+            <label class="radio-inline">
+                <input type="radio" name="gender" value="0" checked> 男
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="gender" value="1"> 女
+            </label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label">年龄</label>
+        <div class="col-md-4">
+            <input type="number" class="form-control" name="age" placeholder="年龄" min="10"
+                   max="120" step="1" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-2 control-label">身份</label>
+        <div class="col-md-4">
+            <label class="radio-inline">
+                <input type="radio" name="identity" value="0" checked> 学生
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="identity" value="1"> 其他
+            </label>
+        </div>
+    </div>
+
+    <div class="stu" style="display: none;">
         <div class="form-group">
-            <label class="col-md-2 control-label">性别</label>
-            <div class="col-md-4">
+            <label class="col-md-2 control-label">每月消费（元）</label>
+            <div class="col-md-10">
                 <label class="radio-inline">
-                    <input type="radio" name="gender" value="0" checked> 男
+                    <input type="radio" name="consumption" value="0" > <800
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="gender" value="1"> 女
-                </label>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">年龄</label>
-            <div class="col-md-4">
-                <input type="number" class="form-control" name="age" placeholder="年龄" min="10"
-                       max="120" step="1" required>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-md-2 control-label">身份</label>
-            <div class="col-md-4">
-                <label class="radio-inline">
-                    <input type="radio" name="identity" value="0" checked> 学生
+                    <input type="radio" name="consumption" value="1"> 800-1000
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="identity" value="1"> 其他
+                    <input type="radio" name="consumption" value="2" checked> 1000-1500
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="consumption" value="3"> 1500-2000
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="consumption" value="4"> >2000
                 </label>
             </div>
         </div>
 
-        <div class="stu" style="display: none;">
-            <div class="form-group">
-                <label class="col-md-2 control-label">每月消费（元）</label>
-                <div class="col-md-10">
-                    <label class="radio-inline">
-                        <input type="radio" name="consumption" value="0" > <800
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="consumption" value="1"> 800-1000
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="consumption" value="2" checked> 1000-1500
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="consumption" value="3"> 1500-2000
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="consumption" value="4"> >2000
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="col-md-2 control-label">获得以下奖学金</label>
-                <div class="col-md-10">
-                    <label class="checkbox-inline">
-                        <input type="checkbox" name="scholarship" value="0"> 学业奖学金
-                    </label>
-                    <label class="checkbox-inline">
-                        <input type="checkbox" name="scholarship" value="1"> 国家奖学金
-                    </label>
-                    <label class="checkbox-inline">
-                        <input type="checkbox" name="scholarship" value="2"> 国家助学金
-                    </label>
-                    <label class="checkbox-inline">
-                        <input type="checkbox" name="scholarship" value="3"> 学院奖学金
-                    </label>
-                    <label class="checkbox-inline">
-                        <input type="checkbox" name="scholarship" value="4"> 其它奖学金
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="col-md-2 control-label">年级</label>
-                <div class="col-md-10">
-                    <label class="radio-inline">
-                        <input type="radio" name="grade" value="0" > 本科1-2年级
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="grade" value="1"> 本科3-4年级
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="grade" value="2" checked> 硕士研究生
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="grade" value="3"> 博士研究生
-                    </label>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="no-stu" style="display: none;">
-            <div class="form-group">
-                <label class="col-md-2 control-label">每月收入（元）</label>
-                <div class="col-md-10">
-                    <label class="radio-inline">
-                        <input type="radio" name="income" value="0" > <5000
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="income" value="1" checked> 5000-8000
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="income" value="2"> 8000-10000
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="income" value="3"> >10000
-                    </label>
-                </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">获得以下奖学金</label>
+            <div class="col-md-10">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="scholarship" value="0"> 学业奖学金
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="scholarship" value="1"> 国家奖学金
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="scholarship" value="2"> 国家助学金
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="scholarship" value="3"> 学院奖学金
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="scholarship" value="4"> 其它奖学金
+                </label>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-md-2 control-label">专业</label>
-            <div class="col-md-4">
-                <select class="form-control" name="major">
-                    {% for major in majors %}
-                    <option value ="{{ major['major_code'] }}" {%if major['major_code'] == '0811' %}selected{% end %}>{{ major['major_name'] }}</option>
-                    {% end %}
-                </select>
+            <label class="col-md-2 control-label">年级</label>
+            <div class="col-md-10">
+                <label class="radio-inline">
+                    <input type="radio" name="grade" value="0" > 本科1-2年级
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="grade" value="1"> 本科3-4年级
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="grade" value="2" checked> 硕士研究生
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="grade" value="3"> 博士研究生
+                </label>
             </div>
         </div>
 
+    </div>
+
+    <div class="no-stu" style="display: none;">
         <div class="form-group">
-            <label class="col-md-2 control-label">国籍</label>
-            <div class="col-md-4">
-                <select class="form-control" name="nation" required>
-                    {% for nation in nations %}
-                    <option value ="{{ nation['nation_id'] }}" {%if nation['nation_id'] == 37 %}selected{% end %}>{{ nation['nation_name'] }}</option>
-                    {% end %}
-                </select>
+            <label class="col-md-2 control-label">每月收入（元）</label>
+            <div class="col-md-10">
+                <label class="radio-inline">
+                    <input type="radio" name="income" value="0" > <5000
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="income" value="1" checked> 5000-8000
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="income" value="2"> 8000-10000
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="income" value="3"> >10000
+                </label>
             </div>
         </div>
+    </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-1">
-                <button type="submit" class="btn btn-primary">注册</button>
-                <label>已有账号？马上<a href="/account/login">登录</a></label>
-            </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label">专业</label>
+        <div class="col-md-4">
+            <select class="form-control" name="major">
+                {% for major in majors %}
+                <option value ="{{ major['major_code'] }}" {%if major['major_code'] == '0811' %}selected{% end %}>{{ major['major_name'] }}</option>
+                {% end %}
+            </select>
         </div>
-    </form>
+    </div>
 
-    <script>
-        function getCookie(name) {
-            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-            return r ? r[1] : undefined;
-        };
+    <div class="form-group">
+        <label class="col-md-2 control-label">国籍</label>
+        <div class="col-md-4">
+            <select class="form-control" name="nation" required>
+                {% for nation in nations %}
+                <option value ="{{ nation['nation_id'] }}" {%if nation['nation_id'] == 37 %}selected{% end %}>{{ nation['nation_name'] }}</option>
+                {% end %}
+            </select>
+        </div>
+    </div>
 
+    <div class="form-group">
+        <div class="col-md-offset-1">
+            <button type="submit" class="btn btn-primary">注册</button>
+            <label>已有账号？马上<a href="/account/login">登录</a></label>
+        </div>
+    </div>
+</form>
+
+<script>
         function formData(selector){
             var args = $(selector).serializeArray();
             var data = {};
@@ -208,7 +203,6 @@
                 if(data[args[i].name]){
                     if(! (data[args[i].name] instanceof Array)){
                         data[args[i].name] = [data[args[i].name], ];
-                        console.log(data[args[i].name]);
                     }
                     data[args[i].name].push(args[i].value);
                 } else {
@@ -217,18 +211,6 @@
             }
             return data;
         };
-
-        function checkPwd(){
-            var pwd = $("input[name='password']").val();
-            var repwd = $("input[name='re-password']").val();
-            if(pwd != repwd){
-                var field = document.getElementsByName('re-password')[0];
-                field.setCustomValidity('密码必须一致');
-                field.reportValidity();
-                return false;
-            }
-            return true;
-        }
 
         function switchStu(){
             if($("form input[name='identity']:checked").val() == '0'){
@@ -246,26 +228,30 @@
                 switchStu();
             });
 
+            $("form input[name='password']").on("input", function(){
+                var pwd = $("input[name='password']").val();
+                $("form input[name='re-password']").attr("pattern", "^" + pwd + "$");
+            });
+
             $("form").submit(function(event){
                 event.preventDefault();
-                if(checkPwd()){
-                    $("form button[type='submit']").attr("disabled", "disabled");
-                    $("form button[type='submit']").html("正在注册");
-                    $.post("", $("form").serialize(), function(res){
+
+                $("form button[type='submit']").attr("disabled", "disabled");
+                $("form button[type='submit']").html("正在注册");
+                $.post("", $("form").serialize(), function(res){
+                    if(res.errors){
                         $("form button[type='submit']").removeAttr("disabled");
                         $("form button[type='submit']").html("注册");
-                        if(res.errors){
-                            for(var i=0; i < res.errors.length; i++){
-                                var field = document.getElementsByName(res.errors[i].name)[0];
-                                field.setCustomValidity(res.errors[i].reason);
-                                field.reportValidity();
-                            }
+                        for(var i=0; i < res.errors.length; i++){
+                            var field = document.getElementsByName(res.errors[i].name)[0];
+                            field.setCustomValidity(res.errors[i].reason);
+                            $("form button[type='submit']").click();
                         }
-                        else{
-                            document.location.href = res.redirect;
-                        }
-                    }, 'json');
-                }
+                    }
+                    else{
+                        document.location.href = res.redirect;
+                    }
+                });
             });
         });
     </script>

@@ -6,7 +6,7 @@
 {% end %}
 
 {% block title %}
-    正式试验-{{ exp['exp_title'] }}
+    测试-{{ exp['exp_title'] }}
 {% end %}
 
 {% block style %}
@@ -39,43 +39,19 @@
             text-indent: 2em;
         }
 
-
         .page-header {
             margin-top: 0px;
         }
 
-        /* .well {
-            background-color: #F5F5DC;
-        } */
-
         .account-info {
             margin-bottom: 20px;
         }
-
-        /*.chat {
-            position: fixed;
-            right: 50px;
-            bottom: 10px;
-            width: 20%;
-        }
-
-        .chat ul {
-            overflow-y: auto;
-            height: 200px;
-        }
-
-        .empty {
-            display: none;
-        }*/
 
     </style>
 {% end %}
 
 {% block row %}
     <div class="toolbar">
-        <a href="javascript:void(0)" title="聊天室">
-            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-        </a>
         <a href="/help" target="_blank" title="FAQ">
             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
         </a>
@@ -112,8 +88,10 @@
                 对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
             </p>
             <p>
-                还不熟悉流程？<a href="/exp/{{ exp['exp_id'] }}/train" target="_blank">前往训练</a>
-                或者查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
+                查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
+            </p>
+            <p>
+                已经做好准备？<a href="/exp/{{ exp['exp_id'] }}/inprogress">前往正式试验</a>
             </p>
         </div>
     </div>
@@ -144,19 +122,9 @@
         </div>
     </div>
 
-    <!--<div class="chat">-->
-        <!--<ul class="list-unstyled well well-sm">-->
-            <!--<li class="chat-msg empty"></li>-->
-        <!--</ul>-->
-        <!--<form>-->
-            <!--<input type="text"value="">-->
-            <!--<button class="btn btn-primary send-chat-msg" type="submit">提交</button>-->
-        <!--</form>-->
-    <!--</div>-->
-
     <script type="text/javascript" language="javascript">
 
-        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
+        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket/train/{{ treatment }}");
 
         var sendCmd = function(cmd, data, callback){
              waitForConnection(function () {
@@ -211,8 +179,6 @@
             }
 
             sendCmd('get');
-
-            var heartbeat = setInterval(sendCmd, 30000, 'heartbeat');
         });
 
     </script>

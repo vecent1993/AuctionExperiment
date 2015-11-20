@@ -45,6 +45,10 @@
         display: none;
     }
 
+    .info .panel-heading {
+        padding: 5px 10px;
+    }
+
     .info .panel-body{
         max-height: 300px;
         overflow-y: auto;
@@ -155,12 +159,12 @@ function newGroup(group){
 
 $(document).ready(function(){
     $(".group").on("click", function(){
-        var top = $(this).offset().top - 20;
+        var top = $(this).offset().top - 10;
         var left = $(this).offset().left + $(this).width() - 20;
         $(".info").css("left", left);
         $(".info").css("top", top);
         var sid = $(this).parents("div.session").attr("session");
-        send({cmd: 'getInfo', data: {sid: sid,  gid: $(this).attr('group')}});
+        sendCmd('getInfo', {sid: sid,  gid: $(this).attr('group')});
         return false;
     });
 

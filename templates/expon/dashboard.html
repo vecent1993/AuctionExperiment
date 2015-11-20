@@ -23,20 +23,7 @@
 
     <script type="text/javascript" language="javascript">
 
-        function getCookie(name) {
-            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-            return r ? r[1] : undefined;
-        };
-
-        $.post = function(url, args, callback) {
-            args._xsrf = getCookie("_xsrf");
-            $.ajax({url: url, data: $.param(args), dataType: "text", type: "POST",
-                success: function(response) {
-                callback(response);
-            }});
-        };
-
-        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket/official");
+        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
 
         var send = function (data, callback) {
             waitForConnection(function () {
@@ -46,6 +33,15 @@
                 }
             }, 5);
         };
+
+        var sendCmd = function(cmd, data, callback){
+             waitForConnection(function () {
+                ws.send( JSON.stringify({cmd: cmd, data: data}) );
+                if (typeof callback !== 'undefined') {
+                    callback();
+                }
+            }, 5);
+        }
 
         var waitForConnection = function (callback, interval) {
             if (ws.readyState === 1) {
@@ -69,7 +65,6 @@
 
         ws.handler = new msgHandler(ws)
 
-
         $(document).ready(function(){
 
             ws.handler.replace = function(data, evt){
@@ -84,9 +79,9 @@
                 document.location.href = data;
             };
 
-            send( {cmd: 'get'} );
+            sendCmd('get');
 
-            var heartbeat = setInterval(send, 30000, {'cmd': 'heartbeat'});
+            var heartbeat = setInterval(sendCmd, 30000, 'heartbeat');
 
         });
 

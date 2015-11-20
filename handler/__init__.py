@@ -8,6 +8,8 @@ def getHandler(type, handler):
         name = '.'.join(('hosthandler_', handler))
     elif type == 'group':
         name = '.'.join(('grouphandler_', handler))
+    elif type == 'train':
+        name = '.'.join(('trainhandler_', handler))
     else:
         raise Exception('type error: type must be player, host or group')
 

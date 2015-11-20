@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 
 {% block title %}
-    拍卖实验
+拍卖设计与实验系统
 {% end %}
 
 {% block css %}
@@ -13,122 +13,131 @@
 
 {% block js %}
 <script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/js/util.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/owl.carousel.min.js"></script>
 {% end %}
 
 {% block style %}
-    <style type="text/css">
-        body {
-            background: url(/static/img/loginbg.jpg);
-            background-size: 100%;
-            background-repeat: no-repeat;
-        }
+<style type="text/css">
+    body {
+    background: url(/static/img/loginbg.jpg);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    }
 
-        .input-form {
-            margin-top: 15%;
-        }
+    .input-form {
+    margin-top: 10%;
+    }
 
-        .home {
-            margin-top: 3%;
-        }
+    .home {
+    margin-top: 3%;
+    }
 
+    .title {
+    margin-top: 15px;
+    margin-left: 8%;
+    }
 
-    </style>
+    .title-cn {
+    font-size: 30px;
+    }
+
+    .title-en {
+    font-size: 15px;
+    }
+
+</style>
 {% end %}
 
 {% block row %}
-    <div class="{% if not current_user %}col-md-offset-1 col-md-7
+<div class="title col-md-4">
+    <div style="display: inline-block; float:left; margin-right: 10px;">
+        <img src="/static/img/auction.png" style="height: 60px;">
+    </div>
+    <div style="display: inline-block; height: 60px; float:left">
+        <div><span class="title-cn">拍卖设计与实验系统</span></div>
+        <div><span class="title-en">Auction Design & Experiment System</span></div>
+    </div>
+</div>
+
+<div class="{% if not current_user %}col-md-offset-1 col-md-7
                 {% else %}col-md-offset-2 col-md-8 {% end %} home">
 
-        <!--<div class="fade">-->
-            <!--<div align="center">-->
-                <!--<figure class="embed hide-smooth dark small">-->
-                    <!--<img src="/static/img/expon.png" alt=""/>-->
-                    <!--<figcaption>-->
-                        <!--参与拍卖实验-->
-                    <!--</figcaption>-->
-                <!--</figure>-->
-            <!--</div>-->
-            <!--<div align="center">-->
-                <!--<figure class="embed hide-smooth dark">-->
-                    <!--<img src="/static/img/train.png" alt=""/>-->
-                    <!--<figcaption>-->
-                        <!--在线训练-->
-                    <!--</figcaption>-->
-                <!--</figure>-->
-            <!--</div>-->
-            <!--<div align="center">-->
-                <!--<figure class="embed hide-smooth dark">-->
-                    <!--<img src="/static/img/newexp.png" alt=""/>-->
-                    <!--<figcaption>-->
-                        <!--创建新实验-->
-                    <!--</figcaption>-->
-                <!--</figure>-->
-            <!--</div>-->
-            <!--<div align="center">-->
-                <!--<figure class="embed hide-smooth dark">-->
-                    <!--<img src="/static/img/shuffle.png" alt=""/>-->
-                    <!--<figcaption>-->
-                        <!--分组-->
-                    <!--</figcaption>-->
-                <!--</figure>-->
-            <!--</div>-->
-            <!--<div align="center">-->
-                <!--<figure class="embed hide-smooth dark">-->
-                    <!--<img src="/static/img/monitor.png" alt=""/>-->
-                    <!--<figcaption>-->
-                        <!--实时监控-->
-                    <!--</figcaption>-->
-                <!--</figure>-->
-            <!--</div>-->
-        <!--</div>-->
-        <!--<script type="text/javascript">-->
-            <!--$(document).ready(function(){-->
-               <!--$('.fade').owlCarousel({-->
-                   <!--'singleItem': true,-->
-                   <!--'stopOnHover': true,-->
-                   <!--'autoPlay': 3000,-->
-               <!--});-->
-            <!--});-->
-        <!--</script>-->
+    <!--<div class="fade">-->
+    <!--<div align="center">-->
+    <!--<figure class="embed hide-smooth dark small">-->
+    <!--<img src="/static/img/expon.png" alt=""/>-->
+    <!--<figcaption>-->
+    <!--参与拍卖实验-->
+    <!--</figcaption>-->
+    <!--</figure>-->
+    <!--</div>-->
+    <!--<div align="center">-->
+    <!--<figure class="embed hide-smooth dark">-->
+    <!--<img src="/static/img/train.png" alt=""/>-->
+    <!--<figcaption>-->
+    <!--在线训练-->
+    <!--</figcaption>-->
+    <!--</figure>-->
+    <!--</div>-->
+    <!--<div align="center">-->
+    <!--<figure class="embed hide-smooth dark">-->
+    <!--<img src="/static/img/newexp.png" alt=""/>-->
+    <!--<figcaption>-->
+    <!--创建新实验-->
+    <!--</figcaption>-->
+    <!--</figure>-->
+    <!--</div>-->
+    <!--<div align="center">-->
+    <!--<figure class="embed hide-smooth dark">-->
+    <!--<img src="/static/img/shuffle.png" alt=""/>-->
+    <!--<figcaption>-->
+    <!--分组-->
+    <!--</figcaption>-->
+    <!--</figure>-->
+    <!--</div>-->
+    <!--<div align="center">-->
+    <!--<figure class="embed hide-smooth dark">-->
+    <!--<img src="/static/img/monitor.png" alt=""/>-->
+    <!--<figcaption>-->
+    <!--实时监控-->
+    <!--</figcaption>-->
+    <!--</figure>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!--<script type="text/javascript">-->
+    <!--$(document).ready(function(){-->
+    <!--$('.fade').owlCarousel({-->
+    <!--'singleItem': true,-->
+    <!--'stopOnHover': true,-->
+    <!--'autoPlay': 3000,-->
+    <!--});-->
+    <!--});-->
+    <!--</script>-->
 
-    </div>
-    {% if not current_user %}
-    <div  class='col-md-2 col-md-offset-1 input-form'>
-        <form method="post">
-            {% module xsrf_form_html() %}
-            <div class="form-group">
-                <label>邮箱</label>
-                <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
-            </div>
-            <div class="form-group">
-                <label>密码</label>
-                <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">登陆</button>
-                <label>还没有账号？请<a href="/account/register">注册</a></label>
-            </div>
-        </form>
-    </div>
-    {% end %}
+</div>
+{% if not current_user %}
+<div  class='col-md-2 col-md-offset-1 input-form'>
+    <form method="post">
+        {% module xsrf_form_html() %}
+        <div class="form-group">
+            <label>邮箱</label>
+            <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
+        </div>
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">登陆</button>
+            <label>还没有账号？请<a href="/account/register">注册</a></label>
+        </div>
+    </form>
+</div>
+{% end %}
 
-    <script>
-        function getCookie(name) {
-            var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-            return r ? r[1] : undefined;
-        };
-
-        $.post = function(url, args, callback) {
-            args._xsrf = getCookie("_xsrf");
-            $.ajax({url: url, data: $.param(args), dataType: "json", type: "POST",
-                success: function(response) {
-                    callback(response);
-                }
-            });
-        };
-
+<script>
         function formData(selector){
             var args = $(selector).serializeArray();
             var data = {};
@@ -139,24 +148,25 @@
         };
 
         $(document).ready(function(){
-            $("form").submit(function(){
+            $("form").submit(function(event){
+                event.preventDefault();
+
                 $("form button[type='submit']").attr("disabled", "disabled");
                 $("form button[type='submit']").html("正在登陆");
                 $.post("", formData("form"), function(res){
-                    $("form button[type='submit']").removeAttr("disabled");
-                    $("form button[type='submit']").html("登陆");
                     if(res.errors){
+                        $("form button[type='submit']").removeAttr("disabled");
+                        $("form button[type='submit']").html("登陆");
                         for(var i=0; i < res.errors.length; i++){
                             var field = document.getElementsByName(res.errors[i].name)[0];
                             field.setCustomValidity(res.errors[i].reason);
-                            field.reportValidity();
+                            $("form button[type='submit']").click();
                         }
                     }
                     else{
                         document.location.href = res.redirect;
                     }
                 });
-                return false;
             });
         });
     </script>

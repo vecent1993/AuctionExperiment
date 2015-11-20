@@ -53,15 +53,15 @@
                         <div class="exp-baseinfo">
                             <div class="form-group">
                                 <label class="col-md-2 control-label">实验标题</label>
-                                <div class="col-md-8"><input type="text" class="form-control" form-domain="title" value="" required></div>
+                                <div class="col-md-8"><input type="text" class="form-control" form-domain="title" value="" required pattern="^1" oninvalid="aa('greagfrs')" oninput=""></div>
                             </div>
                             <div class="form-group">
                                 <label class="col-md-2 control-label">实验描述</label>
-                                <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="description" required></textarea></div>
+                                <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="description"></textarea></div>
                             </div>
                             <div class="form-group">
                                 <label class="col-md-2 control-label">实验说明</label>
-                                <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="introduction" required></textarea></div>
+                                <div class="col-md-8"><textarea class="form-control" rows="3" form-domain="introduction"></textarea></div>
                             </div>
                         </div>
 
@@ -133,7 +133,7 @@
                     </div>
 
                     <div class="panel-footer">
-                        <button type="submit" class="btn btn-primary" disabled>确认修改</button>
+                        <button type="submit" class="btn btn-primary">确认修改</button>
                         <a type="cancel" class="btn btn-default" href="#">取消</a>
                     </div>
                 </form>
@@ -170,6 +170,11 @@
     </div>
 </div>
 <script type="text/javascript" language="javascript">
+
+function aa(msg){
+    console.log(msg);
+    console.log(this);
+}
 
 function initDropDrag(){
     $(".component").draggable({

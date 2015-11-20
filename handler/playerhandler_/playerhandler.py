@@ -52,10 +52,6 @@ class PlayerHandler(WSMessageHandler):
 
     @onRedis('player')
     def switchHandler(self, msg=None):
-        if self.env.train:
-            self.env.msghandler = getHandler('player', 'Train')(self.env)
-            return
-
         if 'stage' not in self.player:
             PlayerHandler.nextStage(self.env.redis, self.exp['id'], self.player.pid)
 
@@ -137,15 +133,3 @@ class PlayerHandler(WSMessageHandler):
         #     player.set('settings', treatment)
         #     t = getTreatment(treatment['code'])(treatment)
         #     player.set('stage', t.getPlayerHandler())
-
-
-class TrainHandler(WSMessageHandler):
-    def __init__(self, env):
-        super(TrainHandler, self).__init__(env)
-
-        self.player = env.player
-        self.exp = self.env.exp
-
-    @onWs
-    def heartbeat(self, data):
-        pass

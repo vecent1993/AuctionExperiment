@@ -110,6 +110,7 @@ class ActivateExpHandler(BaseHandler):
 
         pool = Pool(self.redis, exp['exp_id'])
         pool.set('pool', [])
+        pool.set('players', [])
 
 
 class CloseExpHandler(BaseHandler):
@@ -145,3 +146,46 @@ class ExpResultHandler(BaseHandler):
                                     expid, self.current_user['user_id'])
 
             self.render('expmanage/result.html', exp=exp, results=results)
+
+
+class ExpInProgressHandler(BaseHandler):
+    @userAuthenticated
+    def get(self, expid):
+        settings = dict(
+            maxQ=10,
+            minQ=6,
+            maxC=4,
+            minC=0
+        )
+        exp = self.db.get('select * from exp where exp_id=%s', expid)
+        if not exp:
+            raise tornado.web.HTTPError(404)
+        if exp['exp_status'] != '1':
+            raise tornado.web.HTTPError(503)
+
+        if exp['host_id'] == self.current_user['user_id']:
+            self.render('expon/dashboard.html', exp=exp, settings=settings)
+        else:
+            self.render('expon/expinprogress.html', exp=exp, settings=settings)
+
+
+class ExpTrainHandler(BaseHandler):
+    @userAuthenticated
+    def get(self, expid, treatment=None):
+        settings = dict(
+            maxQ=10,
+            minQ=6,
+            maxC=4,
+            minC=0
+        )
+
+        exp = self.db.get('select * from exp where exp_id=%s', expid)
+        if not exp:
+            raise tornado.web.HTTPError(404)
+        if exp['exp_status'] != '1':
+            raise tornado.web.HTTPError(503)
+
+        if not treatment:
+            self.render('expon/exptrain.html', exp=exp, settings=settings)
+        else:
+            self.render('expon/train.html', exp=exp, settings=settings, treatment=treatment)

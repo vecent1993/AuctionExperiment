@@ -121,7 +121,7 @@
             <div class="well-title">用户池<span class="badge">4</span></div>
             <div class="well-content pool">
 
-                {% for pid in pool['pool'] %}
+                {% for pid in pool.get('players', []) %}
                 {% if pid in players %}
                 <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
@@ -165,10 +165,42 @@
                 {% for i, session in enumerate(pool['sessions']) %}
                 <div role="tabpanel" class="tab-pane session {% if i == 0 %}active{% end %}" id="session{{ i }}">
                     <div class="session-players">
-
+                        {% for pid in session.get('players', []) %}
+                        {% if pid in players %}
+                        <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span class="playername">{{ players[pid]['username'] }}</span>
+                        </div>
+                        {% end %}
+                        {% end %}
                     </div>
                     <div class="session-groups">
-
+                        {% for group in session.get('groups', []) %}
+                        <div class='well group'>
+                            <div class='well-title'>
+                                <span class="glyphicon glyphicon-tags" aria-hidden="true" style="margin-right: 10px;"></span>组
+                                <a href="javascript:void(0)" class="remove-group">
+                                    <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" style="color: #AE4141;float: right"></span>
+                                </a>
+                            </div>
+                            {% for pid in group %}
+                            {% if pid in players %}
+                            <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                                <span class="playername">{{ players[pid]['username'] }}</span>
+                            </div>
+                            {% elif pid.startswith('agent') %}
+                            <div class="well agent">
+                                <span class="glyphicon glyphicon-tag" aria-hidden="true" style="margin-right: 5px;"></span>
+                                <span>智能体</span>
+                                <a href="javascript:void(0)" class="remove-agent">
+                                    <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" style="margin-left: 10px; color: #AE4141; float: right"></span>
+                                </a>
+                            </div>
+                            {% end %}
+                            {% end %}
+                        </div>
+                        {% end %}
                     </div>
                 </div>
                 {% end %}
@@ -252,10 +284,6 @@
 </div>
 
 <script type="text/javascript">
-
-String.prototype.startsWith = function(compareStr){
-    return this.indexOf(compareStr) == 0;
-}
 
 function updateCounts(){
     $(".players").each(function(){
@@ -410,7 +438,7 @@ $(document).ready(function(){
         var pid = $(this).attr("player");
         if(pid == "")
             return ;
-        send({cmd: 'getInfo', data: {pid: pid}});
+        sendCmd('getInfo', {pid: pid});
         return false;
     });
 
@@ -493,10 +521,8 @@ $(document).ready(function(){
             });
             data.sessions.push(session);
         });
-        send( {cmd: 'shuffle', data: data} );
+        sendCmd('shuffle', data);
     });
-
-
 });
 
 </script>

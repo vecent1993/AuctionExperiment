@@ -133,25 +133,6 @@
     </div>
 
     <script type="text/javascript" language="javascript">
-        // add startsWith function to javascript Strings
-        String.prototype.startsWith = function(compareStr){
-            return this.indexOf(compareStr) == 0;
-        }
-
-        // for get value from cookies
-        function getCookie(name) {
-          var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-          return r ? r[1] : undefined;
-        };
-
-        // add _xsrf when ajax post
-        $.post = function(url, args, callback) {
-            args._xsrf = getCookie("_xsrf");
-            $.ajax({url: url, data: args, dataType: "json", type: "POST",
-                success: function(response) {
-                callback(response);
-            }});
-        };
 
         function initDropDrag(){
             $(".component").draggable({

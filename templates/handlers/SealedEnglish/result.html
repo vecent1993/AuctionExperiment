@@ -1,0 +1,73 @@
+<style>
+
+</style>
+
+<div class="page-header col-md-offset-1 col-md-10">
+    <h2>上一轮实验结果<small></small></h2>
+</div>
+
+<div class="alert alert-info col-md-offset-1 col-md-10" role="alert">
+    等待主持人重新分组。
+</div>
+
+<div class="col-md-offset-1 col-md-10 intro">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>阶段</th>
+            <th>赢否</th>
+            <th>获胜价</th>
+            <th>成交价</th>
+            <th>收益（点）</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i, r in enumerate(results) %}
+        <tr>
+            <td>{{ i+1 }}</td>
+            <td>{% if r['type'] == '0' %}密封拍卖{% elif r['type'] == '1' %}公开拍卖(价值隐藏){% else %}公开拍卖(价值公开){% end %}</td>
+            <td>{% if r['win'] == '0' %}否{% else %}赢{% end %}</td>
+            <td>{{ r['win_price'] }}</td>
+            <td>{{ r['strike_price'] }}</td>
+            <td>{{ r['profit'] }}</td>
+        </tr>
+        {% end %}
+        <tr >
+            <td colspan="5">初始奖励</td>
+            <td>10（元）</td>
+        </tr>
+        <tr class="success">
+            <td colspan="5">合计</td>
+            <td >{{ sum(map(lambda a: a['profit'], results)) }} * 10 + 10 = {{ sum(map(lambda a: a['profit'], results))* 10 + 10 }}（元）</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<script type="text/javascript" language="javascript">
+
+$(document).ready(function(){
+
+    ws.handler.GroupReady = function(data, evt){
+        alert("是否准备好？");
+        sendCmd('ready');
+    };
+
+    ws.handler.Ready = function(data, evt){
+        $(".alert").removeClass("alert-info");
+        $(".alert").addClass("alert-warning");
+        $(".alert").html("等待其他人做好准备，注意：实验可能随时开始！");
+    };
+
+    {% if substage == 'GroupReady'%}
+     ws.handler.GroupReady();
+    {% elif substage == 'Ready' %}
+     ws.handler.Ready();
+    {% end %}
+
+});
+
+</script>
+

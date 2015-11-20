@@ -19,6 +19,13 @@ class SealedEnglish(GroupHandler):
         self.redis = redisclient
         self.value = util.pool.Group(self.redis, self.expid, self.sid, self.gid)
 
+        self.settings = dict(
+            maxQ=10,
+            minQ=6,
+            maxC=4,
+            minC=0
+        )
+
         if not self.value.get('players'):
             self.loadPlayers()
 
@@ -27,7 +34,7 @@ class SealedEnglish(GroupHandler):
 
     def init(self, data=None):
         stages = self.value.get('stage', refresh=True).split(':')
-        round = 1
+        round = 20
 
         if len(stages) == 1:
             if round > 0:
@@ -63,13 +70,13 @@ class SealedEnglish(GroupHandler):
         self.value.set('players', players)
 
     def startSealed(self, data):
-        self.value.set('q', round(random.uniform(6, 10), 1))
+        self.value.set('q', round(random.uniform(self.settings['minQ'], self.settings['maxQ']), 1))
         self.value.set('sealedbids', {})
         self.value.set('englishbids', [])
         self.value.set('englishopenbids', [])
 
         for pid in self.value['players'].keys():
-            cost = round(random.uniform(0, 4), 1)
+            cost = round(random.uniform(self.settings['minC']+.1, self.settings['maxC']), 1)
             self.value['players'][pid]['cost'] = cost
             if pid.startswith('agent'):
                 self.addDelay('sealedagentbid'+pid, random.uniform(5, 30), 'sealedAgentBid', pid)
@@ -250,7 +257,8 @@ class SealedEnglish(GroupHandler):
                 self.addDelay('englishagentbid'+pid, random.uniform(5, 20), 'englishAgentBid', pid)
 
     def sealedAgent(self, cost):
-        return round(8. - cost, 1)
+        eq = (self.settings['minQ'] + self.settings['maxQ']) / 2.
+        return round(eq - cost, 1)
 
     def sealedAgentBid(self, data):
         pid = data
@@ -315,9 +323,9 @@ class SealedEnglish(GroupHandler):
         if bidhistory:
             bi = float(bidhistory[-1]['bid'])
             if stages[2] == 'english':
-                s = 6.
-                t = 0.
-                delta = 4.
+                s = self.settings['minQ']
+                t = self.settings['minC']
+                delta = self.settings['maxQ'] - self.settings['minQ']
                 if s - t - delta <= bi <= s - t:
                     q = (delta*(s+delta)**2 + s**2*(t+bi) - 2*s**3/3 - (t+delta+bi)**3/3) \
                             / (2*delta**2 - (t+delta+bi-s)**2)

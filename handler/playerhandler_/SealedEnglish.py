@@ -13,6 +13,13 @@ class SealedEnglish(PlayerHandler):
             self.write({'error': 'not ready'})
             return
 
+        self.settings = dict(
+            maxQ=10,
+            minQ=6,
+            maxC=4,
+            minC=0
+        )
+
         self.group = Group(self.env.redis, self.env.exp['id'], self.player['sid'], self.player['gid'])
         self.groupdomain = ':'.join(('group', str(self.player['sid']), str(self.player['gid'])))
 
@@ -30,17 +37,17 @@ class SealedEnglish(PlayerHandler):
         round, mainstage, substage = stages[1:4]
         if mainstage == 'sealed':
             self.writeCmd('replace', self.env.render('handlers/SealedEnglish/sealed.html', train=False,
-                player=self.player, bids=self.group.get('sealedbids', [], True), substage=substage))
+                settings=self.settings, player=self.player, bids=self.group.get('sealedbids', [], True), substage=substage))
         elif mainstage == 'english':
             bids = map(self._anonymous, self.group.get('englishbids', [], True))
             q = None
             self.writeCmd('replace', self.env.render('handlers/SealedEnglish/english.html', train=False,
-                q=q, player=self.player, bids=bids, substage=substage))
+                settings=self.settings, q=q, player=self.player, bids=bids, substage=substage))
         elif mainstage == 'englishopen':
             bids = map(self._anonymous, self.group.get('englishopenbids', [], True))
             q = self.group.get('q', refresh=True)
             self.writeCmd('replace', self.env.render('handlers/SealedEnglish/english.html', train=False,
-                q=q, player=self.player, bids=bids, substage=substage))
+                settings=self.settings, q=q, player=self.player, bids=bids, substage=substage))
 
     @onWs
     def sealedbid(self, data):
@@ -65,7 +72,7 @@ class SealedEnglish(PlayerHandler):
 
     @onWs
     def getresult(self, data):
-        self.writeCmd('showresult', '马上进入下一轮公开拍卖阶段，请耐心等待并做好准备')
+        self.writeCmd('showresult', '马上进入下一部分，请耐心等待并做好准备')
 
     def _anonymous(self, data):
         if data.get('pid') == str(self.player.pid):

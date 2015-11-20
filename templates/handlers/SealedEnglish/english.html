@@ -28,6 +28,10 @@
         float: right;
     }
 
+    .page-header {
+        margin-top: 0px;
+    }
+
     .page-header h3 {
         display: inline-block;
     }
@@ -43,10 +47,15 @@
 
 </style>
 
+{% if train %}
+<div class="alert alert-warning col-md-offset-1 col-md-10" role="alert" style="margin-top: 20px;">
+    欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
+</div>
+{% end %}
+
 <div class="page-header col-md-offset-1 col-md-10">
     <h3>
-        {% if q is None %}第二阶段{% else %}第三阶段{% end %}（英式公开拍卖）
-        {% if train %}<a class="back" href="javascript:void(0)"><small>返回</small></a>{% end %}
+        {% if q is None %}第二部分{% else %}第三部分{% end %}（英式公开拍卖）
     </h3>
     <div class="timers col-md-2">
         <div class="timer" id="totalT">
@@ -56,7 +65,7 @@
             <span class="countdown" title="您提交价格剩余时间"></span><span>秒</span>
         </div>
         <div class="timer" id="resultT">
-            <span class="countdown" title="下个阶段马上到来"></span><span>秒</span>
+            <span class="countdown" title="下个部分马上到来"></span><span>秒</span>
         </div>
     </div>
 </div>
@@ -65,24 +74,20 @@
 
     <div class="box effect7 problem">
         <ul>
-            <li>
-                竞拍者公开相互叫价，每次出价都要比前一次的出价更高（规定至少要比前一个价格高0.1），
+            <li>竞拍者公开相互叫价，每次出价都要比前一次的出价更高（规定至少要比前一个价格高0.1），
                 当30秒没有人再出更高的价或者到达拍卖截止时间（3分钟）时，拍卖结束，当前出价最高者成为的赢家，赢家需支付其报出的价格。</li>
-            <li>
-                本次阶段拍卖物<span class="highlight">价值q{% if q is None %}服从6-10的均匀分布{% else %}={{ q }}{% end %}</span>，
-                所有竞拍者的成本c均服从0-4的均匀分布。也就是说，物品对您的真实价值为q-c。
-                如果实验结束后，是你最后报价（记为b），那么你将支付b并赢得物品，你的收益为(q-c)-b；
-                否则，你的收益是0。
-            </li>
+            <li>在本部分中，如果你报价过低，你将很难获得胜利；但如果你出价过高，虽然能够赢得物品，但却有可能由于代价过高而导致负的收益。</li>
+            <li>拍卖物价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}，所有竞拍者的成本c均服从{{ settings['minC'] }}-{{ settings['maxC'] }}的均匀分布。也就是说，物品的估价为q-c。</li>
+            <li>如果实验结束后，是你最后报价（记为b），那么你将支付b并赢得物品，你的收益为(q-c)-b；否则，你的收益是0。</li>
             <li>请在下面的输入框写上您对物品的报价，并进行提交。</li>
         </ul>
     </div>
 
     <div class="well well-sm problem">
         <ul>
-            <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>，也就是说该物品对你的<span class="highlight">真实价值
-               q-c{% if q is None %}在{{ 6-player['cost'] }}到{{ 10-player['cost'] }}之间{% else %}为{{ q-player['cost'] }}{% end %}</span>。
-            </li>
+            <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>。拍卖物<span class="highlight">价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}</span>。</li>
+            <li>注意：拍卖物的<span class="highlight">估价q-c{% if q is None %}在{{ settings['minQ']-player['cost'] }}到{{ settings['maxQ']-player['cost'] }}之间
+                {% else %}为{{ q-player['cost'] }}{% end %}</span>。</li>
         </ul>
     </div>
 
@@ -96,7 +101,7 @@
         </ul>
     </div>
 
-    <div  style="margin-bottom: 20px;">
+    <div  style="margin-bottom: 30px;">
         <form class="form-inline">
             <div class="form-group col-md-3 has-success">
                 <div class="input-group">
@@ -113,17 +118,11 @@
         </form>
     </div>
 
-    <div class="well result">
+    <div class="well well-sm result">
 
     </div>
 
 </div>
-
-{% if train %}
-<div class="alert alert-warning col-md-offset-1 col-md-10" role="alert" style="margin-top: 20px;">
-    欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
-</div>
-{% end %}
 
 <script type="text/javascript" language="javascript">
 
@@ -141,10 +140,11 @@ function enableForm(form){
 
 $(document).ready(function(){
 
-    $("form").submit( function(){
+    $("form").submit( function(event){
+        event.preventDefault();
+
         var bid = $("input[name='bid']").val();
-        send( {cmd:'englishbid', data:{bid:bid}} );
-        return false;
+        sendCmd('englishbid', {bid: bid});
     });
 
     function addMessage(data){
@@ -159,7 +159,7 @@ $(document).ready(function(){
         }
         $(".message.empty").before(new_message);
         $(".bid-msg-list ul").scrollTop( $('.bid-msg-list ul')[0].scrollHeight );
-        send( {cmd:'gettimeout', data:{'name': 'englisheach'}} );
+        sendCmd('gettimeout', {name: 'englisheach'});
     };
 
     ws.handler.englishbid = function(data, evt){
@@ -173,16 +173,14 @@ $(document).ready(function(){
     };
 
     ws.handler.result = function(data, evt){
-        disableForm("form", "本阶段已结束");
-        send( {cmd:'getresult', data:'{% if q is None %}english{% else %}englishopen{% end %}'} );
-        send( {cmd:'gettimeout', data:{'name': 'englishresult'}} );
+        disableForm("form", "本部分已结束");
+        sendCmd('getresult', '{% if q is None %}english{% else %}englishopen{% end %}');
+        sendCmd('gettimeout', {name: 'englishresult'});
     };
 
     ws.handler.showresult = function(data, evt){
-        totalT.hide();
-        totalT.stop();
-        eachT.hide();
-        eachT.stop();
+        totalT.close();
+        eachT.close();
         $(".result").html(data);
         $(".result").show();
     };
@@ -209,26 +207,20 @@ $(document).ready(function(){
     {% if train %}
     var totalT = new Timer(10, "totalT", ws.handler.result);
     var eachT = new Timer(10, "eachT", ws.handler.result);
-
-    $("a.back").on("click", function(){
-        send( {cmd: 'get'} );
-        totalT.stop();
-        eachT.stop();
-        resultT.stop();
-    });
+    sendCmd('gettimeout', {name: 'englishtotal'});
     {% else %}
     var totalT = new Timer(10, "totalT");
     var eachT = new Timer(10, "eachT");
-    {% end %}
     var resultT = new Timer(10, "resultT");
-
     var substage = '{{ substage }}';
     if(substage == 'result'){
         ws.handler.result();
     } else if(substage == 'run'){
-        send( {cmd:'gettimeout', data:{'name': 'englishtotal'}} );
-        send( {cmd:'gettimeout', data:{'name': 'englisheach'}} );
+        sendCmd('gettimeout', {name: 'englishtotal'});
+        sendCmd('gettimeout', {name: 'englisheach'});
     }
+    {% end %}
+
 });
 
 </script>

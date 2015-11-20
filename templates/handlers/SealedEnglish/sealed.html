@@ -17,6 +17,10 @@
         float: right;
     }
 
+    .page-header {
+        margin-top: 0px;
+    }
+
     .page-header h3 {
         display: inline-block;
     }
@@ -27,16 +31,22 @@
     }
 </style>
 
+{% if train %}
+<div class="alert alert-warning col-md-offset-1 col-md-10" role="alert" style="margin-top: 10px;">
+    欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
+</div>
+{% end %}
+
 <div class="page-header col-md-offset-1 col-md-10">
     <h3>
-        第一阶段（第二价格密封拍卖）{% if train %}<a class="back" href="javascript:void(0)"><small>返回</small></a>{% end %}
+        第一部分（第二价格密封拍卖）
     </h3>
     <div class="timers">
         <div class="timer" id="sealedT">
             <span class="countdown" title="本轮拍卖剩余时间"></span><span>秒</span>
         </div>
         <div class="timer" id="resultT">
-            <span class="countdown" title="下个阶段马上到来"></span><span>秒</span>
+            <span class="countdown" title="下个部分马上到来"></span><span>秒</span>
         </div>
     </div>
 </div>
@@ -45,29 +55,22 @@
 
     <div class="box effect7 problem">
         <ul>
-            <li>
-                所有竞拍者都以密封的形式独立出价，出价最高的竞拍者赢得本次拍卖的物品，
-                但获胜者只需支付所有出价中的次高价（第二高价）。</li>
-            <li>
-                本次阶段拍卖物<span class="highlight">价值q服从6-10的均匀分布</span>，
-                所有竞拍者的成本c均服从0-4的均匀分布。也就是说，物品对您的真实价值为q-c。
-                如果你的报价是所有报价中的最高价，而所有报价中的第二高价为b，那么你将支付b并获得物品，你的收益为(q-c)-b；
-                否则，你的收益为0。
-            </li>
+            <li>竞拍者都以密封的形式独立出价，出价最高的竞拍者赢得拍卖物，但获胜者只需支付所有出价中的次高价。</li>
+            <li>理论上，在本部分的拍卖规则下，报出你的真实估价是你的占优策略。</li>
+            <li>拍卖物价值q服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布，所有竞拍者的成本c均服从{{ settings['minC'] }}-{{ settings['maxC'] }}的均匀分布。也就是说，物品的估价为q-c。</li>
+            <li>如果你的报价是所有报价中的最高价，而所有报价中的第二高价为b，那么你将支付b并获得物品，你的收益为(q-c)-b；否则，你的收益为0。</li>
             <li>请在下面的输入框写上您对物品的报价，并进行提交。</li>
         </ul>
     </div>
 
     <div class="well well-sm problem">
         <ul>
-            <li>
-                就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>，也就是说该物品对你的<span class="highlight">真实价值
-                q-c在{{ 6-player['cost'] }}到{{ 10-player['cost'] }}之间</span>。
-            </li>
+            <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>。拍卖物<span class="highlight">价值q服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布</span></li>
+            <li>注意：拍卖物的<span class="highlight">估价q-c在{{ settings['minQ']-player['cost'] }}到{{ settings['maxQ']-player['cost'] }}之间</span>。</li>
         </ul>
     </div>
 
-    <div  style="margin-bottom: 20px;">
+    <div  style="margin-bottom: 30px;">
         <form class="form-inline">
             <div class="form-group col-md-3 has-success">
                 <div class="input-group">
@@ -84,17 +87,11 @@
         </form>
     </div>
 
-    <div class="well result">
+    <div class="well well-sm result">
 
     </div>
 
 </div>
-
-{% if train %}
-<div class="alert alert-warning col-md-offset-1 col-md-10" role="alert">
-    欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
-</div>
-{% end %}
 
 <script type="text/javascript" language="javascript">
 
@@ -106,29 +103,29 @@ function disableForm(form, msg){
 
 $(document).ready(function(){
 
-    $("form").submit( function(){
+    $("form").submit( function(event){
+        event.preventDefault();
+
         var bid = $("input[name='bid']").val();
-        send( {cmd:'sealedbid', data:{bid:bid}} );
+        sendCmd('sealedbid', {bid:bid});
         ws.handler.wait();
-        return false;
     });
 
     ws.handler.wait = function(data, evt){
         disableForm("form", "等待对方出价");
 
-        send( {cmd:'gettimeout', data:{'name': 'sealedrun'}} );
+        sendCmd('gettimeout', {name: 'sealedrun'});
         {% if train %}ws.handler.result();{% end %}
     };
 
     ws.handler.result = function(data, evt){
-        disableForm("form", "本阶段已结束");
-        send( {cmd:'getresult', data:'sealed'} );
-        send( {cmd:'gettimeout', data:{'name': 'sealedresult'}} );
+        disableForm("form", "本部分已结束");
+        sendCmd('getresult', 'sealed');
+        sendCmd('gettimeout', {name: 'sealedresult'});
     };
 
     ws.handler.showresult = function(data, evt){
-        sealedT.hide();
-        sealedT.stop();
+        sealedT.close();
         $(".result").html(data);
         $(".result").show();
     };
@@ -146,24 +143,20 @@ $(document).ready(function(){
     };
     {% if train %}
     var sealedT = new Timer(10, "sealedT", ws.handler.result);
-
-    $("a.back").on("click", function(){
-        send( {cmd: 'get'} );
-        sealedT.stop();
-        resultT.stop();
-    });
+    sendCmd('gettimeout', {name: 'sealedrun'});
     {% else %}
     var sealedT = new Timer(10, "sealedT");
-    {% end %}
     var resultT = new Timer(10, "resultT");
 
     var substage = '{{ substage }}';
     if(substage == 'result'){
         ws.handler.result();
     } else if(substage == 'run'){
-        send( {cmd:'gettimeout', data:{'name': 'sealedrun'}} );
+        sendCmd('gettimeout', {name: 'sealedrun'});
     } else if(substage == 'wait'){
         ws.handler.wait();
     }
+    {% end %}
+
 });
 </script>

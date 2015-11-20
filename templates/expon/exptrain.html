@@ -6,7 +6,7 @@
 {% end %}
 
 {% block title %}
-    正式试验-{{ exp['exp_title'] }}
+    训练-{{ exp['exp_title'] }}
 {% end %}
 
 {% block style %}
@@ -24,6 +24,11 @@
             margin-right: 50px;
         }
 
+        .intro{
+            font-size: 20px;
+            text-indent: 2em;
+        }
+
         .info {
             padding: 0px 30px;
             border-left: 1px solid #eee;
@@ -39,43 +44,19 @@
             text-indent: 2em;
         }
 
-
         .page-header {
             margin-top: 0px;
         }
 
-        /* .well {
-            background-color: #F5F5DC;
-        } */
-
         .account-info {
             margin-bottom: 20px;
         }
-
-        /*.chat {
-            position: fixed;
-            right: 50px;
-            bottom: 10px;
-            width: 20%;
-        }
-
-        .chat ul {
-            overflow-y: auto;
-            height: 200px;
-        }
-
-        .empty {
-            display: none;
-        }*/
 
     </style>
 {% end %}
 
 {% block row %}
     <div class="toolbar">
-        <a href="javascript:void(0)" title="聊天室">
-            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-        </a>
         <a href="/help" target="_blank" title="FAQ">
             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
         </a>
@@ -88,7 +69,32 @@
     </div>
 
     <div class="col-md-7 col-md-offset-1" id="main">
-        {% module xsrf_form_html() %}
+        <div class="page-header col-md-offset-1 col-md-10">
+            <h2>训练说明<small></small></h2>
+        </div>
+
+        <div class="intro col-md-offset-1 col-md-10">
+
+            <div class="well">
+                <p>训练旨在让您熟悉相应的操作和概念，与正式实验并不完全一致。训练时你的对手是一个智能agent，而正式实验时你将面对真实报价人。</p>
+                <p>本实验包含三个部分，请在仔细阅读实验说明之后选择需要训练的部分进行练习。</p>
+            </div>
+
+            <div class="box effect7">
+                <p>欢迎你参加实验！本次实验分为三个部分，在每个部分你都将和其他参与人面临一个拍卖场景，你需要独立提交报价，以扩大你的收益。</p>
+                <p>拍卖场景如下，你和其他竞拍者一起竞拍一片油田，油田中石油储量的市场价值为q，所有人都知道q服从一个给定分布，而且油田对每个人的价值是相同的。由于技术差异，每个竞拍者对这片的开采成本c都不一样，而且各竞拍者开采成本的确切值只有自己知道，但所有竞拍者都知道所有开采成本都服从同一个的分布。那么给定价值q和成本c，油田对你的估价即为q-c。本实验的三个部分都面临同样的这个场景，并且给定q服从[{{ settings['minQ'] }}, {{ settings['maxQ'] }}]的均匀分布，c服从({{ settings['minC'] }}, {{ settings['maxC'] }}]的均匀分布。注意，在实验中，价值q和每个人的成本c贯穿三个部分不变。</p>
+                <p>虽然拍卖场景类似，但各个部分拍卖规则并不相同。第一部分采用第二价格密封拍卖，即每个人分别提交一个密封报价，当所有人都提交了报价或者到达截止时间（3分钟），实验结束。如果实验结束时并未提交价格则视为放弃。本部分价高者获胜，胜者赢得物品并支付第二高报价。例如，物品价值为q，你的成本为c。如果你的报价是所有报价中的最高价，你将赢得该物品并支付所有报价中的第二高价（记为b），你在本部分的最终收益为估价减去支付价格，即(q-c)-b；但是如果你的报价并不是最高价，那么你的收益将为0。</p>
+                <p>第二部分采用英式升价公开拍卖，即竞拍者公开相互叫价，但每次出价都要比前一次的出价更高，所有人都能看到报价历史，当30秒时间内没有人再出更高的价或者到达截止时间（3分钟）时，实验结束。最后的报价人即为胜者，胜者赢得物品并支付其所报的价。例如，物品价值为q，你的成本为c。如果是你最后出价b，你将赢得该物品并支付你最后的报价b，你在本部分的最终收益为估价减去支付价格，即(q-c)-b；但是如果你不是最后一个出价的，那么你的收益将为0。</p>
+                <p>第三部分拍卖仍然采用与第二部分相同的英式公开拍卖形式，不同的是，前两个部分并不透露物品的价值q的确切值，只告诉你q的分布，而第三部分会告知q的确切值。</p>
+                <p>所有实验结束后，你将看到实验结果以及实际收益，而你在实验中的表现将直接决定你的实际收益。</p>
+            </div>
+
+            <div class="btn-group btn-group-lg" role="group">
+                <a href="/exp/{{ exp['exp_id'] }}/train/Sealed" class="btn btn-default">第一部分</a>
+                <a href="/exp/{{ exp['exp_id'] }}/train/English" class="btn btn-default">第二部分</a>
+                <a href="/exp/{{ exp['exp_id'] }}/train/EnglishOpen" class="btn btn-default">第三部分</a>
+            </div>
+        </div>
     </div>
 
     <div class="info col-md-3">
@@ -112,8 +118,7 @@
                 对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
             </p>
             <p>
-                还不熟悉流程？<a href="/exp/{{ exp['exp_id'] }}/train" target="_blank">前往训练</a>
-                或者查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
+                查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
             </p>
         </div>
     </div>
@@ -144,75 +149,13 @@
         </div>
     </div>
 
-    <!--<div class="chat">-->
-        <!--<ul class="list-unstyled well well-sm">-->
-            <!--<li class="chat-msg empty"></li>-->
-        <!--</ul>-->
-        <!--<form>-->
-            <!--<input type="text"value="">-->
-            <!--<button class="btn btn-primary send-chat-msg" type="submit">提交</button>-->
-        <!--</form>-->
-    <!--</div>-->
 
     <script type="text/javascript" language="javascript">
-
-        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
-
-        var sendCmd = function(cmd, data, callback){
-             waitForConnection(function () {
-                ws.send( JSON.stringify({cmd: cmd, data: data}) );
-                if (typeof callback !== 'undefined') {
-                    callback();
-                }
-            }, 5);
-        }
-
-        var waitForConnection = function (callback, interval) {
-            if (ws.readyState === 1) {
-                callback();
-            } else {
-                setTimeout(function () {
-                    waitForConnection(callback, interval);
-                }, interval);
-            }
-        };
-
-        function msgHandler(ws){
-            var that = this;
-            ws.onmessage = function (evt) {
-                msg = JSON.parse(evt.data);
-                if( that[msg.cmd] ){
-                    that[msg.cmd](msg.data, evt);
-                }
-            };
-        };
-
-        ws.handler = new msgHandler(ws)
 
         $(document).ready(function(){
             $("a.show-introduction").on("click", function(){
                 $(".modal.introduction").modal('toggle');
             });
-
-            ws.handler.replace = function(data, evt){
-                $("#main").html(data);
-            };
-
-            ws.handler.refresh = function(data, evt) {
-                sendCmd('get');
-            };
-
-            ws.handler.redirect = function(data, evt){
-                document.location.href = data;
-            };
-
-            ws.handler.error = function(data, evt){
-                console.log(data);
-            }
-
-            sendCmd('get');
-
-            var heartbeat = setInterval(sendCmd, 30000, 'heartbeat');
         });
 
     </script>
