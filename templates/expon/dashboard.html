@@ -1,13 +1,14 @@
 {% extends '../main.html' %}
 
 {% block title %}
-    Dashboard
+    监控面板 - {{ exp['exp_title'] }}
 {% end %}
 
 {% block js %}
     <script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" language="javascript" src="/static/js/jquery-ui.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/util.js"></script>
 {% end %}
 
 {% block style %}

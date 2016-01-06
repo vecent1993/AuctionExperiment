@@ -33,14 +33,6 @@
             <td>{{ r['profit'] }}</td>
         </tr>
         {% end %}
-        <tr >
-            <td colspan="5">初始奖励</td>
-            <td>10（元）</td>
-        </tr>
-        <tr class="success">
-            <td colspan="5">合计</td>
-            <td >{{ sum(map(lambda a: a['profit'], results)) }} * 10 + 10 = {{ sum(map(lambda a: a['profit'], results))* 10 + 10 }}（元）</td>
-        </tr>
         </tbody>
     </table>
 </div>

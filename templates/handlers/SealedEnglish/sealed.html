@@ -66,6 +66,7 @@
     <div class="well well-sm problem">
         <ul>
             <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>。拍卖物<span class="highlight">价值q服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布</span></li>
+            {% if round == '2' %}<li>在上一轮中，<span class="highlight">你的对手们获得的收益高于你</span>。</li>{% end %}
             <li>注意：拍卖物的<span class="highlight">估价q-c在{{ settings['minQ']-player['cost'] }}到{{ settings['maxQ']-player['cost'] }}之间</span>。</li>
         </ul>
     </div>
@@ -107,21 +108,21 @@ $(document).ready(function(){
         event.preventDefault();
 
         var bid = $("input[name='bid']").val();
-        sendCmd('sealedbid', {bid:bid});
+        sendCmd('sealed_bid', {bid:bid});
         ws.handler.wait();
     });
 
     ws.handler.wait = function(data, evt){
         disableForm("form", "等待对方出价");
 
-        sendCmd('gettimeout', {name: 'sealedrun'});
+        sendCmd('get_timeout', 'sealedrun');
         {% if train %}ws.handler.result();{% end %}
     };
 
     ws.handler.result = function(data, evt){
         disableForm("form", "本部分已结束");
-        sendCmd('getresult', 'sealed');
-        sendCmd('gettimeout', {name: 'sealedresult'});
+        sendCmd('get_result', 'sealed');
+        sendCmd('get_timeout', 'sealedresult');
     };
 
     ws.handler.showresult = function(data, evt){
@@ -143,7 +144,7 @@ $(document).ready(function(){
     };
     {% if train %}
     var sealedT = new Timer(10, "sealedT", ws.handler.result);
-    sendCmd('gettimeout', {name: 'sealedrun'});
+    sendCmd('get_timeout', 'sealedrun');
     {% else %}
     var sealedT = new Timer(10, "sealedT");
     var resultT = new Timer(10, "resultT");
@@ -152,7 +153,7 @@ $(document).ready(function(){
     if(substage == 'result'){
         ws.handler.result();
     } else if(substage == 'run'){
-        sendCmd('gettimeout', {name: 'sealedrun'});
+        sendCmd('get_timeout', 'sealedrun');
     } else if(substage == 'wait'){
         ws.handler.wait();
     }

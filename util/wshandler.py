@@ -1,15 +1,26 @@
 # -*- coding: utf-8 -*-
-import traceback
 import json
+from util.log import FileLogger, Logger
 
-def onWs(func):
+DEBUG = True
+
+if not DEBUG:
+    logger = FileLogger('wshandler.txt')
+else:
+    logger = Logger()
+
+
+def on_ws(func):
+    # @functools.wraps(func)
     def _wrap1(*args, **kwargs):
         return func(*args, **kwargs)
     _wrap1.__name__ = '_'.join(('@', 'ws', func.__name__))
     return _wrap1
 
-def onRedis(*domains):
+
+def on_redis(*domains):
     def _wrap(func):
+        # @functools.wraps(func)
         def _wrap1(*args, **kwargs):
             func(*args, **kwargs)
         names = map(lambda domain: '_'.join(('@', 'redis', domain, func.__name__)), domains)
@@ -36,13 +47,11 @@ class WSMessageHandler(object):
     def get(self, data):
         pass
 
+    @logger.log
     def handle(self, msg):
-        try:
-            name = '_'.join(('@', 'ws', msg['cmd']))
-            if hasattr(self, name):
-                getattr(self, name)(msg.get('data'))
-        except:
-            print str(traceback.format_exc())
+        name = '_'.join(('@', 'ws', msg['cmd']))
+        if hasattr(self, name):
+            getattr(self, name)(msg.get('data'))
 
     def publish(self, channel, msg):
         self.env.redis.publish(str(channel), json.dumps(msg))
@@ -50,7 +59,7 @@ class WSMessageHandler(object):
     def write(self, msg):
         self.env.write_message(json.dumps(msg))
 
-    def writeCmd(self, cmd, data=None, **kwargs):
+    def write_cmd(self, cmd, data=None, **kwargs):
         msg = dict(cmd=cmd)
         if data is not None:
             msg['data'] = data

@@ -39,13 +39,13 @@
                 </a>
             </li>
             <li role="presentation">
-                <a {% if exp['exp_status']=='0' %}href="/exp/{{ exp['exp_id'] }}/activate"
+                <a {% if exp['exp_status']!='1' %}href="/exp/{{ exp['exp_id'] }}/activate"
                 {% else %}title="实验已被激活"{% end %}>
                     <span class="glyphicon glyphicon-off" aria-hidden="true"></span>激活
                 </a>
             </li>
             <li role="presentation">
-                <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/close"
+                <a {% if exp['exp_status']!='2' %}href="/exp/{{ exp['exp_id'] }}/close"
                 {% else %}title="实验尚未被激活或已结束"{% end %}>
                     <span class="glyphicon glyphicon-off" aria-hidden="true" style="color: #c0c0c0"></span>关闭
                 </a>

@@ -2,26 +2,28 @@
 from gevent import monkey; monkey.patch_all()
 from gevent import Greenlet
 import redis
-import time
 
 pool = redis.ConnectionPool()
-red = redis.Redis(connection_pool=pool)
+conn = redis.Redis(connection_pool=pool)
 
 
 class RedisSub(Greenlet):
+    """Asynchronous redis subscribe based on gevent Greenlet
+
+    """
     def __init__(self, channel, callback):
         Greenlet.__init__(self)
 
-        self.channel = channel
-        self.callback = callback
-        self.pubsub = red.pubsub()
+        self._channel = channel
+        self._callback = callback
+        self._pub_sub = conn.pubsub()
 
     def _run(self):
-        self.pubsub.subscribe(self.channel)
-        for msg in self.pubsub.listen():
-            self.callback(msg)
+        self._pub_sub.subscribe(self._channel)
+        for msg in self._pub_sub.listen():
+            self._callback(msg)
 
     def stop(self):
-        if self.pubsub and self.pubsub.subscribed:
-            self.pubsub.unsubscribe()
+        if self._pub_sub and self._pub_sub.subscribed:
+            self._pub_sub.unsubscribe()
         # self.kill()

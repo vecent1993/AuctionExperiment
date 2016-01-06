@@ -58,9 +58,6 @@
         {% if q is None %}第二部分{% else %}第三部分{% end %}（英式公开拍卖）
     </h3>
     <div class="timers col-md-2">
-        <div class="timer" id="totalT">
-            <span class="countdown" title="本轮拍卖剩余时间"></span><span>秒</span>
-        </div>
         <div class="timer" id="eachT">
             <span class="countdown" title="您提交价格剩余时间"></span><span>秒</span>
         </div>
@@ -86,6 +83,7 @@
     <div class="well well-sm problem">
         <ul>
             <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>。拍卖物<span class="highlight">价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}</span>。</li>
+            {% if round == '2' %}<li>在上一轮中，<span class="highlight">你的对手们获得的收益高于你</span>。</li>{% end %}
             <li>注意：拍卖物的<span class="highlight">估价q-c{% if q is None %}在{{ settings['minQ']-player['cost'] }}到{{ settings['maxQ']-player['cost'] }}之间
                 {% else %}为{{ q-player['cost'] }}{% end %}</span>。</li>
         </ul>
@@ -144,7 +142,7 @@ $(document).ready(function(){
         event.preventDefault();
 
         var bid = $("input[name='bid']").val();
-        sendCmd('englishbid', {bid: bid});
+        sendCmd('english_bid', {bid: bid});
     });
 
     function addMessage(data){
@@ -159,7 +157,7 @@ $(document).ready(function(){
         }
         $(".message.empty").before(new_message);
         $(".bid-msg-list ul").scrollTop( $('.bid-msg-list ul')[0].scrollHeight );
-        sendCmd('gettimeout', {name: 'englisheach'});
+        sendCmd('get_timeout', 'englishrun');
     };
 
     ws.handler.englishbid = function(data, evt){
@@ -174,12 +172,11 @@ $(document).ready(function(){
 
     ws.handler.result = function(data, evt){
         disableForm("form", "本部分已结束");
-        sendCmd('getresult', '{% if q is None %}english{% else %}englishopen{% end %}');
-        sendCmd('gettimeout', {name: 'englishresult'});
+        sendCmd('get_result', '{% if q is None %}english{% else %}englishopen{% end %}');
+        sendCmd('get_timeout', 'englishresult');
     };
 
     ws.handler.showresult = function(data, evt){
-        totalT.close();
         eachT.close();
         $(".result").html(data);
         $(".result").show();
@@ -188,10 +185,7 @@ $(document).ready(function(){
     ws.handler.timeout = function(data, evt){
         if(!data.seconds)
             return;
-        if(data.name == 'englishtotal'){
-            totalT.show();
-            totalT.set(data.seconds);
-        }else if(data.name == 'englisheach'){
+        if(data.name == 'englishrun'){
             eachT.show();
             eachT.set(data.seconds);
         }else if(data.name == 'englishresult'){
@@ -205,19 +199,16 @@ $(document).ready(function(){
     {% end %}
 
     {% if train %}
-    var totalT = new Timer(10, "totalT", ws.handler.result);
     var eachT = new Timer(10, "eachT", ws.handler.result);
-    sendCmd('gettimeout', {name: 'englishtotal'});
     {% else %}
-    var totalT = new Timer(10, "totalT");
     var eachT = new Timer(10, "eachT");
     var resultT = new Timer(10, "resultT");
     var substage = '{{ substage }}';
     if(substage == 'result'){
         ws.handler.result();
     } else if(substage == 'run'){
-        sendCmd('gettimeout', {name: 'englishtotal'});
-        sendCmd('gettimeout', {name: 'englisheach'});
+        sendCmd('get_timeout', 'englishrun');
+        sendCmd('get_timeout', 'englisheach');
     }
     {% end %}
 

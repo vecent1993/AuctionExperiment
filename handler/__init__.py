@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 import traceback
 
-def getHandler(type, handler):
+def get_handler(type, handler):
     if type == 'player':
-        name = '.'.join(('playerhandler_', handler))
+        name = '.'.join(('playerhandler', handler))
     elif type == 'host':
-        name = '.'.join(('hosthandler_', handler))
+        name = '.'.join(('hosthandler', handler))
     elif type == 'group':
-        name = '.'.join(('grouphandler_', handler))
+        name = '.'.join(('grouphandler', handler))
     elif type == 'train':
-        name = '.'.join(('trainhandler_', handler))
+        name = '.'.join(('trainhandler', handler))
     else:
         raise Exception('type error: type must be player, host or group')
 

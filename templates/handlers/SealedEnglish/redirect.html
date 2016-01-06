@@ -1,0 +1,28 @@
+
+<style TYPE="text/css">
+
+    .timer {
+        display: none;
+    }
+
+</style>
+
+<div class="page-header">
+    <h3>实验已结束</h3>
+</div>
+
+<div class="timer" id="redirectT">
+    <span>马上跳转到<a href="{{ redirecturl }}">{{ redirecttitle }}</a>页面</span><span class="countdown" title="离跳转还剩"></span><span>秒</span>
+</div>
+
+<script>
+
+$(document).ready(function(){
+    var redirectT = new Timer({{ delay }}, "redirectT", function(){
+        document.location.href = '{{ redirecturl }}';
+    });
+    redirectT.show();
+    redirectT.start();
+});
+
+</script>
