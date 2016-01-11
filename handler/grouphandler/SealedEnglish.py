@@ -6,13 +6,13 @@ from tornado.template import Template
 
 import util.pool
 from . import GroupHandler, on_redis
-
+from ..playerhandler import PlayerHandler
 
 class SealedEnglish(GroupHandler):
-    def __init__(self, expid, sid, gid):
-        super(SealedEnglish, self).__init__()
+    def __init__(self, exp, sid, gid):
+        super(SealedEnglish, self).__init__(exp)
 
-        self.expid, self.sid, self.gid = map(str, (expid, sid, gid))
+        self.sid, self.gid = map(str, (sid, gid))
         self.value = util.pool.Group(self.redis, self.expid, self.sid, self.gid)
 
         self.settings = dict(
@@ -63,7 +63,7 @@ class SealedEnglish(GroupHandler):
             cost = round(random.uniform(self.settings['minC']+.1, self.settings['maxC']), 1)
             self.value['players'][pid]['cost'] = cost
             if pid.startswith('agent'):
-                self.add_delay('sealedagentbid'+pid, random.uniform(5, 30), 'sealed_agent_bid', pid)
+                self.add_delay('sealedagentbid'+pid, random.uniform(5, 30), self.sealed_agent_bid, pid)
             else:
                 player = util.pool.Player(self.redis, self.expid, pid)
                 player.set('stage', self.value['stage'])
@@ -71,7 +71,7 @@ class SealedEnglish(GroupHandler):
                 self.publish('change_stage', ':'.join(('player', self.expid, pid)))
             self.value.save('players')
 
-        self.add_delay('sealedrun', self.settings['sealed_run_time'], 'sealed_run_timeout')
+        self.add_delay('sealedrun', self.settings['sealed_run_time'], self.sealed_run_timeout)
 
     def sealed_run_timeout(self, data):
         for pid in self.value['players'].keys():
@@ -117,7 +117,7 @@ class SealedEnglish(GroupHandler):
                     pass
             self.publish('change_stage', ':'.join(('player', self.expid, pid)))
 
-        self.add_delay('sealedresult', self.settings['result_time'], 'sealed_result_timeout')
+        self.add_delay('sealedresult', self.settings['result_time'], self.sealed_result_timeout)
 
     def sealed_result_timeout(self, data):
         stages = self.value.get('stage', refresh=True).split(':')
@@ -147,7 +147,7 @@ class SealedEnglish(GroupHandler):
 
         for pid in self.value['players'].keys():
             if pid.startswith('agent'):
-                self.add_delay('englishagentbid'+pid, random.uniform(5, 20), 'english_agent_bid', pid)
+                self.add_delay('englishagentbid'+pid, random.uniform(5, 20), self.english_agent_bid, pid)
 
     def english_run_timeout(self, data):
         stages = self.value.get('stage', refresh=True).split(':')
@@ -191,7 +191,7 @@ class SealedEnglish(GroupHandler):
                     pass
             self.publish('change_stage', ':'.join(('player', self.expid, pid)))
 
-        self.add_delay('englishresult', self.settings['result_time'], 'english_result_timeout')
+        self.add_delay('englishresult', self.settings['result_time'], self.english_result_timeout)
 
     def english_result_timeout(self, data):
         stages = self.value.get('stage', refresh=True).split(':')
@@ -216,7 +216,7 @@ class SealedEnglish(GroupHandler):
         self.db.insertmany(sql, englishbids)
 
         if stages[2] == 'englishopen':
-            self.publish('change_stage', data=dict(sid=self.sid, gid=self.gid))
+            self.end()
             return
 
         stages = self.value.get('stage', refresh=True).split(':')
@@ -232,7 +232,14 @@ class SealedEnglish(GroupHandler):
 
         for pid in self.value['players'].keys():
             if pid.startswith('agent'):
-                self.add_delay('englishagentbid'+pid, random.uniform(5, 20), 'english_agent_bid', pid)
+                self.add_delay('englishagentbid'+pid, random.uniform(5, 20), self.english_agent_bid, pid)
+
+    def end(self):
+        for pid in filter(lambda pid: not pid.startswith('agent'), self.value['players'].keys()):
+            PlayerHandler.next_stage(self.redis, self.expid, pid)
+            self.publish('switch_handler', ':'.join(('player', self.expid, pid)), dict(cmd='get'))
+
+        self.exp.close_group(dict(sid=self.sid, gid=self.gid))
 
     def sealed_agent(self, cost):
         eq = (self.settings['minQ'] + self.settings['maxQ']) / 2.
@@ -320,7 +327,7 @@ class SealedEnglish(GroupHandler):
 
             bid = bi + self._f(q-cj-bi)
 
-        self.publish('english_bid', ':'.join('group', self.sid, self.gid),
+        self.publish('english_bid', ':'.join(('group', self.sid, self.gid)),
                      {'pid': pid, 'bid': bid, 'username': 'AGENT'})
 
     @on_redis
@@ -365,18 +372,13 @@ class SealedEnglish(GroupHandler):
                 self.value.save('englishopenbids')
 
             for pid in filter(lambda pid: pid.startswith('agent'), self.value['players'].keys()):
-                self.add_delay('englishagentbid'+pid, random.uniform(5, 20), 'english_agent_bid', pid)
-        self.add_delay('englishrun', self.settings['english_run_time'], 'english_run_timeout')
+                self.add_delay('englishagentbid'+pid, random.uniform(5, 20), self.english_agent_bid, pid)
+        self.add_delay('englishrun', self.settings['english_run_time'], self.english_run_timeout)
 
         self.publish('english_bid_open', ':'.join(('group', self.sid, self.gid)), data)
 
     @staticmethod
     def render_info(group):
-        """used in host monitor
-
-        :param group: A redis dict value, group information stored in redis.
-        :return: A html string.
-        """
         return Template('''
             当前阶段：<br/>
                 {{ group['stage'] }}<br/>

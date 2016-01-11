@@ -7,17 +7,17 @@ from ..playerhandler import PlayerHandler
 
 
 class End(GroupHandler):
-    def __init__(self, expid, sid, gid):
-        super(End, self).__init__()
+    def __init__(self, exp, sid, gid):
+        super(End, self).__init__(exp)
 
-        self.expid, self.sid, self.gid = map(str, (expid, sid, gid))
+        self.sid, self.gid = map(str, (sid, gid))
         self.value = util.pool.Group(self.redis, self.expid, self.sid, self.gid)
 
         for pid in filter(lambda pid: not pid.startswith('agent'), self.value['players'].keys()):
             PlayerHandler.next_stage(self.redis, self.expid, pid)
             self.publish('switch_handler', ':'.join(('player', self.expid, pid)), dict(cmd='get'))
 
-        self.publish('close_group', data=dict(sid=self.sid, gid=self.gid))
+        self.exp.close_group(dict(sid=self.sid, gid=self.gid))
 
     @staticmethod
     def render_info(group):

@@ -82,7 +82,7 @@
 
     <div class="well well-sm problem">
         <ul>
-            <li>就你而言，你的<span class="highlight">成本c={{ player['cost'] }}</span>。拍卖物<span class="highlight">价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}</span>。</li>
+            <li>就你而言，你的<span class="highlight">成本c={{ player.get('cost', refresh=True) }}</span>。拍卖物<span class="highlight">价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}</span>。</li>
             {% if round == '2' %}<li>在上一轮中，<span class="highlight">你的对手们获得的收益高于你</span>。</li>{% end %}
             <li>注意：拍卖物的<span class="highlight">估价q-c{% if q is None %}在{{ settings['minQ']-player['cost'] }}到{{ settings['maxQ']-player['cost'] }}之间
                 {% else %}为{{ q-player['cost'] }}{% end %}</span>。</li>

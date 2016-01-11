@@ -3,6 +3,7 @@ import traceback
 import json
 import time
 
+import gevent
 import torndb
 from gevent import monkey; monkey.patch_all()
 from gevent import Greenlet
@@ -71,7 +72,8 @@ class Exp(Greenlet):
         super(Exp, self).__init__()
 
         self.redis = rc
-        self.exp = util.pool.RedisExp(self.redis, expid)
+        self.expid = expid
+        self.value = util.pool.RedisExp(self.redis, expid)
         self.sub = RedisSub('exp:'+str(expid), self.on_message)
 
         self.groups = {}
@@ -110,7 +112,7 @@ class Exp(Greenlet):
                 self.host.handle(data)
             elif domain.startswith('group'):
                 _, sid, gid = domain.strip().split(':')
-                group_key = ':'.join(('group', str(self.exp['id']), str(sid), str(gid)))
+                group_key = ':'.join(('group', str(self.expid), str(sid), str(gid)))
                 if group_key in self.groups:
                     self.groups[group_key].handle(data)
             elif not domain:
@@ -127,7 +129,7 @@ class Exp(Greenlet):
         self.sub.start()
 
     def publish(self, data):
-        self.redis.publish('exp:'+str(self.exp['id']), json.dumps(data))
+        self.redis.publish('exp:'+str(self.expid), json.dumps(data))
 
     def close(self):
         if self.sub:
@@ -139,7 +141,8 @@ class Experiment(Exp):
         super(Experiment, self).__init__(expid)
         self.host = get_handler('group', 'AutoHost')(self.exp['id'], self.exp['host'])
 
-        handler.grouphandler.Delay(2, self.init, None).start()
+        gevent.sleep(2)
+        self.init()
 
     def init(self, data=None):
         p = util.pool.Pool(self.redis, self.exp['id'])
@@ -153,24 +156,25 @@ class Experiment(Exp):
             return
 
         sid, gid = data['sid'], data['gid']
-        group = util.pool.Group(self.redis, self.exp['id'], sid, gid)
+        group = util.pool.Group(self.redis, self.expid, sid, gid)
         if 'stage' not in group:
             return
             # GroupHandler.nextStage(self.redis, self.exp['id'], sid, gid)
 
-        group_key = ':'.join(('group', str(self.exp['id']), str(sid), str(gid)))
+        group_key = ':'.join(('group', str(self.expid), str(sid), str(gid)))
+        stage = group.get('stage', refresh=True).split(':')[0]
         if group_key in self.groups:
             self.groups[group_key].close()
 
-        self.groups[group_key] = get_handler('group', group.get('stage', refresh=True))(self.exp['id'], sid, gid)
+        self.groups[group_key] = get_handler('group', stage)(self, sid, gid)
 
     def change_stage(self, data=None):
         sid, gid = data['sid'], data['gid']
-        handler.grouphandler.GroupHandler.next_stage(self.redis, self.exp['id'], sid, gid)
+        handler.grouphandler.GroupHandler.next_stage(self.redis, self.expid, sid, gid)
         self.switch_handler(data)
 
     def close_group(self, data=None):
-        group_key = ':'.join(('group', str(self.exp['id']), str(data['sid']), str(data['gid'])))
+        group_key = ':'.join(('group', str(self.expid), str(data['sid']), str(data['gid'])))
         if group_key in self.groups:
             self.groups[group_key].close()
             self.groups.pop(group_key)
@@ -178,8 +182,8 @@ class Experiment(Exp):
             return
 
         if not self.groups:
-            handler.hosthandler.HostHandler.next_stage(self.redis, self.exp['id'], self.exp['host'])
-            self.publish('switch_handler', ':'.join(('host', str(self.exp['id']))), data=dict(cmd='get'))
+            handler.hosthandler.HostHandler.next_stage(self.redis, self.expid, self.value['host'])
+            self.publish('switch_handler', ':'.join(('host', str(self.expid))), data=dict(cmd='get'))
 
     def publish(self, cmd, domain=None, data=None):
         msg = dict(cmd=cmd)
@@ -188,7 +192,7 @@ class Experiment(Exp):
         if data is not None:
             msg['data'] = data
 
-        self.redis.publish('exp:'+str(self.exp['id']), json.dumps(msg))
+        self.redis.publish('exp:'+str(self.expid), json.dumps(msg))
 
     def close(self):
         for group_key in self.groups.keys():
@@ -196,24 +200,24 @@ class Experiment(Exp):
             self.groups[group_key].close()
             self.groups.pop(group_key)
 
-        p = util.pool.Pool(self.redis, self.exp['id'])
+        p = util.pool.Pool(self.redis, self.expid)
         for sid, session in enumerate(p.get('sessions', [])):
             for gid, group in enumerate(session.get('groups', [])):
-                group = util.pool.Group(self.redis, self.exp['id'], sid, gid)
+                group = util.pool.Group(self.redis, self.expid, sid, gid)
                 group.delete()
 
         for pid in p.get('pool', []):
-            player = util.pool.Player(self.redis, self.exp['id'], pid)
+            player = util.pool.Player(self.redis, self.expid, pid)
             player.delete()
         p.delete()
 
-        h = util.pool.Host(self.redis, self.exp['id'], self.exp['host'])
+        h = util.pool.Host(self.redis, self.expid, self.value['host'])
         h.delete()
 
-        e = util.pool.RedisExp(self.redis, self.exp['id'])
+        e = util.pool.RedisExp(self.redis, self.expid)
         e.delete()
 
-        db.update('update exp set exp_status=2 where exp_id=%s', self.exp['id'])
+        db.update('update exp set exp_status=2 where exp_id=%s', self.expid)
 
         super(Experiment, self).close()
 

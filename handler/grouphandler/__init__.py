@@ -1,1 +1,1 @@
-from _grouphandler import GroupHandler, Delay, on_redis
+from _grouphandler import GroupHandler, on_redis

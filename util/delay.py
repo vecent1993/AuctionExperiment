@@ -3,7 +3,6 @@ import traceback
 import time
 import json
 import heapq
-import datetime
 
 import gevent
 from gevent import monkey; monkey.patch_all()
@@ -29,7 +28,7 @@ class DelayExecutor(Greenlet):
 
     def cancel(self):
         self.canceled = True
-        self.kill(block=False)
+        # self.kill(block=False)
 
 
 class TaskHub(Greenlet):
@@ -43,7 +42,7 @@ class TaskHub(Greenlet):
     def add_task(self, tid, runtime, function, context=None):
         if tid in self._task_finder:
             self.remove_task(tid)
-        task = [runtime, tid, function, context]
+        task = [runtime, tid, 0, function, context]
         self._task_finder[tid] = task
         heapq.heappush(self._tasks, task)
 
@@ -61,9 +60,25 @@ class TaskHub(Greenlet):
         if self._delay_executor:
             self._delay_executor.cancel()
 
-        delay = (self._tasks[0][0] - datetime.datetime.now()).total_seconds()
+        delay = self._tasks[0][0] - time.time()
         self._delay_executor = DelayExecutor(delay, self.execute_task)
         self._delay_executor.start()
+
+    def run_task(self, tid):
+        if tid not in self._task_finder:
+            return
+
+        task = self._task_finder[tid]
+        function, context = task[-2], task[-1]
+        self.remove_task(tid)
+        if task[2] == 0:
+            try:
+                task[2] = 1
+                function(context)
+                task[2] = 2
+            except:
+                print traceback.format_exc()
+
 
     def execute_task(self):
         if not self._tasks:
@@ -71,10 +86,13 @@ class TaskHub(Greenlet):
 
         task = heapq.heappop(self._tasks)
         function, context = task[-2], task[-1]
-        try:
-            function(context)
-        except:
-            print traceback.format_exc()
+        if task[2] == 0:
+            try:
+                task[2] = 1
+                function(context)
+                task[2] = 2
+            except:
+                print traceback.format_exc()
         self.schedule()
 
     def _run(self):
@@ -82,22 +100,22 @@ class TaskHub(Greenlet):
             gevent.sleep(100000)
 
 
-th = TaskHub()
-th.start()
-
-def print11(a):
-    print datetime.datetime.now(), a
-
-def print22(a):
-    th.remove_task('2')
-
-now = datetime.datetime.now()
-print now
-
-th.add_task('1', now + datetime.timedelta(seconds=10), print11, 1)
-th.add_task('2', now + datetime.timedelta(seconds=5.1), print11, 2)
-th.add_task('3', now + datetime.timedelta(seconds=5), print22, 3)
-th.add_task('1', now + datetime.timedelta(seconds=2), print11, 4)
-th.add_task('4', now + datetime.timedelta(seconds=17.6), print11, 4)
-
-time.sleep(10000)
+# th = TaskHub()
+# th.start()
+#
+# def print11(a):
+#     print datetime.datetime.now(), a
+#
+# def print22(a):
+#     th.remove_task('2')
+#
+# now = datetime.datetime.now()
+# print now
+#
+# th.add_task('1', now + datetime.timedelta(seconds=10), print11, 1)
+# th.add_task('2', now + datetime.timedelta(seconds=5.1), print11, 2)
+# th.add_task('3', now + datetime.timedelta(seconds=5), print22, 3)
+# th.run_task('1')
+# th.add_task('4', now + datetime.timedelta(seconds=17.6), print11, 4)
+#
+# time.sleep(10000)

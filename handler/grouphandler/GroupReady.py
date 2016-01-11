@@ -6,10 +6,10 @@ from . import GroupHandler, on_redis
 
 
 class GroupReady(GroupHandler):
-    def __init__(self, expid, sid, gid):
-        super(GroupReady, self).__init__()
+    def __init__(self, exp, sid, gid):
+        super(GroupReady, self).__init__(exp)
 
-        self.expid, self.sid, self.gid = map(str, (expid, sid, gid))
+        self.sid, self.gid = map(str, (sid, gid))
         self.value = util.pool.Group(self.redis, self.expid, self.sid, self.gid)
 
         self.init_tasks()
@@ -30,4 +30,4 @@ class GroupReady(GroupHandler):
             self.value.save('ready')
             if len(self.value['ready']) == \
                     len(filter(lambda pid: not pid.startswith('agent'), self.value['players'].keys())):
-                self.publish('change_stage', data=dict(sid=self.sid, gid=self.gid))
+                self.exp.change_stage(dict(sid=self.sid, gid=self.gid))

@@ -5,15 +5,15 @@ import random
 import datetime
 
 import util.pool
-from . import GroupHandler, Delay, on_redis
+from . import GroupHandler, on_redis
 from ..hosthandler import HostHandler
 from ..playerhandler import PlayerHandler
 
 
 class AutoHost(GroupHandler):
-    def __init__(self, expid, hostid):
-        super(AutoHost, self).__init__()
-        self.expid = str(expid)
+    def __init__(self, exp, hostid):
+        super(AutoHost, self).__init__(exp)
+
         self.hid = str(hostid)
 
         self.value = util.pool.Host(self.redis, self.expid, self.hid)
@@ -62,7 +62,7 @@ class AutoHost(GroupHandler):
                 player.set('online', True)
                 self.publish('online', self.host_domain, pid)
         if not self._close:
-            Delay(45, self.check_player, None).start()
+            self.add_delay('check_player', 45, self.check_player, None)
 
     @on_redis
     def shuffle(self, data=None):
@@ -84,7 +84,7 @@ class AutoHost(GroupHandler):
                 rg = util.pool.Group(self.redis, self.expid, sid, gid)
                 rg.clear()
                 rg.set('players', players)
-                rg.set('handlers', ['GroupReady', 'SealedEnglish', 'End'])
+                rg.set('handlers', ['GroupReady', 'SealedEnglish'])
                 rg.set('round', self.value.get('round'))
 
                 self.publish('change_stage', data={'sid': sid, 'gid': gid})

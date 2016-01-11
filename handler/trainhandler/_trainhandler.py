@@ -11,6 +11,7 @@ class TrainHandler(WSMessageHandler):
         super(TrainHandler, self).__init__(env)
 
         self.player = env.player
+        self.player.sandbox = True
         self.exp = self.env.exp
 
     @on_ws

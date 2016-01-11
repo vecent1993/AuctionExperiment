@@ -3,6 +3,7 @@ import time
 
 from util.pool import *
 from . import PlayerHandler, on_ws, on_redis
+from ..grouphandler import GroupHandler
 
 
 class SealedEnglish(PlayerHandler):
@@ -64,8 +65,10 @@ class SealedEnglish(PlayerHandler):
 
     @on_ws
     def get_timeout(self, name=None):
-        if name in self.group.get('tasks', {}, True):
-            seconds = round(self.group['tasks'][name]['runtime'] - time.time())
+        tid = self.group.key + ':' + name
+        runtime = GroupHandler.get_runtime(tid)
+        if runtime:
+            seconds = round(runtime - time.time())
             if seconds > 0:
                 self.write_cmd('timeout', {'name': name, 'seconds': seconds})
 
