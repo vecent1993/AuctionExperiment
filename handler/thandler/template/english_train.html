@@ -1,0 +1,199 @@
+<style type="text/css">
+
+    .problem{
+        font-size: 20px;
+    }
+
+    .bid-msg-list ul {
+        height: 200px;
+        overflow-y: auto;
+    }
+
+    li.message {
+        margin-left: 5px;
+        margin-top: 5px;
+    }
+
+    .message.empty {
+        display: none;
+    }
+
+    .timer {
+        display: none;
+    }
+
+    .timers {
+        margin-top: 10px;
+        display: inline-block;
+        float: right;
+    }
+
+    .page-header {
+        margin-top: 0px;
+    }
+
+    .page-header h3 {
+        display: inline-block;
+    }
+
+    .result {
+        display: none;
+        font-size: 20px;
+    }
+
+    .highlight {
+        color: red;
+    }
+
+</style>
+
+<div class="page-header col-md-offset-1 col-md-10">
+    <h3>
+        {% if q is None %}第二部分{% else %}第三部分{% end %}（英式公开拍卖）
+    </h3>
+    <div class="timers col-md-2">
+        <div class="timer" id="eachT">
+            <span class="countdown" title="您提交价格剩余时间"></span><span>秒</span>
+        </div>
+        <div class="timer" id="resultT">
+            <span class="countdown" title="下个部分马上到来"></span><span>秒</span>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-offset-1 col-md-10">
+
+    <div class="box effect7 problem">
+        <ul>
+            <li>竞拍者公开相互叫价，每次出价都要比前一次的出价更高（规定至少要比前一个价格高0.1），
+                当30秒没有人再出更高的价或者到达拍卖截止时间（3分钟）时，拍卖结束，当前出价最高者成为的赢家，赢家需支付其报出的价格。</li>
+            <li>在本部分中，如果你报价过低，你将很难获得胜利；但如果你出价过高，虽然能够赢得物品，但却有可能由于代价过高而导致负的收益。</li>
+            <li>拍卖物价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}，所有竞拍者的成本c均服从{{ settings['minC'] }}-{{ settings['maxC'] }}的均匀分布。也就是说，物品的估价为q-c。</li>
+            <li>如果实验结束后，是你最后报价（记为b），那么你将支付b并赢得物品，你的收益为(q-c)-b；否则，你的收益是0。</li>
+            <li>请在下面的输入框写上您对物品的报价，并进行提交。</li>
+        </ul>
+    </div>
+
+    <div class="well well-sm problem">
+        <ul>
+            <li>就你而言，你的<span class="highlight">成本c={{ player.get('cost', refresh=True) }}</span>。拍卖物<span class="highlight">价值q{% if q is None %}服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布{% else %}={{ q }}{% end %}</span>。</li>
+            {% if round == '2' %}<li>在上一轮中，<span class="highlight">你的对手们获得的收益高于你</span>。</li>{% end %}
+            <li>注意：拍卖物的<span class="highlight">估价q-c{% if q is None %}在{{ settings['minQ']-player['cost'] }}到{{ settings['maxQ']-player['cost'] }}之间
+                {% else %}为{{ q-player['cost'] }}{% end %}</span>。</li>
+        </ul>
+    </div>
+
+    <div class="list-unstyled bid-msg-list">
+        <p>竞价历史：</p>
+        <ul class="list-unstyled well well-sm">
+            {% for bid in bids %}
+            <li class="message" {% if bid.get('self') %}self{% end %}>{{ bid['username'] }}出价{{ bid['bid'] }}</li>
+            {% end %}
+            <li class="message empty"></li>
+        </ul>
+    </div>
+
+    <div  style="margin-bottom: 30px;">
+        <form class="form-inline" id="bid">
+            <div class="form-group col-md-3 has-success">
+                <div class="input-group">
+                    <input type="number" class="form-control input-lg" aria-describedby="addon" name="bid" required oninput="setCustomValidity('');" value="{% if bids %}{{ bids[-1]['bid']+0.1 }}{% else %}0.1{% end %}"
+                           min="{% if bids %}{{ bids[-1]['bid']+0.1 }}{% else %}0.1{% end %}" max="10" step="0.1" oninvalid="setCustomValidity('必须输入'+this.min+'到'+this.max+'整数或一位小数');">
+                    <span class="input-group-addon" id="addon">点</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-1">
+                    <button class="btn btn-primary" type="submit" role="button">提交</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="well well-sm result">
+
+    </div>
+
+</div>
+
+<script type="text/javascript" language="javascript">
+
+function disableForm(form, msg){
+    $(form).find("button[type='submit']").attr('disabled', 'disabled');
+    $(form).find("input").attr('disabled', 'disabled');
+    $(form).find("button[type='submit']").html(msg);
+}
+
+function enableForm(form){
+    $(form).find("button[type='submit']").removeAttr('disabled');
+    $(form).find("input").removeAttr('disabled');
+    $(form).find("button[type='submit']").html("提交");
+}
+
+$(document).ready(function(){
+
+    $("form#bid").submit( function(event){
+        event.preventDefault();
+
+        var bid = $("input[name='bid']").val();
+        sendCmd('english_bid', {bid: bid});
+    });
+
+    function addMessage(data){
+        var new_message = $(".message.empty").clone(true);
+        new_message.removeClass("empty");
+        new_message.html(data.username + "出价" + data.bid);
+        if(data.self){
+            new_message.attr('self', '');
+            disableForm("form#bid", "等待对方出价");
+        } else {
+            enableForm("form#bid");
+        }
+        $(".message.empty").before(new_message);
+        $(".bid-msg-list ul").scrollTop( $('.bid-msg-list ul')[0].scrollHeight );
+        sendCmd('get_timeout', 'englishrun');
+    };
+
+    ws.handler.englishbid = function(data, evt){
+        addMessage(data);
+        var minBid = parseFloat(data.bid) + 0.1;
+        if(minBid > 10)
+            minBid = 10;
+        minBid = minBid.toFixed(1);
+        document.getElementsByName('bid')[0].min = minBid;
+        $("form#bid input").val(minBid);
+    };
+
+    ws.handler.result = function(data, evt){
+        disableForm("form#bid", "本部分已结束");
+        sendCmd('get_result', '{% if q is None %}english{% else %}englishopen{% end %}');
+        sendCmd('get_timeout', 'englishresult');
+    };
+
+    ws.handler.showresult = function(data, evt){
+        eachT.close();
+        $(".result").html(data);
+        $(".result").show();
+    };
+
+    ws.handler.timeout = function(data, evt){
+        if(!data.seconds)
+            return;
+        if(data.name == 'englishrun'){
+            eachT.show();
+            eachT.set(data.seconds);
+        }else if(data.name == 'englishresult'){
+            resultT.show();
+            resultT.set(data.seconds);
+        }
+    }
+
+    {% if bids and bids[-1].get('self') %}
+     disableForm("form#bid", "等待对方出价");
+    {% end %}
+
+    var eachT = new Timer(10, "eachT", ws.handler.result);
+
+});
+
+</script>

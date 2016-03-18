@@ -1,4 +1,29 @@
 # -*- coding: utf-8 -*-
+"""This module contains delay task hub system.
+
+Usage:
+
+th = TaskHub()
+th.start()
+
+def print11(a):
+    print time.time(), a
+
+def print22(a):
+    th.remove_task('2')
+
+now = time.time()
+print now
+
+th.add_task('1', now + 10, print11, 1)
+th.add_task('2', now + 5.1, print11, 2)
+th.add_task('3', now + 5, print11, 3)
+th.run_task('1')
+th.add_task('4', now + 17.6, print11, 4)
+
+th.run()
+
+"""
 import traceback
 import time
 import json
@@ -32,6 +57,9 @@ class DelayExecutor(Greenlet):
 
 
 class TaskHub(Greenlet):
+    """Hub of Tasks.
+
+    """
     def __init__(self):
         super(TaskHub, self).__init__()
 
@@ -40,6 +68,14 @@ class TaskHub(Greenlet):
         self._delay_executor = None
 
     def add_task(self, tid, runtime, function, context=None):
+        """
+
+        :param tid: str of task id/name.
+        :param runtime: int of task run time. e.g. time.time() + 20.
+        :param function: function needed ran.
+        :param context: function arguments.
+        :return:
+        """
         if tid in self._task_finder:
             self.remove_task(tid)
         task = [runtime, tid, 0, function, context]
@@ -49,6 +85,11 @@ class TaskHub(Greenlet):
         self.schedule()
 
     def remove_task(self, tid):
+        """
+
+        :param tid: str of task id.
+        :return:
+        """
         if tid not in self._task_finder:
             return
         task = self._task_finder.pop(tid)
@@ -79,7 +120,6 @@ class TaskHub(Greenlet):
             except:
                 print traceback.format_exc()
 
-
     def execute_task(self):
         if not self._tasks:
             return
@@ -98,24 +138,3 @@ class TaskHub(Greenlet):
     def _run(self):
         while True:
             gevent.sleep(100000)
-
-
-# th = TaskHub()
-# th.start()
-#
-# def print11(a):
-#     print datetime.datetime.now(), a
-#
-# def print22(a):
-#     th.remove_task('2')
-#
-# now = datetime.datetime.now()
-# print now
-#
-# th.add_task('1', now + datetime.timedelta(seconds=10), print11, 1)
-# th.add_task('2', now + datetime.timedelta(seconds=5.1), print11, 2)
-# th.add_task('3', now + datetime.timedelta(seconds=5), print22, 3)
-# th.run_task('1')
-# th.add_task('4', now + datetime.timedelta(seconds=17.6), print11, 4)
-#
-# time.sleep(10000)

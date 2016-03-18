@@ -1,66 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <!-- jQuery -->
-    <script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>
-    <!-- Bootstrap -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <script src="/static/js/bootstrap.min.js"></script>
-    <!-- self -->
-	<title>用户登录</title>
-    <style TYPE="text/css">
-        body {
-            background: url(/static/img/loginbg.jpg);
-            background-size: 100%;
-            background-repeat: no-repeat;
-        }
+{% extends '../main.html' %}
 
-        .input-form {
-            margin-top: 15%;
-        }
-    </style>
-</head>
-<body>
+{% block title %}
+用户登录
+{% end %}
 
-    {% include '../nav.html' %}
+{% block style %}
+<style type="text/css">
+    body {
+        background: url(/static/img/loginbg.jpg);
+        background-size: 100%;
+        background-repeat: no-repeat;
+    }
 
-	<div class="container-fluid">
-		<div class="row">
-            <form method="post" class='col-md-3 col-md-offset-8 input-form'>
-                {% module xsrf_form_html() %}
-                <div class="form-group">
-			        <label>邮箱</label>
-			        <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
-			    </div>
-			    <div class="form-group">
-			        <label>密码</label>
-			        <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
-			     </div>
-			    <div class="form-group">
-			  	    <button type="submit" class="btn btn-primary">登陆</button>
-                    <label>还没有账号？请<a href="/account/register">注册</a></label>
-			    </div>
-			</form>
-		</div>
-	</div>
+    .input-form {
+        margin-top: 15%;
+    }
+</style>
+{% end %}
+
+{% block row %}
+
+<form method="post" class='col-md-3 col-md-offset-8 input-form'>
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+        <label>邮箱</label>
+        <input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">
+    </div>
+    <div class="form-group">
+        <label>密码</label>
+        <input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">登陆</button>
+        <label>还没有账号？请<a href="/account/register">注册</a></label>
+    </div>
+</form>
 
 <script>
-function getCookie(name) {
-    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-    return r ? r[1] : undefined;
-};
-
-$.post = function(url, args, callback) {
-    args._xsrf = getCookie("_xsrf");
-    $.ajax({url: url, data: $.param(args), dataType: "json", type: "POST",
-        success: function(response) {
-            callback(response);
-        }
-    });
-};
-
 function formData(selector){
     var args = $(selector).serializeArray();
     var data = {};
@@ -93,5 +69,102 @@ $(document).ready(function(){
 });
 </script>
 
-</body>
-</html>
+{% end %}
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+	<!--<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
+	<!--<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">-->
+    <!--&lt;!&ndash; jQuery &ndash;&gt;-->
+    <!--<script type="text/javascript" language="javascript" src="/static/js/jquery-1.11.1.min.js"></script>-->
+    <!--&lt;!&ndash; Bootstrap &ndash;&gt;-->
+    <!--<link href="/static/css/bootstrap.min.css" rel="stylesheet">-->
+    <!--<script src="/static/js/bootstrap.min.js"></script>-->
+    <!--&lt;!&ndash; self &ndash;&gt;-->
+	<!--<title>用户登录</title>-->
+    <!--<style TYPE="text/css">-->
+        <!--body {-->
+            <!--background: url(/static/img/loginbg.jpg);-->
+            <!--background-size: 100%;-->
+            <!--background-repeat: no-repeat;-->
+        <!--}-->
+
+        <!--.input-form {-->
+            <!--margin-top: 15%;-->
+        <!--}-->
+    <!--</style>-->
+<!--</head>-->
+<!--<body>-->
+
+    <!--{% include '../nav.html' %}-->
+
+	<!--<div class="container-fluid">-->
+		<!--<div class="row">-->
+            <!--<form method="post" class='col-md-3 col-md-offset-8 input-form'>-->
+                <!--{% module xsrf_form_html() %}-->
+                <!--<div class="form-group">-->
+			        <!--<label>邮箱</label>-->
+			        <!--<input type="email" class="form-control" name="email" placeholder="邮箱" required oninput="setCustomValidity('');">-->
+			    <!--</div>-->
+			    <!--<div class="form-group">-->
+			        <!--<label>密码</label>-->
+			        <!--<input type="password" class="form-control" name="password" placeholder="密码" required oninput="setCustomValidity('');">-->
+			     <!--</div>-->
+			    <!--<div class="form-group">-->
+			  	    <!--<button type="submit" class="btn btn-primary">登陆</button>-->
+                    <!--<label>还没有账号？请<a href="/account/register">注册</a></label>-->
+			    <!--</div>-->
+			<!--</form>-->
+		<!--</div>-->
+	<!--</div>-->
+
+<!--<script>-->
+<!--function getCookie(name) {-->
+    <!--var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");-->
+    <!--return r ? r[1] : undefined;-->
+<!--};-->
+
+<!--$.post = function(url, args, callback) {-->
+    <!--args._xsrf = getCookie("_xsrf");-->
+    <!--$.ajax({url: url, data: $.param(args), dataType: "json", type: "POST",-->
+        <!--success: function(response) {-->
+            <!--callback(response);-->
+        <!--}-->
+    <!--});-->
+<!--};-->
+
+<!--function formData(selector){-->
+    <!--var args = $(selector).serializeArray();-->
+    <!--var data = {};-->
+    <!--for(var i=0; i < args.length; i++){-->
+        <!--data[args[i].name] = args[i].value;-->
+    <!--}-->
+    <!--return data;-->
+<!--};-->
+
+<!--$(document).ready(function(){-->
+    <!--$("form").submit(function(){-->
+        <!--$("form button[type='submit']").attr("disabled", "disabled");-->
+        <!--$("form button[type='submit']").html("正在登陆");-->
+        <!--$.post("", formData("form"), function(res){-->
+            <!--$("form button[type='submit']").removeAttr("disabled");-->
+            <!--$("form button[type='submit']").html("登陆");-->
+            <!--if(res.errors){-->
+                <!--for(var i=0; i < res.errors.length; i++){-->
+                    <!--var field = document.getElementsByName(res.errors[i].name)[0];-->
+                    <!--field.setCustomValidity(res.errors[i].reason);-->
+                    <!--$("form button[type='submit']").click();-->
+                <!--}-->
+            <!--}-->
+            <!--else{-->
+                <!--document.location.href = res.redirect;-->
+            <!--}-->
+        <!--});-->
+        <!--return false;-->
+    <!--});-->
+<!--});-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->

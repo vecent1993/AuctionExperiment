@@ -18,21 +18,11 @@
 
 {% block row %}
     <div class="col-md-5 col-md-offset-2">
+        {% for treatment in treatments %}
         <div class="list-group">
-            <a class="list-group-item component" href="/treatment/Report" target="Report">Report</a>
+            <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}" target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
         </div>
-        <div class="list-group">
-            <a class="list-group-item component" href="/treatment/Intro" target="Intro">Intro</a>
-        </div>
-        <div class="list-group">
-            <a class="list-group-item component" href="/treatment/SealedEnglish" target="SealedEnglish">SealedEnglish</a>
-        </div>
-        <div class="list-group">
-            <a class="list-group-item component" href="/treatment/Sessions" target="Sessions">Sessions</a>
-        </div>
-        <div class="list-group">
-            <a class="list-group-item component" href="/treatment/End" target="End">End</a>
-        </div>
+        {% end %}
     </div>
 
     <div class="well col-md-3 tips">

@@ -51,7 +51,7 @@
                 </a>
             </li>
             <li role="presentation">
-                <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/inprogress" target="_blank"
+                <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/socket" target="_blank"
                 {% else %}title="实验尚未被激活或已结束"{% end %}>
                     <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>监控
                 </a>
@@ -66,7 +66,7 @@
         {% else %}
         <ul class="nav nav-pills" style="margin-bottom:20px;">
             <li role="presentation">
-                <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/inprogress" target="_blank"
+                <a {% if exp['exp_status']=='1' %}href="/exp/{{ exp['exp_id'] }}/socket" target="_blank"
                 {% else %}title="实验尚未被激活"{% end %}>
                     <span class="glyphicon glyphicon-hand-up" aria-hidden="true"></span>正式试验
                 </a>

@@ -7,15 +7,15 @@ import datetime
 import tornado.web
 
 from util.web import BaseHandler, hostAuthenticated, userAuthenticated, expHostAuthenticated
-from util.pool import Player, Pool, Host, RedisExp
-from treatments_ import getTreatment
+from util.exprv import Player, Pool, Host, RedisExp
+import handler
 
 
 class NewExpHandler(BaseHandler):
     @hostAuthenticated
     def get(self):
         settings=dict(title='', des='', intro='', treatments=[])
-        self.render('expmanage/newexp.html', settings=settings, treatments=None)
+        self.render('expmanage/newexp.html', settings=settings, treatments=handler.hs.treatments)
 
     @hostAuthenticated
     def post(self):
@@ -45,7 +45,7 @@ class ExpSettingsHandler(BaseHandler):
     def get(self, expid):
         settings = json.loads(self.exp['exp_settings'])
         self.render('expmanage/expsettings.html', exp=self.exp, settings=settings,
-                    treatments=None, getTreatment=getTreatment)
+                    treatments=handler.hs.treatments, handlers=handler.hs.handlers)
 
     @expHostAuthenticated
     def post(self, expid):
@@ -70,8 +70,8 @@ class NewTreatmentHandler(BaseHandler):
     def post(self):
         try:
             target = self.get_argument('target')
-            treatment = getTreatment(target)()
-            treatment['content'] = treatment.content
+            t = handler.hs.handlers[target]
+            treatment = dict(code=t.__name__, title=t.title, content=t.content(t.settings))
         except:
             print traceback.format_exc()
             raise tornado.web.HTTPError(404)
@@ -131,7 +131,7 @@ class ExpResultHandler(BaseHandler):
             self.render('expmanage/result.html', exp=exp, results=results)
 
 
-class ExpInProgressHandler(BaseHandler):
+class ExpOnHandler(BaseHandler):
     @userAuthenticated
     def get(self, expid):
         settings = dict(

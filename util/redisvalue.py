@@ -1,14 +1,22 @@
-#!usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
+"""This module contains dict-like Redis Value.
+
 Usage:
 
-    >>>
+import redis
+
+rc = redis.Redis()
+
+rv = RedisValue(rc, 'group:3:3')
+rv.set('name', 'JKiriS')
+print rv.get('name')
+
+rv.sandbox = True
 """
 
 import json
 
-# 保存全局的RedisValue
+# store all RedisValue objects.
 _redis_value_hub = dict()
 
 

@@ -12,7 +12,7 @@ import torndb
 from account import *
 from treatments import *
 from expmanage import *
-from expon import *
+from expsocket import *
 from self import *
 from help import *
 
@@ -53,7 +53,7 @@ class Application(tornado.web.Application):
             (r"/exp/(\d+)/result", ExpResultHandler),
             (r"/exp/(\d+)/close", CloseExpHandler),
 
-            (r"/exp/(\d+)/inprogress", ExpInProgressHandler),
+            (r"/exp/(\d+)/socket", ExpOnHandler),
             (r"/exp/(\d+)/train", ExpTrainHandler),
             (r"/exp/(\d+)/train/([\s\S]*)", ExpTrainHandler),
 

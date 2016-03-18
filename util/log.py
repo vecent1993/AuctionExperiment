@@ -1,4 +1,26 @@
 # -*- coding: utf-8 -*-
+"""This module contains log system.
+
+Useage:
+
+DEBUG = True
+
+if not DEBUG:
+    logger = FileLogger('expserver.txt')
+else:
+    logger = Logger()
+
+@logger.log
+def on_message1(self, msg):
+    print msg
+
+@logger.log
+def on_message2(self, msg):
+    raise Exception(msg)
+
+on_message1('test1')
+on_message2('test2')
+"""
 import sys
 import functools
 import traceback
@@ -17,13 +39,17 @@ class Redirection(object):
 
 
 class FileRedirection(Redirection):
+    """ Redirect output str to file.
+
+    """
     def __init__(self, fname):
         self._f = open(fname, 'a+')
 
     def write(self, msg, level='INFO'):
-        if not msg.strip():
+        msg = msg.strip()
+        if not msg:
             return
-        output = (datetime.datetime.now(), level, msg.strip(), '\r\n')
+        output = (datetime.datetime.now(), level, msg, '\r\n')
         self._f.write(' '.join(map(str, output)))
 
     def close(self):
@@ -31,6 +57,9 @@ class FileRedirection(Redirection):
 
 
 class Logger(object):
+    """Logger which output msg to sys.output(screen).
+    hint: when logging Exceptions will be caught.
+    """
     def __init__(self):
         pass
 
@@ -48,7 +77,15 @@ class Logger(object):
 
 
 class FileLogger(Logger):
+    """Log information redirected to file
+
+    """
     def __init__(self, fname):
+        """
+
+        :param fname:
+        :return:
+        """
         self._redirection = FileRedirection(fname)
         self._stdout = sys.stdout
 

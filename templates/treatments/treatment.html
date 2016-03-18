@@ -1,7 +1,7 @@
 {% extends '../main.html' %}
 
 {% block title %}
-    {{ treatment['title'] }}
+    {{ treatment.title }}
 {% end %}
 
 {% block style %}
@@ -11,8 +11,8 @@
 {% block row %}
     <div class="jumbotron col-md-8 col-md-offset-2" style="margin-top: 50px;">
         <div class="page-header">
-            <h2>{{ treatment['title'] }}</h2>
+            <h2>{{ treatment.title }}</h2>
         </div>
-        <div class="well well-lg" style="background:#F5F5DC">{{ treatment['des'] }}</div>
+        <div class="well well-lg" style="background:#F5F5DC">{{ treatment.description }}</div>
     </div>
 {% end %}
