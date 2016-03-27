@@ -9,45 +9,12 @@
 {% end %}
 
 {% block row %}
-    <div class="col-md-6 col-md-offset-3">
-        <div class="page-header">
-            <h2>结果与个人收益</h2>
-        </div>
-
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>轮数</th>
-                <th>阶段</th>
-                <th>赢否</th>
-                <th>获胜价</th>
-                <th>成交价</th>
-                <th>收益（点）</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for i, r in enumerate(results) %}
-            <tr>
-                <td>{{ i+1 }}</td>
-                <td>{{ r['round'] }}</td>
-                <td>{% if r['type'] == '0' %}密封拍卖{% elif r['type'] == '1' %}公开拍卖(价值隐藏){% else %}公开拍卖(价值公开){% end %}</td>
-                <td>{% if r['win'] == '0' %}否{% else %}赢{% end %}</td>
-                <td>{{ r['win_price'] }}</td>
-                <td>{{ r['strike_price'] }}</td>
-                <td>{{ r['profit'] }}</td>
-            </tr>
-            {% end %}
-            <tr >
-                <td colspan="6">初始奖励</td>
-                <td>10（元）</td>
-            </tr>
-            <tr class="success">
-                <td colspan="6">合计</td>
-                <td >{{ sum(map(lambda a: a['profit'], results)) }} * 10 + 10 = {{ sum(map(lambda a: a['profit'], results))* 10 + 10 }}（元）</td>
-            </tr>
-            </tbody>
-        </table>
-
+<div class="col-md-10 col-md-offset-1">
+    <div class="page-header">
+        <h2>结果与个人收益</h2>
     </div>
+
+    {% raw result %}
+
+</div>
 {% end %}

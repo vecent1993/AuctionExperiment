@@ -24,13 +24,14 @@
             margin-right: 50px;
         }
 
-        .info {
+        .sidebar {
             padding: 0px 30px;
             border-left: 1px solid #eee;
-            margin-top: 40px
+            margin-top: 20px;
+            padding-top: 20px;
         }
 
-        .info h4 {
+        .sidebar h4 {
             background-color: #F3F3F3;
             padding: 8px;
         }
@@ -44,12 +45,21 @@
             margin-top: 0px;
         }
 
-        /* .well {
-            background-color: #F5F5DC;
-        } */
+        .error {
+            display: none;
+        }
+
+        .error .error-detail {
+            display: none;
+            margin-top: 20px;
+        }
 
         .account-info {
             margin-bottom: 20px;
+        }
+
+        .exp-info p {
+            margin-bottom: 10px;
         }
 
         /*.chat {
@@ -79,7 +89,7 @@
         <a href="/help" target="_blank" title="FAQ">
             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
         </a>
-        <a href="javascript:void(0)" class="show-introduction" title="实验说明">
+        <a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');" title="实验说明">
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
         </a>
         <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
@@ -91,7 +101,22 @@
         {% module xsrf_form_html() %}
     </div>
 
-    <div class="info col-md-3">
+    <div class="error">
+        <div class="page-header col-md-offset-1 col-md-10">
+            <h2>错误<small></small></h2>
+        </div>
+
+        <div class="col-md-offset-1 col-md-10">
+            <span style="font-size: 20px;">网页发生错误，请稍后刷新网页。若重复出现错误，请联系管理员。</span>
+            <a href="javascript:void(0)" onclick="$('.error-detail').toggle()">详细信息</a>
+            <div class="error-detail" style="display: none">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar col-md-3">
+
         <div class="account-info">
             <h4>账户信息</h4>
             <p>邮箱: {{ current_user['user_email'] }}</p>
@@ -113,9 +138,14 @@
             </p>
             <p>
                 还不熟悉流程？<a href="/exp/{{ exp['exp_id'] }}/train" target="_blank">前往训练</a>
-                或者查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
+                或者查看<a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');">实验说明</a>
             </p>
         </div>
+
+        <div class="alert alert-warning" role="alert" style="margin-top: 40px;">
+
+        </div>
+
     </div>
 
     <div class="modal fade introduction" tabindex="-1" role="dialog">
@@ -129,12 +159,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="box effect7">
-                        <p>欢迎你参加实验！本次实验分为三个部分，在每个部分你都将和其他参与人面临一个拍卖场景，你需要独立提交报价，以扩大你的收益。</p>
-                        <p>拍卖场景如下，你和其他竞拍者一起竞拍一片油田，油田中石油储量的市场价值为q，所有人都知道q服从一个给定分布，而且油田对每个人的价值是相同的。由于技术差异，每个竞拍者对这片的开采成本c都不一样，而且各竞拍者开采成本的确切值只有自己知道，但所有竞拍者都知道所有开采成本都服从同一个的分布。那么给定价值q和成本c，油田对你的估价即为q-c。本实验的三个部分都面临同样的这个场景，并且给定q服从[{{ settings['minQ'] }}, {{ settings['maxQ'] }}]的均匀分布，c服从({{ settings['minC'] }}, {{ settings['maxC'] }}]的均匀分布。注意，在实验中，价值q和每个人的成本c贯穿三个部分不变。</p>
-                        <p>虽然拍卖场景类似，但各个部分拍卖规则并不相同。第一部分采用第二价格密封拍卖，即每个人分别提交一个密封报价，当所有人都提交了报价或者到达截止时间（3分钟），实验结束。如果实验结束时并未提交价格则视为放弃。本部分价高者获胜，胜者赢得物品并支付第二高报价。例如，物品价值为q，你的成本为c。如果你的报价是所有报价中的最高价，你将赢得该物品并支付所有报价中的第二高价（记为b），你在本部分的最终收益为估价减去支付价格，即(q-c)-b；但是如果你的报价并不是最高价，那么你的收益将为0。</p>
-                        <p>第二部分采用英式升价公开拍卖，即竞拍者公开相互叫价，但每次出价都要比前一次的出价更高，所有人都能看到报价历史，当30秒时间内没有人再出更高的价或者到达截止时间（3分钟）时，实验结束。最后的报价人即为胜者，胜者赢得物品并支付其所报的价。例如，物品价值为q，你的成本为c。如果是你最后出价b，你将赢得该物品并支付你最后的报价b，你在本部分的最终收益为估价减去支付价格，即(q-c)-b；但是如果你不是最后一个出价的，那么你的收益将为0。</p>
-                        <p>第三部分拍卖仍然采用与第二部分相同的英式公开拍卖形式，不同的是，前两个部分并不透露物品的价值q的确切值，只告诉你q的分布，而第三部分会告知q的确切值。</p>
-                        <p>所有实验结束后，你将看到实验结果以及实际收益，而你在实验中的表现将直接决定你的实际收益。</p>
+                        {% raw exp['exp_intro'] %}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -189,14 +214,31 @@
             };
         };
 
+        function sideInfo(text){
+            if(text == "")
+                $(".sidebar .alert").hide();
+            else
+                $(".sidebar .alert").show();
+            $(".sidebar .alert").removeClass("alert-warning");
+            $(".sidebar .alert").addClass("alert-info");
+            $(".sidebar .alert").html(text);
+        }
+
+        function sideWarn(text){
+            if(text == "")
+                $(".sidebar .alert").hide();
+            else
+                $(".sidebar .alert").show();
+            $(".sidebar .alert").removeClass("alert-info");
+            $(".sidebar .alert").addClass("alert-warning");
+            $(".sidebar .alert").html(text);
+        }
+
         ws.handler = new msgHandler(ws)
 
         $(document).ready(function(){
-            $("a.show-introduction").on("click", function(){
-                $(".modal.introduction").modal('toggle');
-            });
-
             ws.handler.replace = function(data, evt){
+                sideInfo("");
                 $("#main").html(data);
             };
 
@@ -209,7 +251,11 @@
             };
 
             ws.handler.error = function(data, evt){
-                console.log(data);
+                var errorDIV = $(".error").clone(true);
+                errorDIV.find(".error-detail").html(data);
+                $("#main").html("");
+                $("#main").append(errorDIV);
+                errorDIV.show();
             }
 
             sendCmd('get');

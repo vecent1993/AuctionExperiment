@@ -10,12 +10,13 @@ from gevent import monkey; monkey.patch_all()
 from gevent import Greenlet
 import redis
 
-from util.redissub import RedisSub
-import util.exprv
-from handler.autohost import AutoHost
-from util.log import FileLogger, Logger
-import handler.hs as hs
-import handler.hosthandler as hosthandler
+from utils.redissub import RedisSub
+from utils.redisvalue import RemoteRedis
+import utils.exprv
+from components.autohost import AutoHost
+from utils.log import FileLogger, Logger
+import components.hub as hub
+import components.hosthandler as hosthandler
 
 DEBUG = True
 
@@ -74,8 +75,9 @@ class Exp(Greenlet):
         super(Exp, self).__init__()
 
         self.redis = rc
+        self.db = db
         self.expid = expid
-        self.value = util.exprv.RedisExp(self.redis, expid)
+        self.value = utils.exprv.RedisExp(self.redis, expid)
         self.sub = RedisSub('exp:'+str(expid), self.on_message)
 
         self.groups = {}
@@ -89,13 +91,13 @@ class Exp(Greenlet):
 
         settings = json.loads(exp['exp_settings'])
 
-        re = util.exprv.RedisExp(rc, exp['exp_id'])
+        re = utils.exprv.RedisExp(rc, exp['exp_id'])
         re.set('host', exp['host_id'])
         re.set('id', exp['exp_id'])
         re.set('title', exp['exp_title'])
-        re.set('settings', settings)
+        re.set('treatments', settings['treatments'])
 
-        pool = util.exprv.Pool(rc, exp['exp_id'])
+        pool = utils.exprv.Pool(rc, exp['exp_id'])
         pool.set('pool', [])
         pool.set('players', [])
 
@@ -147,72 +149,68 @@ class Experiment(Exp):
         self.init()
 
     def init(self, data=None):
-        p = util.exprv.Pool(self.redis, self.expid)
+        p = utils.exprv.Pool(self.redis, self.expid)
 
-        # for sid, session in enumerate(p.get('sessions', [])):
-        #     for gid, group in enumerate(session.get('groups', [])):
-        #         self.switch_handler(dict(sid=sid, gid=gid))
+        for sid, session in enumerate(p.get('sessions', [])):
+            for gid, group in enumerate(session.get('groups', [])):
+                self.switch_handler(dict(sid=sid, gid=gid))
 
     def switch_handler(self, data=None):
         if 'sid' not in data or 'gid' not in data:
             return
 
         sid, gid = data['sid'], data['gid']
-        group = util.exprv.Group(self.redis, self.expid, sid, gid)
-        if 'stage' not in group:
+        group = utils.exprv.Group(self.redis, self.expid, sid, gid)
+        if not group.get('stage'):
             return
-            # GroupHandler.nextStage(self.redis, self.exp['id'], sid, gid)
 
         group_key = ':'.join(('group', str(self.expid), str(sid), str(gid)))
         stage = group.get('stage', refresh=True).split(':')[0]
         if group_key in self.groups:
             self.groups[group_key].close()
 
-        self.groups[group_key] = hs.handlers[stage].gh(self, sid, gid)
+        self.groups[group_key] = hub.handlers[stage](self, sid, gid)
 
     def close_group(self, data=None):
         group_key = ':'.join(('group', str(self.expid), str(data['sid']), str(data['gid'])))
         if group_key in self.groups:
             self.groups[group_key].close()
             self.groups.pop(group_key)
+            self.host.next_group_stage(data)
         else:
             return
 
         if not self.groups:
-            hosthandler.HostHandler.next_stage(self.redis, self.expid, self.value['host'])
-            self.publish('switch_handler', ':'.join(('host', str(self.expid))), data=dict(cmd='get'))
-
-    def publish(self, cmd, domain=None, data=None):
-        msg = dict(cmd=cmd)
-        if domain is not None:
-            msg['domain'] = domain
-        if data is not None:
-            msg['data'] = data
-
-        self.redis.publish('exp:'+str(self.expid), json.dumps(msg))
+            self.host.next_host_stage()
 
     def close(self):
+        remote_redis = RemoteRedis(self.redis.publish)
         for group_key in self.groups.keys():
-            self.groups[group_key].value.delete()
+            self.groups[group_key].value.clear(True)
             self.groups[group_key].close()
             self.groups.pop(group_key)
 
-        p = util.exprv.Pool(self.redis, self.expid)
+        p = utils.exprv.Pool(self.redis, self.expid)
         for sid, session in enumerate(p.get('sessions', [])):
             for gid, group in enumerate(session.get('groups', [])):
-                group = util.exprv.Group(self.redis, self.expid, sid, gid)
-                group.delete()
+                group = utils.exprv.Group(self.redis, self.expid, sid, gid)
+                group.clear(True)
+                remote_redis.refresh(group.key)
 
         for pid in p.get('pool', []):
-            player = util.exprv.Player(self.redis, self.expid, pid)
-            player.delete()
-        p.delete()
+            player = utils.exprv.Player(self.redis, self.expid, pid)
+            player.clear(True)
+            remote_redis.refresh(player.key)
+        p.clear(True)
+        remote_redis.refresh(p.key)
 
-        h = util.exprv.Host(self.redis, self.expid, self.value['host'])
-        h.delete()
+        h = utils.exprv.Host(self.redis, self.expid, self.value['host'])
+        h.clear(True)
+        remote_redis.refresh(h.key)
 
-        e = util.exprv.RedisExp(self.redis, self.expid)
-        e.delete()
+        e = utils.exprv.RedisExp(self.redis, self.expid)
+        e.clear(True)
+        remote_redis.refresh(e.key)
 
         db.update('update exp set exp_status=2 where exp_id=%s', self.expid)
 

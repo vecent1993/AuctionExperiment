@@ -5,41 +5,41 @@
 {% end %}
 
 {% block style %}
-    <style type="text/css">
-        .exp-participated {
-            margin-bottom: 100px;
-        }
+<style type="text/css">
+    .tips {
+        margin-top: 30px;
+    }
 
-        .tips {
-            margin-left: 50px;
-            margin-top: 30px;
-        }
-
-        .tips li {
-            margin-bottom: 20px;
-        }
-    </style>
+    .tips li {
+        margin-bottom: 20px;
+    }
+</style>
 {% end %}
 
 {% block row %}
-    <div class="col-md-5 col-md-offset-2">
-
+<div class="col-md-6 col-md-offset-1">
+    <div class="col-md-11">
         <div class="page-header">
-            <h3>我参与的&nbsp;<span class="badge" style="background-color: #337AB7;">&nbsp;{{ len(exp_participated) }}&nbsp;</span></span></h3>
+            <h3>
+                正在进行的&nbsp;
+                <span class="badge" style="background-color: #337AB7;">&nbsp;{{ len(exp_activated) }}&nbsp;</span>
+            </h3>
         </div>
-
-        <div class="list-group exp-participated">
-            {% for exp in exp_participated %}
+        <div class="list-group">
+            {% for exp in exp_activated %}
             <a class="list-group-item col-md-7" href="/exp/{{ exp['exp_id'] }}">{{ exp['exp_title'] }}</a>
             {% end %}
-            {% if not exp_participated %}
-            <span>尚未参与任何实验</span>
+            {% if not exp_activated %}
+            <span>目前没有实验可供参与。</span>
             {% end %}
         </div>
-
+    </div>
+    <div class="col-md-11">
         {% if current_user['user_ishost'] == '1' %}
         <div class="page-header">
-            <h3>我创建的&nbsp;<span class="badge" style="background-color: #337AB7;">&nbsp;{{ len(exp_established) }}&nbsp;</span></h3>
+            <h3>
+                我创建的&nbsp;
+                <span class="badge" style="background-color: #337AB7;">&nbsp;{{ len(exp_established) }}&nbsp;</span></h3>
         </div>
         <div class="list-group">
             {% for exp in exp_established %}
@@ -50,16 +50,32 @@
             </div>
         </div>
         {% end %}
-
     </div>
-
-    <div class="well col-md-3 tips">
+    <div class="col-md-11">
+        <div class="page-header">
+            <h3>
+                我参与的&nbsp;
+                <span class="badge" style="background-color: #337AB7;">&nbsp;{{ len(exp_participated) }}&nbsp;</span>
+            </h3>
+        </div>
+        <div class="list-group">
+            {% for exp in exp_participated %}
+            <a class="list-group-item col-md-7" href="/exp/{{ exp['exp_id'] }}">{{ exp['exp_title'] }}</a>
+            {% end %}
+            {% if not exp_participated %}
+            <span>尚未参与任何实验。</span>
+            {% end %}
+        </div>
+    </div>
+</div>
+<div class="col-md-5">
+    <div class="well col-md-offset-2 col-md-8 tips">
         <p>提示:</p>
         <ul>
-            <li>您有一个实验需要参加，<a href="exp/7">点击</a>查看详情</li>
             {% if current_user['user_ishost'] == '0' %}
             <li>想要定制您的专属实验？请先<a>申请成为主持人</a>。</li>
             {% end %}
         </ul>
     </div>
+</div>
 {% end %}

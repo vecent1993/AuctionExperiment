@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from util.web import BaseHandler
+from utils.web import BaseHandler
 
 
 class HelpHandler(BaseHandler):

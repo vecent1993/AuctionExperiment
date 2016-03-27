@@ -1,0 +1,41 @@
+{% extends '../main.html' %}
+
+{% block title %}
+    训练场
+{% end %}
+
+{% block style %}
+    <style type="text/css">
+        .tips {
+            margin-top: 50px;
+            margin-left: 50px;
+        }
+
+        .tips li {
+            margin-bottom: 20px;
+        }
+
+    </style>
+{% end %}
+
+{% block row %}
+    <div class="col-md-5 col-md-offset-2">
+        <div class="page-header">
+            <h3>训练&nbsp;<span class="badge" style="background-color: #337AB7;">&nbsp;{{ len(trains) }}&nbsp;</span></h3>
+        </div>
+
+        <div class="list-group">
+            {% for train in trains %}
+            <a class="list-group-item col-md-7" href="/train/{{ train.__name__ }}">{{ train.title }}</a>
+            {% end %}
+        </div>
+    </div>
+
+    <div class="well col-md-3 tips">
+        <p>提示:</p>
+        <ul>
+            <li>共{{ len(trains) }}个训练可供选择，点击进入训练。</li>
+            <li>需要新式的训练组件？请<a>联系我们</a>。</li>
+        </ul>
+    </div>
+{% end %}

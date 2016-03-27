@@ -6,16 +6,19 @@ import datetime
 
 import tornado.web
 
-from util.web import BaseHandler, hostAuthenticated, userAuthenticated, expHostAuthenticated
-from util.exprv import Player, Pool, Host, RedisExp
-import handler
+from utils.web import BaseHandler, hostAuthenticated, userAuthenticated, expHostAuthenticated
+from utils.redisvalue import RemoteRedis
+from utils.exprv import Player, Pool, Host, RedisExp
+import components
 
 
 class NewExpHandler(BaseHandler):
     @hostAuthenticated
     def get(self):
         settings=dict(title='', des='', intro='', treatments=[])
-        self.render('expmanage/newexp.html', settings=settings, treatments=handler.hs.treatments)
+        self.render('expmanage/newexp.html', settings=settings, treatments=components.hub.treatments,
+                    PlayerOnly=components.treatment.PlayerOnly, PlayerGroup=components.treatment.PlayerGroup,
+                    Container=components.treatment.Container, Train=components.treatment.Train)
 
     @hostAuthenticated
     def post(self):
@@ -45,24 +48,27 @@ class ExpSettingsHandler(BaseHandler):
     def get(self, expid):
         settings = json.loads(self.exp['exp_settings'])
         self.render('expmanage/expsettings.html', exp=self.exp, settings=settings,
-                    treatments=handler.hs.treatments, handlers=handler.hs.handlers)
+                    treatments=components.hub.treatments, PlayerOnly=components.treatment.PlayerOnly,
+                    PlayerGroup=components.treatment.PlayerGroup, Container=components.treatment.Container,
+                    Train=components.treatment.Train)
 
     @expHostAuthenticated
     def post(self, expid):
-        try:
-            settings = json.loads(self.get_argument('data'))
-            self.db.update('update exp set exp_title=%s, exp_des=%s, exp_intro=%s, '
-                           'exp_settings=%s where exp_id=%s', settings['title'], settings['des'],
-                            settings['intro'], json.dumps(settings), expid)
+        if self.exp['exp_status'] == '1':
+            raise tornado.web.HTTPError(503)
 
-            exp = RedisExp(self.redis, expid)
-            if exp:
-                exp.set('title', settings['title'])
-                exp.set('settings', settings)
+        settings = json.loads(self.get_argument('data'))
+        self.db.update('update exp set exp_title=%s, exp_des=%s, exp_intro=%s, '
+                       'exp_settings=%s where exp_id=%s', settings['title'], settings['des'],
+                       settings['intro'], json.dumps(settings), expid)
 
-            self.write(json.dumps(dict(redirect='/exp/' + str(expid))))
-        except:
-            self.write(json.dumps(dict(error=str(traceback.format_exc()))))
+        exp = RedisExp(self.redis, expid)
+        if exp:
+            exp.set('title', settings['title'])
+            exp.set('treatments', settings['treatments'])
+            RemoteRedis(self.redis.publish).refresh()
+
+        self.write(json.dumps(dict(redirect='/exp/' + str(expid))))
 
 
 class NewTreatmentHandler(BaseHandler):
@@ -70,7 +76,7 @@ class NewTreatmentHandler(BaseHandler):
     def post(self):
         try:
             target = self.get_argument('target')
-            t = handler.hs.handlers[target]
+            t = components.hub.treatments[target]
             treatment = dict(code=t.__name__, title=t.title, content=t.content(t.settings))
         except:
             print traceback.format_exc()
@@ -92,9 +98,8 @@ class ActivateExpHandler(BaseHandler):
         if self.exp['exp_status'] == '1':
             raise tornado.web.HTTPError(503)
 
-        # self.db.update('update exp set exp_status=1 where exp_id=%s', expid)
         self.redis.publish('experiment', json.dumps({'cmd': 'load_exp', 'data': expid}))
-        self.redirect('/exp/%s' % expid)
+        self.redirect('/self')
 
 
 class CloseExpHandler(BaseHandler):
@@ -104,7 +109,8 @@ class CloseExpHandler(BaseHandler):
             raise tornado.web.HTTPError(503)
 
         self.redis.publish('experiment', json.dumps({'cmd': 'close_exp', 'data': expid}))
-        self.redirect('/exp/%s' % expid)
+        RedisExp(self.redis, expid).clear()
+        self.redirect('/self')
 
 
 class ExpResultHandler(BaseHandler):
@@ -116,30 +122,24 @@ class ExpResultHandler(BaseHandler):
 
         if exp['host_id'] == self.current_user['user_id']:
             host = Host(self.redis, expid, self.current_user['user_id'])
-            if not(exp['exp_status'] == '2' or host.get('stage') == 'End'):
+            if not(exp['exp_status'] == '2' or host.get('stage') == 'HostEnd'):
                 raise tornado.web.HTTPError(503)
 
-            self.render('expmanage/stat.html', exp=exp)
+            result = components.hub.treatments['InfoAcquiSequence'].host_result(self.db, expid)
+            self.render('expmanage/stat.html', exp=exp, result=result)
         else:
             player = Player(self.redis, expid, self.current_user['user_id'])
-            if not(exp['exp_status'] == '2' or player.get('stage') == 'End'):
+            if not(exp['exp_status'] == '2' or player.get('stage') == 'PlayerEnd'):
                 raise tornado.web.HTTPError(503)
 
-            results = self.db.query('select * from result where exp_id=%s and user_id=%s order by round',
-                                    expid, self.current_user['user_id'])
-
-            self.render('expmanage/result.html', exp=exp, results=results)
+            result = components.hub.treatments['InfoAcquiSequence'].player_result(self.db,
+                                                                              expid, self.current_user['user_id'])
+            self.render('expmanage/result.html', exp=exp, result=result)
 
 
 class ExpOnHandler(BaseHandler):
     @userAuthenticated
     def get(self, expid):
-        settings = dict(
-            maxQ=10,
-            minQ=6,
-            maxC=4,
-            minC=0
-        )
         exp = self.db.get('select * from exp where exp_id=%s', expid)
         if not exp:
             raise tornado.web.HTTPError(404)
@@ -147,28 +147,21 @@ class ExpOnHandler(BaseHandler):
             raise tornado.web.HTTPError(503)
 
         if exp['host_id'] == self.current_user['user_id']:
-            self.render('expon/dashboard.html', exp=exp, settings=settings)
+            self.render('expon/dashboard.html', exp=exp)
         else:
-            self.render('expon/expinprogress.html', exp=exp, settings=settings)
+            self.render('expon/expinprogress.html', exp=exp)
 
 
 class ExpTrainHandler(BaseHandler):
     @userAuthenticated
-    def get(self, expid, treatment=None):
-        settings = dict(
-            maxQ=10,
-            minQ=6,
-            maxC=4,
-            minC=0
-        )
-
+    def get(self, expid):
         exp = self.db.get('select * from exp where exp_id=%s', expid)
         if not exp:
             raise tornado.web.HTTPError(404)
         if exp['exp_status'] == '2':
             raise tornado.web.HTTPError(503)
 
-        if not treatment:
-            self.render('expon/exptrain.html', exp=exp, settings=settings)
-        else:
-            self.render('expon/train.html', exp=exp, settings=settings, treatment=treatment)
+        settings = json.loads(exp['exp_settings'])
+
+        self.render('expon/exptrain.html', exp=exp, settings=settings,
+                    treatments=components.hub.treatments)

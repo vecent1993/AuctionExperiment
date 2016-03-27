@@ -15,8 +15,8 @@
     <style type="text/css">
         .treatments {
             min-height: 200px;
-            padding-bottom: 30px;
-            padding-top: 30px;
+            padding-bottom: 20px;
+            padding-top: 5px;
         }
 
         .well {
@@ -30,6 +30,24 @@
 
         .treatment .treatment-content {
             margin-top: 10px;
+        }
+
+        .session .treatments {
+            min-height: 100px;
+            padding-bottom: 20px;
+            padding-top: 5px;
+        }
+
+        .repeat .treatments {
+            min-height: 100px;
+            padding-bottom: 20px;
+            padding-top: 5px;
+        }
+
+        .trains {
+            min-height: 100px;
+            padding-bottom: 20px;
+            padding-top: 5px;
         }
 
         .empty {
@@ -51,11 +69,12 @@
             </h3>
         </div>
 
-        <div class="well">
-            <form class="form-horizontal new-exp" action="" method="post">
-                {% module xsrf_form_html() %}
 
+        <form class="form-horizontal new-exp" action="" method="post">
+            {% module xsrf_form_html() %}
+            <div class="well" style="background-color: #EEE">
                 {% block baseinfo %}
+                <h4>基本设置</h4>
                 <div class="exp-info">
                     <div class="form-group">
                         <label class="col-md-2 control-label">实验标题</label>
@@ -71,7 +90,10 @@
                     </div>
                 </div>
                 {% end %}
+            </div>
 
+            <div class="well" style="background-color: #EEE">
+                <h4>实验组件</h4>
                 <div class="treatments">
 
                     <div class="well treatment empty" form-domain="[]treatments">
@@ -85,7 +107,7 @@
 
                     {% for treatment in settings['treatments'] %}
                     <div class="well treatment" form-domain="[]treatments">
-                        {% set t = handlers[treatment['code']] %}
+                        {% set t = treatments[treatment['code']] %}
                         <input type="hidden" form-domain="code" value="{{ t.__name__ }}">
                         <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
                         <span class="treatment-title">{{ t.title }}</span>
@@ -94,17 +116,44 @@
                         </div>
                     </div>
                     {% end %}
-
                 </div>
+            </div>
 
-                <div class="">
-                    {% block footer_buttons%}
-                    <button type="submit" class="btn btn-primary">确认修改</button>
-                    <a type="cancel" class="btn btn-default" href="/exp/{{ exp['exp_id'] }}">取消</a>
+            <div class="well" style="background-color: #EEE">
+                <h4>训练组件</h4>
+                <div class="trains">
+
+                    <div class="well treatment empty" form-domain="[]trains">
+                        <input type="hidden" form-domain="code" value="">
+                        <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                        <span class="treatment-title"></span>
+                        <div class="treatment-content" form-domain="data">
+                            <span class="glyphicon glyphicon-cloud-download" aria-hidden="true" style="color: green;" title="加载中。。。"></span>
+                        </div>
+                    </div>
+
+                    {% for treatment in settings.get('trains', []) %}
+                    <div class="well treatment" form-domain="[]trains">
+                        {% set t = treatments[treatment['code']] %}
+                        <input type="hidden" form-domain="code" value="{{ t.__name__ }}">
+                        <a href="javascript:void(0)" class="remove-treatment"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a>
+                        <span class="treatment-title">{{ t.title }}</span>
+                        <div class="treatment-content" form-domain="data">
+                            {% raw t.content(treatment) %}
+                        </div>
+                    </div>
                     {% end %}
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="">
+                {% block footer_buttons%}
+                <button type="submit" class="btn btn-primary">确认修改</button>
+                <a type="cancel" class="btn btn-default" href="/exp/{{ exp['exp_id'] }}">取消</a>
+                {% end %}
+            </div>
+        </form>
+
 
     </div>
 
@@ -114,11 +163,37 @@
                 <span class="panel-title">组件</span>
             </div>
             <div class="panel-body">
-                {% for treatment in treatments %}
+                <h4 class="treatment-type">实验组件</h4>
+                {% set ts = treatments.values() %}
+                {% set PlayerOnlys = filter(lambda t: issubclass(t, PlayerOnly), ts) %}
                 <div class="list-group">
-                    <a class="list-group-item component" href="javascript:void(0)" target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
-                </div>
+                {% for treatment in PlayerOnlys %}
+                <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+                   target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
                 {% end %}
+                </div>
+                {% set PlayerGroups = filter(lambda t: issubclass(t, PlayerGroup), ts) %}
+                <div class="list-group">
+                    {% for treatment in PlayerGroups %}
+                    <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+                       target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+                    {% end %}
+                </div>
+                {% set Containers = filter(lambda t: issubclass(t, Container), ts) %}
+                <div class="list-group">
+                    {% for treatment in Containers %}
+                    <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+                       target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+                    {% end %}
+                </div>
+                <h4 class="treatment-type">训练组件</h4>
+                {% set Trains = filter(lambda t: issubclass(t, Train), ts) %}
+                <div class="list-group">
+                    {% for treatment in Trains %}
+                    <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+                       target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+                    {% end %}
+                </div>
             </div>
         </div>
     </div>
@@ -152,8 +227,30 @@
                     });
                 }
             });
-
             $(".treatments").sortable();
+
+            $(".trains").droppable({
+                activeClass: "ui-state-default",
+                hoverClass: "ui-state-hover",
+                accept: ":not(.ui-sortable-helper)",
+                greedy: true,
+                drop: function( event, ui ) {
+                    var target = $(ui.helper.context).attr('target');
+
+                    var new_treatment = $(".trains .treatment.empty").clone(true);
+                    new_treatment.removeClass("empty");
+                    $(this).append(new_treatment);
+
+                    $.post("/exp/newtreatment", data={target: target}, function(res){
+                        new_treatment.find("input:first").val(res.code);
+                        new_treatment.find("span.treatment-title").html(res.title);
+                        new_treatment.find("div.treatment-content").html(res.content);
+                        initDropDrag();
+                        adjustForm();
+                    });
+                }
+            });
+            $(".trains").sortable();
         }
 
         function adjustForm(){
@@ -226,7 +323,7 @@
             initDropDrag();
 
             // handle remove treatment
-            $(".treatments").on("click", "a.remove-treatment", function(){
+            $(".treatments, .trains").on("click", "a.remove-treatment", function(){
                 adjustForm();
                 $(this).parents(".treatment:first").remove();
             });
@@ -264,7 +361,7 @@
                     parseExpSettingsForm(data, arguments[i].name.split("-"), arguments[i].value);
                 }
 
-                delete data._xsrf
+                delete data._xsrf;
 
                 $.post("", {data: JSON.stringify(data)}, function(res){
                     if(res.redirect)

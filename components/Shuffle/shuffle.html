@@ -1,0 +1,579 @@
+
+<style type="text/css">
+    .panel-footer{
+        background-color: white;
+    }
+
+    div.players {
+        width: 100%;
+    }
+
+    .player, .agent {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 1px solid silver;
+        margin: 5px 10px;
+        height: 60px;
+        max-width: 150px;
+    }
+
+    .player.online {
+        color: green;
+    }
+
+    .player.offline {
+        color: gray;
+    }
+
+    .pool {
+        min-height: 80px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    div.session {
+        min-height: 80px;
+    }
+
+    .badge {
+        float: right;
+        margin-left: 10px;
+    }
+
+    .session-players {
+        margin-top: 20px;
+        min-height: 80px;
+    }
+
+    .group {
+        float: left;
+        display: inline-block;
+        padding: 10px;
+        margin: 10px 10px;
+        min-height: 100px;
+        min-width: 100px;
+        max-width: 300px;
+        border: 1px solid silver;
+    }
+
+    .new-group {
+        margin: 10px 0px;
+        width: 100%;
+        height: 25px;
+    }
+
+    .new-group span{
+        float: right;
+        font-size: 20px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .new-agent span{
+        float: right;
+        font-size: 20px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .empty {
+        display: none;
+    }
+
+    .info {
+        position: fixed;
+        width: 300px;
+        max-height: 700px;
+        border: 1px solid silver;
+        display: none;
+    }
+
+    .info .panel-body{
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .info:after, .info:before {
+        border: 10px solid transparent;
+        border-right: 10px solid #fff;
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 30px;
+        left: -20px;
+        content: ' ';
+    }
+
+    .info:before {
+        border-right-color: silver;
+        left: -21px;
+    }
+
+</style>
+
+<div class="panel shuffle">
+    <div class="page-header">
+        <h3>分组</h3>
+    </div>
+
+    <div class="panel-body">
+        <div class="players well well-sm">
+            <div class="well-title">用户池<span class="badge">4</span></div>
+            <div class="well-content pool">
+
+                {% for pid in pool.get('players', [], True) %}
+                {% if pid in players %}
+                <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online
+                                      {% else %}offline{% end %}" player="{{ pid }}">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                    <span class="playername">{{ players[pid]['username'] }}</span>
+                </div>
+                {% end %}
+                {% end %}
+
+            </div>
+            <div style="height: 30px;">
+                <a class="new-agent" href="javascript:void(0)" title="添加智能体">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>
+            </div>
+        </div>
+        <div class="well agent empty">
+            <span class="glyphicon glyphicon-tag" aria-hidden="true" style="margin-right: 5px;"></span>
+            <span>智能体</span>
+            <a href="javascript:void(0)" class="remove-agent">
+                <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" style="margin-left: 10px; color: #AE4141; float: right"></span>
+            </a>
+        </div>
+        <div class="well player empty online">
+            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+            <span class="playername"></span>
+        </div>
+
+        <div role="tabpanel">
+            <ul class="nav nav-tabs" role="tablist">
+                {% for i, session in enumerate(pool['sessions']) %}
+                <li role="presentation" class="{% if i == 0 %}active{% end %}">
+                    <a href="#session{{ i }}" aria-controls="session{{ i }}" role="tab" data-toggle="tab">
+                        session {{ i }}<span class="badge">0</span>
+                    </a>
+                </li>
+                {% end %}
+            </ul>
+
+            <div class="tab-content">
+                {% for i, session in enumerate(pool['sessions']) %}
+                <div role="tabpanel" class="tab-pane session {% if i == 0 %}active{% end %}" id="session{{ i }}">
+                    <div class="session-players">
+                        {% for pid in session.get('players', []) %}
+                        {% if pid in players %}
+                        <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online
+                                             {% else %}offline{% end %}" player="{{ pid }}">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span class="playername">{{ players[pid]['username'] }}</span>
+                        </div>
+                        {% end %}
+                        {% end %}
+                    </div>
+                    <div class="session-groups">
+                        {% for group in session.get('groups', []) %}
+                        <div class='well group'>
+                            <div class='well-title'>
+                                <span class="glyphicon glyphicon-tags" aria-hidden="true" style="margin-right: 10px;"></span>组
+                                <a href="javascript:void(0)" class="remove-group">
+                                    <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" style="color: #AE4141;float: right"></span>
+                                </a>
+                            </div>
+                            {% for pid in group %}
+                            {% if pid in players %}
+                            <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline
+                                                 {% end %}" player="{{ pid }}">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                                <span class="playername">{{ players[pid]['username'] }}</span>
+                            </div>
+                            {% elif pid.startswith('agent') %}
+                            <div class="well agent">
+                                <span class="glyphicon glyphicon-tag" aria-hidden="true" style="margin-right: 5px;"></span>
+                                <span>智能体</span>
+                                <a href="javascript:void(0)" class="remove-agent">
+                                    <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" style="margin-left: 10px; color: #AE4141; float: right"></span>
+                                </a>
+                            </div>
+                            {% end %}
+                            {% end %}
+                        </div>
+                        {% end %}
+                    </div>
+                </div>
+                {% end %}
+                <div class="panel panel-info info">
+                    <div class="panel-heading">被试信息</div>
+                    <div class="panel-body">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class='well group empty'>
+            <div class='well-title'>
+                <span class="glyphicon glyphicon-tags" aria-hidden="true" style="margin-right: 10px;"></span>组
+                <a href="javascript:void(0)" class="remove-group">
+                    <span class="glyphicon glyphicon-minus-sign" aria-hidden="true" style="color: #AE4141;float: right"></span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+    <div style="height: 30px;">
+        <a class="new-group" href="javascript:void(0)" title="添加新组">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+        </a>
+    </div>
+    <div class="panel-footer">
+        <a class="btn btn-primary submit-shuffle" href="javascript:void(0)">确认</a>
+        <a class="btn btn-default random-shuffle" href="javascript:void(0)">随机分组</a>
+    </div>
+
+</div>
+
+<div class="modal fade params" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">自动分组参数</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" method="post">
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">session比例</label>
+                        <div class="col-md-6">
+                            {% for i, session in enumerate(pool['sessions']) %}
+                            <input type="number" class="form-control" name="ratios{{ i }}" placeholder="比例"
+                                   required value="{{ round(100/len(pool['sessions'])) }}"
+                                   min="0" max="100" oninvalid="setCustomValidity('0-100整数');" oninput="setCustomValidity('');">
+                            {% end %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">每组参与人数（不包括AGENT）</label>
+                        <div class="col-md-6">
+                            {% for i, session in enumerate(pool['sessions']) %}
+                            <input type="number" class="form-control" name="gplayers{{ i }}" placeholder="每组人数" required value="2"
+                                   min="2" oninvalid="setCustomValidity('大于1的整数');" oninput="setCustomValidity('');">
+                            {% end %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">每组AGENT数</label>
+                        <div class="col-md-6">
+                            {% for i, session in enumerate(pool['sessions']) %}
+                            <input type="number" class="form-control" name="gagents{{ i }}" placeholder="每组AGENT数" required value="0"
+                                   min="0" oninvalid="setCustomValidity('整数');" oninput="setCustomValidity('');">
+                            {% end %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary auto-shuffle" data-dismiss="modal">确定</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+function updateCounts(){
+    $(".players").each(function(){
+        var player_count = parseInt($(this).find(".pool .player, .pool .agent").length);
+        $(this).find(".badge").html(player_count);
+    });
+    $("a[role=tab]").each(function(){
+        var id = $(this).attr("href");
+        var player_count = parseInt($(id).find(".player, .agent").length);
+        $(this).find(".badge").html(player_count);
+    });
+}
+
+function shuffle(aArr){
+    var iLength = aArr.length,
+        i = iLength,
+        mTemp,
+        iRandom;
+
+    while(i--){
+        if(i !== (iRandom = Math.floor(Math.random() * iLength))){
+            mTemp = aArr[i];
+            aArr[i] = aArr[iRandom];
+            aArr[iRandom] = mTemp;
+        }
+    }
+    return aArr;
+}
+
+Array.prototype.sum = function () {
+    for(var sum = i = 0; i < this.length; i++)
+        sum += parseInt(this[i]);
+    return sum;
+};
+
+function newPlayer(player){
+    var p = $(".player.empty").clone(true);
+    p.attr("player", player.pid);
+    p.find("span.playername").html(player.username);
+    p.removeClass("empty");
+    p.draggable({
+        appendTo: "body",
+        helper: "clone"
+    });
+    return p;
+}
+
+function newGroup(session){
+    var empty_group = $(".shuffle").find(".empty.group");
+    var new_group = empty_group.clone(true);
+    new_group.removeClass("empty");
+    new_group.show();
+
+    new_group.droppable({
+        activeClass: "ui-state-default",
+        hoverClass: "ui-state-hover",
+        accept: ":not(.ui-sortable-helper)",
+        drop: function( event, ui ) {
+            $(this).append(ui.helper.context);
+            updateCounts();
+        }
+    });
+    return new_group;
+}
+
+function removeGroup(group){
+    group = $(group);
+    group.parents(".session").find(".session-players").append(group.find(".player, .agent"));
+    group.remove();
+    updateCounts();
+}
+
+function newAgent(){
+    var agent = $(".shuffle").find(".agent.empty");
+    var new_agent = agent.clone(true);
+    new_agent.removeClass("empty");
+    new_agent.css("display", "inline-block");
+
+    new_agent.draggable({
+        appendTo: "body",
+        helper: "clone"
+    });
+    return new_agent;
+}
+
+function initDropDrag(){
+    $(".player:not('.empty'), .agent:not('.empty')").draggable({
+        appendTo: "body",
+        helper: "clone"
+    });
+
+    $(".session-players").droppable({
+        activeClass: "ui-state-default",
+        hoverClass: "ui-state-hover",
+        accept: ":not(.ui-sortable-helper)",
+        drop: function( event, ui ) {
+            $(this).append(ui.helper.context);
+            updateCounts();
+        }
+    });
+
+    $(".pool").droppable({
+        drop: function( event, ui ) {
+            $(this).append(ui.helper.context);
+            updateCounts();
+        }
+    });
+
+    $(".group:not('.empty')").droppable({
+        activeClass: "ui-state-default",
+        hoverClass: "ui-state-hover",
+        accept: ":not(.ui-sortable-helper)",
+        drop: function( event, ui ) {
+            $(this).append(ui.helper.context);
+            updateCounts();
+        }
+    });
+}
+
+function autoGroupShuffle(session, players, gplayers){
+    var groups = parseInt(players.length / gplayers);
+    for(var gi=0; gi < groups; gi++){
+        var group = newGroup();
+        for(var pi=0; pi < gplayers; pi++){
+            $(players[gi*gplayers+pi]).appendTo(group);
+        }
+        group.appendTo("#session"+session+" .session-groups");
+    }
+}
+
+function autoSessionShuffle(players, ratios){
+    var sum = ratios.sum();
+    var splayers = new Array();
+    ratios.forEach(function(r){
+        splayers.push(parseInt(r * players.length / sum));
+    });
+    var pi = 0;
+    var spi = 0;
+    $(".session").each(function(si){
+        spi += splayers[si];
+        while(pi < spi){
+            $(players[pi]).appendTo("#session"+si+" .session-players");
+            pi++;
+        }
+    });
+}
+
+function autoShuffle(ratios, gplayers, gagents){
+    var groups = $(".group:not('.empty')");
+    for(var i=0; i < groups.length; i++){
+        removeGroup(groups[i]);
+    }
+    var players = $(".player:not('.empty'), .agent:not('.empty')").each(function(i){
+        $(this).appendTo(".pool");
+    });
+    var players = $(".player:not('.empty'), .agent:not('.empty')");
+    shuffle(players);
+    autoSessionShuffle(players, ratios);
+    $(".session").each(function(si){
+        var players = $("#session"+si+" .session-players .player, #session"+si+" .session-players .agent");
+        autoGroupShuffle(si, players, gplayers[si]);
+    });
+
+}
+
+$(document).ready(function(){
+    updateCounts();
+    initDropDrag();
+
+    ws.handler.addplayer = function(data, evt){
+        if(data.pid != undefined){
+            $("div.pool").append( newPlayer(data) );
+        }
+        updateCounts();
+    };
+
+    ws.handler.online = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("offline");
+        player.addClass("online");
+    };
+
+    ws.handler.offline = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("online");
+        player.addClass("offline");
+    };
+
+    ws.handler.showInfo = function(data, evt){
+        $(".info .panel-body").html(data);
+        $(".info").show();
+    };
+
+    $(".player").on("click", function(){
+        var top = $(this).offset().top - 20;
+        var left = $(this).offset().left + $(this).width() - 20;
+        $(".info").css("left", left);
+        $(".info").css("top", top);
+        var pid = $(this).attr("player");
+        if(pid == "")
+            return ;
+        sendCmd('getInfo', {pid: pid});
+        return false;
+    });
+
+    $(".info").on("click", function(){
+        return false;
+    });
+
+    $("body:not(.player, .info)").on("click", function(){
+        $(".info").hide();
+    });
+
+    $(".new-group").on("click", function(){
+        $(".session.active .session-groups").append( newGroup() );
+    });
+
+    $(".new-agent").on("click", function(){
+        $(".pool").append( newAgent() );
+        updateCounts();
+    });
+
+    $(".remove-group").on("click", function(){
+        removeGroup( $(this).parents(".group") );
+    });
+
+    $(".remove-agent").on("click", function(){
+        $(this).parents(".agent").remove();
+        updateCounts();
+    });
+
+    $(".random-shuffle").on("click", function(){
+        $(".modal.params").modal('toggle');
+    });
+
+    $("a.submit-shuffle").on("click", function(){
+        var data = {};
+        data.players = [];
+        data.sessions = [];
+        $(".pool").find(".player").each(function(i){
+            var player_id = $(this).attr("player");
+            if(player_id && player_id != "")
+                data.players.push(player_id);
+        });
+        $(".session").each(function(i){
+            var session = {};
+            session.players = [];
+            session.id = i;
+            $(this).find(".session-players .player").each(function(i){
+                var player_id = $(this).attr("player");
+                if(player_id && player_id != "")
+                    session.players.push(player_id);
+            });
+            session.groups = [];
+            $(this).find(".session-groups .group").each(function(i){
+                var group = [];
+                $(this).find(".player").each(function(i){
+                    var player_id = $(this).attr("player");
+                    if(player_id && player_id != "")
+                        group.push(player_id);
+                });
+                $(this).find(".agent").each(function(i){
+                    group.push("agent"+i);
+                });
+                if(group.length > 0)
+                    session.groups.push(group);
+            });
+            data.sessions.push(session);
+        });
+        sendCmd('shuffle', data);
+    });
+
+    $("button.auto-shuffle").on('click', function(e){
+        $(".modal.params").modal('toggle');
+        var arguments = $(".modal.params form").serializeArray();
+        var ratios = new Array();
+        var gplayers = new Array();
+        var gagents = new Array();
+        for(var i=0; i < arguments.length; i++){
+            if(arguments[i].name.startsWith('ratios'))
+                ratios.push(parseFloat(arguments[i].value));
+            else if(arguments[i].name.startsWith('gplayers'))
+                gplayers.push(parseInt(arguments[i].value));
+            else if(arguments[i].name.startsWith('gagents'))
+                gagents.push(parseInt(arguments[i].value));
+        }
+        autoShuffle(ratios, gplayers, gagents);
+        updateCounts();
+    });
+});
+
+</script>

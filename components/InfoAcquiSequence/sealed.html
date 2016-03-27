@@ -1,0 +1,198 @@
+<style type="text/css">
+    .common-info {
+        font-size: 20px;
+    }
+
+    .private-info {
+        font-size: 20px;
+    }
+
+    p {
+        text-indent: 1em;
+    }
+
+    .highlight {
+        font-weight: bold;
+    }
+
+    .timer {
+        display: none;
+    }
+
+    .timers {
+        margin-top: 20px;
+        display: inline-block;
+        float: right;
+    }
+
+    .page-header {
+        margin-top: 0px;
+    }
+
+    .page-header h3 {
+        display: inline-block;
+    }
+
+    .result {
+        display: none;
+        font-size: 20px;
+    }
+
+    .tip {
+        font-size: 20px;
+        margin-left: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+</style>
+
+<div class="page-header col-md-offset-1 col-md-10">
+    <h3>
+        第{{ group.get('round_', refresh=True) }}轮 -
+        {% if mainstage == 'info' %}信息获取拍卖（p = {{ round(float(settings['prob']), 3) }}）
+        {% elif mainstage == 'a' %}A物品拍卖（p = {{ round(float(settings['prob']), 3) }}）
+        {% elif mainstage == 'b' %}B物品拍卖（p = {{ round(float(settings['prob']), 3) }}）
+        {% else %}结束（p = {{ round(float(settings['prob']), 3) }}）
+        {% end %}
+    </h3>
+    <div class="timers">
+        <div class="timer" id="sealedT">
+            <span class="countdown" title="剩余时间"></span><span>秒</span>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-offset-1 col-md-10">
+
+    <div class="box effect7 common-info">
+        <ul>
+            <li>在A、B两物品序贯拍卖中，所有竞拍者对每件物品的估价服从<span class="highlight">{5, 10}</span>上概率
+                <span class="highlight">p={{ round(float(settings['prob']), 3) }}</span>的两点（伯努利）分布
+                （即估价为10的概率为{{ round(float(settings['prob']), 3) }}，估价5的概率为{{ round(1 - float(settings['prob']), 3) }}）。</li>
+            <li>实验中的拍卖均采用第二价格密封拍卖，即竞拍者都以密封的形式独立出价，出价最高的竞拍者成为胜者，但胜者只需支付所有出价中的次高价。
+                <span class="highlight">理论上，在第二价格密封拍卖中，报出你的真实估价是你的占优策略。</span></li>
+        </ul>
+    </div>
+
+    <div class="box effect7 private-info">
+        就你而言:
+        <ul>
+            <li><span class="highlight">拍卖物A的估价为{{ group.get('aq', refresh=True)[player.pid] }}。</span></li>
+            {% if mainstage == 'b' or mainstage == 'end' %}
+            <li><span class="highlight">拍卖物B的估价为{{ group.get('bq', refresh=True)[player.pid] }}。</span></li>
+            {% end %}
+            {% if mainstage == 'a'%}
+            {% if player.pid == group.get('results', refresh=True).get('info', {}).get('winner') %}
+            <li>你赢得了信息获取拍卖，<span class="highlight">拍卖物B的估价为{{ group.get('bq', refresh=True)[player.pid] }}。</span></li>
+            {% else %}
+            <li>你未赢得信息获取拍卖， 你尚不知道拍卖物B的估价</li>
+            {% end %}
+            {% end %}
+        </ul>
+    </div>
+    <div class="tip">
+        {% if mainstage == 'info' %}
+        现在进行<span class="highlight">信息获取拍卖</span>:<br/>
+            <p>为了在A物品拍卖前获得对物品B的估价信息，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
+        {% elif mainstage == 'a' %}
+        现在进行<span class="highlight">A物品拍卖</span>:<br/>
+            <p>为了赢得A物品拍卖，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
+        {% elif mainstage == 'b' %}
+        现在进行<span class="highlight">B物品拍卖</span>:<br/>
+            <p>为了赢得B物品拍卖，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
+        {% elif mainstage == 'end' %}
+            <p>你已经完成了本轮实验。</p>
+        {% end %}
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <form class="form-inline" id="bid">
+            <div class="form-group col-md-3 has-success">
+                <div class="input-group">
+                    <input type="number" class="form-control input-lg" aria-describedby="addon" name="bid"
+                           required oninput="setCustomValidity('');" min="0" step="0.1" value="{{ 0.1 }}"
+                           oninvalid="setCustomValidity('必须输入大于'+this.min+'的整数或一位小数');">
+                    <span class="input-group-addon" id="addon">点</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-1">
+                    <button class="btn btn-primary" type="submit" role="button">提交</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="box effect7 result">
+
+    </div>
+
+</div>
+
+<script type="text/javascript" language="javascript">
+
+function disableForm(form, msg){
+    $(form).find("button[type='submit']").attr('disabled', 'disabled');
+    $(form).find("input").attr('disabled', 'disabled');
+    $(form).find("button[type='submit']").html(msg);
+}
+
+$(document).ready(function(){
+
+    $("form#bid").submit( function(event){
+        event.preventDefault();
+
+        var bid = $("input[name='bid']").val();
+        sendCmd('sealed_bid', {bid:bid});
+        ws.handler.wait();
+    });
+
+    ws.handler.refresh = function(data, evt) {
+        sealedT.stop();
+        sendCmd('get');
+    };
+
+    ws.handler.wait = function(data, evt){
+        disableForm("form#bid", "等待对方出价");
+    };
+
+    ws.handler.end = function(data, evt){
+        disableForm("form#bid", "本轮实验已完成");
+        sendCmd('get_result');
+    };
+
+    ws.handler.result = function(data, evt){
+        disableForm("form#bid", "本阶段已结束");
+        sendCmd('get_result');
+        sendCmd('get_timeout');
+    };
+
+    ws.handler.showresult = function(data, evt){
+        $(".result").html(data);
+        $(".result").show();
+    };
+
+    ws.handler.timeout = function(data, evt){
+        if(data.seconds){
+            sealedT.show();
+            sealedT.set(data.seconds);
+        }
+    };
+
+    var sealedT = new Timer(10, "sealedT");
+    sealedT.stop();
+
+    {% if mainstage == 'end' %}
+    ws.handler.end();
+    {% elif substage == 'wait' %}
+    ws.handler.wait();
+    sendCmd('get_timeout');
+    {% elif substage == 'result' %}
+    ws.handler.result();
+    {% elif substage == 'run' %}
+    sendCmd('get_timeout');
+    {% end %}
+
+});
+</script>

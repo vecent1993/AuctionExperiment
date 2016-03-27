@@ -8,7 +8,7 @@ import concurrent.futures
 import uuid
 import email
 
-from util.web import BaseHandler, userAuthenticated
+from utils.web import BaseHandler, userAuthenticated
 
 # A thread pool to be used for sending email
 executor = concurrent.futures.ThreadPoolExecutor(2)

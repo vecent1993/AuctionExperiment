@@ -3,19 +3,21 @@ import traceback
 
 import tornado.web
 
-from util.web import BaseHandler
-import handler
+from utils.web import BaseHandler
+import components
 
 
 class TreatmentListHandler(BaseHandler):
     def get(self):
-        self.render('treatments/treatmentlist.html', treatments=handler.hs.treatments)
+        self.render('treatments/treatmentlist.html', treatments=components.hub.treatments.values(),
+                    PlayerOnly=components.treatment.PlayerOnly, PlayerGroup=components.treatment.PlayerGroup,
+                    Container=components.treatment.Container, Train=components.treatment.Train)
 
 
 class TreatmentHandler(BaseHandler):
     def get(self, treatment):
         try:
-            t = handler.hs.handlers[treatment]
-            self.render('treatments/treatment.html', treatment=t)
+            t = components.hub.treatments[treatment]
+            self.render('treatments/treatment.html', treatment=t, Train=components.treatment.Train)
         except:
             raise tornado.web.HTTPError(404)

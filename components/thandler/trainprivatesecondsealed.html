@@ -1,0 +1,141 @@
+<style type="text/css">
+    .problem {
+        font-size: 20px;
+    }
+
+    .highlight {
+        color: red;
+    }
+
+    .timer {
+        display: none;
+    }
+
+    .timers {
+        margin-top: 20px;
+        display: inline-block;
+        float: right;
+    }
+
+    .page-header {
+        margin-top: 0px;
+    }
+
+    .page-header h3 {
+        display: inline-block;
+    }
+
+    .result {
+        display: none;
+        font-size: 20px;
+    }
+</style>
+
+<div class="page-header col-md-offset-1 col-md-10">
+    <h3>
+        私人价值第二价格密封拍卖
+    </h3>
+    <div class="timers">
+        <div class="timer" id="sealedT">
+            <span class="countdown" title="本轮拍卖剩余时间"></span><span>秒</span>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-offset-1 col-md-10">
+
+    <div class="box effect7 problem">
+        <ul>
+            <li>竞拍者都以密封的形式独立出价，出价最高的竞拍者赢得拍卖物，但获胜者只需支付所有出价中的次高价。</li>
+            <li>理论上，<a href="javascript:void(0)" onclick="$('#tip').toggle()">报出你的真实估价是你的占优策略</a>。</li>
+            <div id="tip" style="display: none; font-size: 18px;">
+                <p>假定你是一个投标人，你对拍卖物的估价是100。如果你出价低于100，比如80。别人的出价大于100，你出100和80是没有区别。
+                别人的出价低于80，你出100和80没有区别。别人的出价在80到100之间，比如90，
+                那么你出价100就能赢得拍品并且能有10的盈余，如果你出价80收益就是0，也就是说出价低于100会降低收益。</p>
+                <p>如果你出价高于100，比如120。别人出价低于100，你出价100和120无区别都能赢得拍品。
+                别人出价高于120，你出100和120是无区别的，收益都为0。别人出价在100到120之间，比如110，你出价100收益为0，你出价120收益为-10，
+                还不如出100，也就是说出价大于100也会降低收益。</p>
+            </div>
+            <li>所有竞拍者对拍卖物的估价并都服从{{ settings['minQ'] }}-{{ settings['maxQ'] }}的均匀分布。竞拍者估价的
+                相互独立，且各竞拍者只知道自己的估价，不知道其他人的估价的确切值，但竞拍者知道所有人的估价服从相同的均匀分布。</li>
+            <li>如果你的报价是所有报价中的最高价，而所有报价中的第二高价为b，那么你将支付b并获得物品，你的收益为q-b；否则，你的收益为0。</li>
+            <li>请在下面的输入框写上您对物品的报价，并进行提交。</li>
+        </ul>
+    </div>
+
+    <div class="box effect7 problem">
+        <ul>
+            <li>就你而言，你对拍卖物的估价q = {{ player['q'] }}</li>
+        </ul>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <form class="form-inline" id="bid">
+            <div class="form-group col-md-3 has-success">
+                <div class="input-group">
+                    <input type="number" class="form-control input-lg" aria-describedby="addon" name="bid" required oninput="setCustomValidity('');"
+                           value="0.1" min="0" max="10" step="0.1" oninvalid="setCustomValidity('必须输入'+this.min+'到'+this.max+'整数或一位小数');">
+                    <span class="input-group-addon" id="addon">点</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-1">
+                    <button class="btn btn-primary" type="submit" role="button">提交</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="box effect7 result">
+
+    </div>
+
+</div>
+
+<script type="text/javascript" language="javascript">
+
+function disableForm(form, msg){
+    $(form).find("button[type='submit']").attr('disabled', 'disabled');
+    $(form).find("input").attr('disabled', 'disabled');
+    $(form).find("button[type='submit']").html(msg);
+}
+
+$(document).ready(function(){
+
+    $("form#bid").submit( function(event){
+        event.preventDefault();
+
+        var bid = $("input[name='bid']").val();
+        sendCmd('sealed_bid', {bid:bid});
+        ws.handler.wait();
+    });
+
+    ws.handler.wait = function(data, evt){
+        disableForm("form#bid", "等待对方出价");
+
+        ws.handler.result();
+    };
+
+    ws.handler.result = function(data, evt){
+        disableForm("form#bid", "本部分已结束");
+        sendCmd('get_result');
+    };
+
+    ws.handler.showresult = function(data, evt){
+        sealedT.close();
+        $(".result").html(data);
+        $(".result").show();
+    };
+
+    ws.handler.timeout = function(data, evt){
+        sealedT.show();
+        sealedT.set(data);
+    };
+
+    sideInfo("欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。");
+
+    var sealedT = new Timer(10, "sealedT", ws.handler.result);
+    sendCmd('get_timeout');
+
+});
+</script>

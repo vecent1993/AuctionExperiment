@@ -76,3 +76,29 @@ function Timer(seconds, eid, func){
     	that.hide();
     };
 }
+
+String.prototype.format = function() {
+  var src = this;
+  var cap;
+  var subStrs = [];
+  var ai = 0;
+  while(src) {
+    if(cap = /([^{]*){ *(\d*) *}/.exec(src)){
+      src = src.substring(cap[0].length);
+      subStrs.push(cap[1]);
+      if(cap[2]) {
+        subStrs.push(arguments[parseInt(cap[2])]);
+      } else {
+        subStrs.push(arguments[ai++]);
+      }
+    } else {
+      subStrs.push(src);
+      src = '';
+    }
+  }
+
+  subStrs.forEach(function(s, i){
+    src += s;
+  });
+  return src;
+}

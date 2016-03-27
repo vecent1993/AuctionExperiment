@@ -29,13 +29,13 @@
             text-indent: 2em;
         }
 
-        .info {
+        .sidebar {
             padding: 0px 30px;
             border-left: 1px solid #eee;
             margin-top: 40px
         }
 
-        .info h4 {
+        .sidebar h4 {
             background-color: #F3F3F3;
             padding: 8px;
         }
@@ -60,7 +60,7 @@
         <a href="/help" target="_blank" title="FAQ">
             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
         </a>
-        <a href="javascript:void(0)" class="show-introduction" title="实验说明">
+        <a href="javascript:void(0)" class="$('.modal.introduction').modal('toggle');" title="实验说明">
             <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
         </a>
         <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
@@ -76,23 +76,19 @@
         <div class="intro col-md-offset-1 col-md-10">
 
             <div class="well">
-                <p>本实验包含三个部分，请在选择需要训练的部分进行练习。</p>
+                <p>请在选择需要训练的部分进行练习。</p>
                 <p>训练旨在让您熟悉相应的操作和概念，与正式实验并不完全一致。训练时你的对手是一个智能agent，而正式实验时你将面对真实报价人。</p>
             </div>
 
             <div class="btn-group btn-group-lg" role="group">
-                <a href="/exp/{{ exp['exp_id'] }}/train/Sealed" class="btn btn-default">第一部分</a>
-                <a href="/exp/{{ exp['exp_id'] }}/train/English" class="btn btn-default">第二部分</a>
-                <a href="/exp/{{ exp['exp_id'] }}/train/EnglishOpen" class="btn btn-default">第三部分</a>
+                {% for train in settings.get('trains', []) %}
+                <a href="/train/{{ train['code'] }}" class="btn btn-default">{{ treatments[train['code']].title }}</a>
+                {% end %}
             </div>
         </div>
     </div>
 
-    <div class="info col-md-3">
-
-        <div class="alert alert-warning" role="alert" style="margin-top: 20px;">
-            欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
-        </div>
+    <div class="sidebar col-md-3">
 
         <div class="account-info">
             <h4>账户信息</h4>
@@ -114,9 +110,15 @@
                 对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
             </p>
             <p>
-                查看<a href="javascript:void(0)" class="show-introduction">实验说明</a>
+                查看<a href="javascript:void(0)" class="$('.modal.introduction').modal('toggle');">实验说明</a>
             </p>
         </div>
+
+        <div class="alert alert-warning" role="alert" style="margin-top: 20px;">
+            欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。
+        </div>
+
+
     </div>
 
     <div class="modal fade introduction" tabindex="-1" role="dialog">
@@ -130,6 +132,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="box effect7">
+                        {% raw exp['exp_intro'] %}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -143,9 +146,6 @@
     <script type="text/javascript" language="javascript">
 
         $(document).ready(function(){
-            $("a.show-introduction").on("click", function(){
-                $(".modal.introduction").modal('toggle');
-            });
         });
 
     </script>

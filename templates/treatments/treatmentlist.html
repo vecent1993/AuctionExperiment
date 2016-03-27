@@ -1,7 +1,7 @@
 {% extends '../main.html' %}
 
 {% block title %}
-    treatment列表
+    组件列表
 {% end %}
 
 {% block style %}
@@ -13,24 +13,55 @@
         .tips li {
             margin-bottom: 20px;
         }
+
+        .list-group {
+            margin-bottom: 40px;
+        }
     </style>
 {% end %}
 
 {% block row %}
     <div class="col-md-5 col-md-offset-2">
-        {% for treatment in treatments %}
+        {% set PlayerOnlys = filter(lambda t: issubclass(t, PlayerOnly), treatments) %}
+        <h3 class="treatment-type">个人组件 <span class="badge">{{ len(PlayerOnlys) }}</span></h3>
         <div class="list-group">
-            <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}" target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+            {% for treatment in PlayerOnlys %}
+            <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+               target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+            {% end %}
         </div>
-        {% end %}
+        {% set PlayerGroups = filter(lambda t: issubclass(t, PlayerGroup), treatments) %}
+        <h3 class="treatment-type">小组组件 <span class="badge">{{ len(PlayerGroups) }}</span></h3>
+        <div class="list-group">
+            {% for treatment in PlayerGroups %}
+            <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+               target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+            {% end %}
+        </div>
+        {% set Containers = filter(lambda t: issubclass(t, Container), treatments) %}
+        <h3 class="treatment-type">容器组件 <span class="badge">{{ len(Containers) }}</span></h3>
+        <div class="list-group">
+            {% for treatment in Containers %}
+            <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+               target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+            {% end %}
+        </div>
+        {% set Trains = filter(lambda t: issubclass(t, Train), treatments) %}
+        <h3 class="treatment-type">训练组件 <span class="badge">{{ len(Trains) }}</span></h3>
+        <div class="list-group">
+            {% for treatment in Trains %}
+            <a class="list-group-item component" href="/treatment/{{ treatment.__name__ }}"
+               target="{{ treatment.__name__ }}">{{ treatment.title }}</a>
+            {% end %}
+        </div>
     </div>
 
     <div class="well col-md-3 tips">
         <p>提示:</p>
         <ul>
-            <li>共5种treatment，点击查看详情。</li>
-            <li>这些treatment作为实验的基本组件，可用于创建新实验。</li>
-            <li>需要新式的treatment？请<a>联系我们</a>。</li>
+            <li>共{{ len(treatments) }}个组件，点击查看详情。</li>
+            <li>这些作为实验的基本组件，可用于创建新实验。</li>
+            <li>需要新式的组件？请<a>联系我们</a>。</li>
         </ul>
     </div>
 {% end %}

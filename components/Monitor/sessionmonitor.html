@@ -1,0 +1,242 @@
+<style type="text/css">
+    .monitor {
+        margin-top: 50px;
+    }
+
+    .well {
+        background-color: white;
+    }
+
+    .page-header {
+        margin-top: 0px;
+    }
+
+    .session {
+        min-height: 200px;
+    }
+
+    .group {
+        margin: 2%;
+        width: 12%;
+        float: left;
+    }
+
+    .group.empty {
+        display: none;
+    }
+
+    .group .player.online {
+        color: green;
+    }
+
+    .group .player.offline {
+        color: gray;
+    }
+
+    .player.empty {
+        display: none;
+    }
+
+    well.player, well.agent {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 1px solid silver;
+        margin: 5px 10px;
+        height: 60px;
+        max-width: 150px;
+    }
+
+    well.player.online {
+        color: green;
+    }
+
+    well.player.offline {
+        color: gray;
+    }
+
+    .floatinfo {
+        position: fixed;
+        width: 500px;
+        max-height: 700px;
+        border: 1px solid silver;
+        display: none;
+    }
+
+    .floatinfo .panel-heading {
+        padding: 5px 10px;
+    }
+
+    .floatinfo .panel-body{
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .floatinfo:after, .floatinfo:before {
+        border: 10px solid transparent;
+        border-right: 10px solid #fff;
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 30px;
+        left: -20px;
+        content: ' ';
+    }
+
+    .floatinfo:before {
+        border-right-color: silver;
+        left: -21px;
+    }
+
+</style>
+<div class="monitor">
+    <div class="page-header">
+        <h3>监控</span>
+            <a href="/help" target="_blank">
+                <span class="glyphicon glyphicon-question-sign" aria-hidden="true" style="float:right; color:white;"></span>
+            </a>
+        </h3>
+    </div>
+
+
+    <div role="tabpanel">
+
+        <ul class="nav nav-tabs" role="tablist">
+            {% for i, session in enumerate(pool['sessions']) %}
+            <li role="presentation" class="{% if i == 0 %}active{% end %}">
+                <a href="#session{{ i }}" aria-controls="session{{ i }}" role="tab" data-toggle="tab">session{{ session['id'] }}</a>
+            </li>
+            {% end %}
+        </ul>
+
+        <div class="tab-content">
+            {% for i, session in enumerate(pool['sessions']) %}
+            <div role="tabpanel" class="tab-pane session {% if i == 0 %}active{% end %}" id="session{{ i }}" session="{{ i }}">
+                <div class="groups">
+                    {% for i, group in enumerate(session.get('groups', [])) %}
+                    <div class="well well-sm group" group="{{ i }}">
+                        {% for pid in group %}
+                        {% if pid.startswith('agent') %}
+                        <div class="player online agent" player="{{ pid }}">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span class="playername">AGENT</span>
+                        </div>
+                        {% elif pid in players %}
+                        <div class="player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <span class="playername">{{ players[pid]['username'] }}</span>
+                        </div>
+                        {% end %}
+                        {% end %}
+                    </div>
+                    {% end %}
+
+                    {% for pid in session.get('players', []) %}
+                    {% if pid in players %}
+                    <div class="well player {% if players[pid].get('heartbeat') and now - players[pid]['heartbeat'] <= 120 %}online{% else %}offline{% end %}" player="{{ pid }}">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        <span class="playername">{{ players[pid]['username'] }}</span>
+                    </div>
+                    {% end %}
+                    {% end %}
+                </div>
+
+            </div>
+            {% end %}
+        </div>
+
+        <div class="well well-sm group empty">
+
+        </div>
+
+        <div class="player empty online">
+            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+            <span class="playername"></span>
+        </div>
+
+        <div class="panel panel-info floatinfo">
+            <div class="panel-heading">具体信息</div>
+            <div class="panel-body">
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+function newPlayer(player){
+    var p = $(".player.empty").clone(true);
+    p.attr("player", player.pid);
+    p.find("span.playername").html(player.username);
+    p.removeClass("empty");
+    return p;
+}
+
+function newGroup(group){
+    var g = $(".group.empty").clone(true);
+    g.attr('group', group.gid);
+    for(var i=0;i < group.players.length; i++){
+        g.append(newPlayer(group.players[i]));
+    }
+    g.removeClass("empty");
+    return g;
+}
+
+$(document).ready(function(){
+    $(".well.group").on("click", function(){
+        var top = $(this).offset().top - 10;
+        var left = $(this).offset().left + $(this).width() - 20;
+        $(".floatinfo").css("left", left);
+        $(".floatinfo").css("top", top);
+        var sid = $(this).parents("div.session").attr("session");
+        sendCmd('getGroupInfo', {sid: sid,  gid: $(this).attr('group')});
+        return false;
+    });
+
+    $(".well.player").on("click", function(){
+        var top = $(this).offset().top - 10;
+        var left = $(this).offset().left + $(this).width() - 20;
+        $(".floatinfo").css("left", left);
+        $(".floatinfo").css("top", top);
+        var pid = $(this).attr("player");
+        sendCmd('getPlayerInfo', pid);
+        return false;
+    });
+
+    $(".floatinfo").on("click", function(){
+        return false;
+    });
+
+    $("body:not(.group, .floatinfo)").on("click", function(){
+        $(".floatinfo").hide();
+    });
+
+    ws.handler.online = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("offline");
+        player.addClass("online");
+    };
+
+    ws.handler.offline = function(data, evt){
+        var player = $(".player[player='"+data+"']");
+        player.removeClass("online");
+        player.addClass("offline");
+    };
+
+    ws.handler.addgroup = function(data, evt){
+        if(data.gid != undefined & data.sid != undefined){
+            $("#session"+data.sid+" div.groups").append(
+                newGroup(data)
+            );
+        }
+    };
+
+    ws.handler.showInfo = function(data, evt){
+        $(".floatinfo .panel-body").html(data);
+        $(".floatinfo").show();
+    };
+
+});
+
+</script>

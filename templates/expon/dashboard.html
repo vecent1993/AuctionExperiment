@@ -1,7 +1,7 @@
 {% extends '../main.html' %}
 
 {% block title %}
-    监控面板 - {{ exp['exp_title'] }}
+监控面板 - {{ exp['exp_title'] }}
 {% end %}
 
 {% block js %}
@@ -12,17 +12,54 @@
 {% end %}
 
 {% block style %}
+<style type="text/css">
+    .toolbar {
+        font-size: 20px;
+        float: right;
+        margin-right: 50px;
+    }
+    .error {
+        display: none;
+    }
 
+    .error .error-detail {
+        display: none;
+        margin-top: 20px;
+    }
+</style>
 {% end %}
 
 {% block row %}
-    <div class="col-md-8 col-md-offset-2" id="main">
+<div class="toolbar">
+    <a href="javascript:void(0)" title="聊天室">
+        <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+    </a>
+    <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
+        <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
+    </a>
+</div>
 
-        {% module xsrf_form_html() %}
+<div class="col-md-8 col-md-offset-2" id="main">
 
+    {% module xsrf_form_html() %}
+
+</div>
+
+<div class="error">
+    <div class="page-header">
+        <h2>错误<small></small></h2>
     </div>
 
-    <script type="text/javascript" language="javascript">
+    <div class="">
+        <span style="font-size: 20px;">网页发生错误，请稍后刷新网页。若重复出现错误，请联系管理员。</span>
+        <a href="javascript:void(0)" onclick="$('.error-detail').toggle()">详细信息</a>
+        <div class="error-detail" style="display: none">
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" language="javascript">
 
         var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
 
@@ -67,7 +104,6 @@
         ws.handler = new msgHandler(ws)
 
         $(document).ready(function(){
-
             ws.handler.replace = function(data, evt){
                  $("#main").html(msg.data);
             };
@@ -75,6 +111,14 @@
             ws.handler.wait = function(data, evt){
                  $(".waiting").show();
             };
+
+            ws.handler.error = function(data, evt){
+                var errorDIV = $(".error").clone(true);
+                errorDIV.find(".error-detail").html(data);
+                $("#main").html("");
+                $("#main").append(errorDIV);
+                errorDIV.show();
+            }
 
             ws.handler.redirect = function(data, evt){
                 document.location.href = data;
@@ -86,5 +130,5 @@
 
         });
 
-    </script>
+</script>
 {% end %}

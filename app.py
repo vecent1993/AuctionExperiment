@@ -13,6 +13,7 @@ from account import *
 from treatments import *
 from expmanage import *
 from expsocket import *
+from train import *
 from self import *
 from help import *
 
@@ -23,7 +24,7 @@ class Application(tornado.web.Application):
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             xsrf_cookies=True,
-            cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+            cookie_secret="---HUST-ISE---",
             login_url="/",
             autoload=False,
         )
@@ -55,10 +56,12 @@ class Application(tornado.web.Application):
 
             (r"/exp/(\d+)/socket", ExpOnHandler),
             (r"/exp/(\d+)/train", ExpTrainHandler),
-            (r"/exp/(\d+)/train/([\s\S]*)", ExpTrainHandler),
 
             (r"/exp/(\d+)/websocket", ExpSocketHandler),
-            (r"/exp/(\d+)/websocket/train/([\s\S]*)", TrainSocketHandler),
+
+            (r"/trainlist", TrainListHandler),
+            (r"/train/([a-zA-Z0-9]*)", TrainHandler),
+            (r"/train/([a-zA-Z0-9]*)/websocket", TrainSocketHandler),
 
             (r"/help", HelpHandler),
         ]
