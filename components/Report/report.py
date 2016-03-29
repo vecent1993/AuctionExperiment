@@ -35,8 +35,8 @@ class HostReport(hosthandler.HostHandler):
                 if player:
                     self.players[pid] = player
         now = time.time()
-        self.RemoteWS.replace(self.render('Report/report.html', now=now,
-                                                          exp=self.exp, pool=self.pool, players=self.players))
+        self.RemoteWS.replace(self.render('Report/report.html', now=now, exp=self.exp,
+                                          pool=self.pool, players=self.players))
 
     @hosthandler.on_ws
     def start(self, data=None):

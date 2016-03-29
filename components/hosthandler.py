@@ -34,16 +34,16 @@ class HostHandler(WSMessageHandler):
         self.exp = env.exp
         self.pool = Pool(self.env.redis, self.exp['id'])
 
-        self.msg_channel = 'exp:' + str(self.exp['id'])
-        self.host_domain = 'host:' + str(self.exp['id'])
-        self.pool_domain = 'pool:' + str(self.exp['id'])
+        self.msg_channel = 'exp:%s' % self.exp['id']
+        self.host_domain = 'host:%s' % self.exp['id']
+        self.pool_domain = 'pool:%s' % self.exp['id']
         self.settings = self.host.get('settings', dict(), True)
         self.sub = None
 
         self.RemotePool = RemotePool(self.msg_channel, self.pool_domain,
                                      self.env.redis.publish)
 
-        self.loader = components.hs.loader
+        self.loader = components.hub.loader
 
     def listen(self, channel, callback):
         self.sub = RedisSub(channel, callback)
@@ -69,12 +69,12 @@ class HostHandler(WSMessageHandler):
     @on_redis
     def switch_handler(self, msg=None):
         if 'stage' not in self.host:
-            self.env.msg_handler = components.hs.handlers['HostInit'](self.env)
+            self.env.msg_handler = components.hub.handlers['HostInit'](self.env)
             return
 
         stage = self.host.get('stage', refresh=True).split(':')[0]
         self.close()
-        self.env.msg_handler = components.hs.handlers[stage](self.env)
+        self.env.msg_handler = components.hub.handlers[stage](self.env)
         if msg:
             self.env.on_message(json.dumps(msg))
 

@@ -176,12 +176,12 @@ class Experiment(Exp):
         if group_key in self.groups:
             self.groups[group_key].close()
             self.groups.pop(group_key)
-            self.host.next_group_stage(data)
+            # self.host.next_group_stage(data)
         else:
             return
 
-        if not self.groups:
-            self.host.next_host_stage()
+        # if not self.groups:
+        #     self.host.next_host_stage()
 
     def close(self):
         remote_redis = RemoteRedis(self.redis.publish)

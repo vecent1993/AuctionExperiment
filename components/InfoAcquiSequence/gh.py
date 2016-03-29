@@ -9,6 +9,9 @@ import components.grouphandler as grouphandler
 import components.playerhandler as playerhandler
 
 
+_qs = ((5, 10), (10, 10), (5, 5), (10, 5))
+
+
 class GroupInfoAcquiSequence(grouphandler.GroupHandler):
     def __init__(self, exp, sid, gid):
         super(GroupInfoAcquiSequence, self).__init__(exp)
@@ -18,14 +21,11 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
         self.settings = self.value.get('settings', dict(), True)
         self.RemoteGroup = grouphandler.RemoteGroup(self.expid, self.sid, self.gid, self.redis.publish)
 
-        if not self.value.get('players'):
-            self.load_players()
-
         self.init_tasks()
 
         stages = self.value.get('stage', refresh=True).split(':')
         if len(stages) == 1:
-            self.prepare()
+            self.start()
         elif stages[1] == 'info':
             if stages[2] == 'run':
                 self.start()
@@ -43,22 +43,6 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
             else:
                 self.add_delay('bresult', 10, self.b_result_timeout)
 
-    def load_players(self):
-        p = utils.exprv.Pool(self.redis, self.expid)
-        pids = p['sessions'][int(self.sid)]['groups'][int(self.gid)]
-        players = {}
-        for pid in pids:
-            if pid.startswith('agent'):
-                players[pid] = {'pid': pid, 'username': 'AGENT'}
-            else:
-                player = utils.exprv.Player(self.redis, self.expid, pid)
-                if not player:
-                    continue
-                player.set('gid', self.gid)
-                player.set('sid', self.sid)
-                players[pid] = {'pid': pid, 'username': player['username']}
-        self.value.set('players', players)
-
     def start(self, data=None):
         group_stage = '%s:%s:%s' % ('GroupInfoAcquiSequence', 'info', 'run')
         self.value.set('stage', group_stage)
@@ -72,21 +56,28 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         player_stage = '%s:%s:%s' % ('PlayerInfoAcquiSequence', 'info', 'run')
         prob = float(self.settings['prob'])
+        if 'fixed' in self.settings:
+            for pid in self.value['players'].keys():
+                temp = _qs[int(pid) % len(_qs)]
+                self.value['aq'][pid] = temp[0]
+                self.value['bq'][pid] = temp[1]
+        else:
+            for pid in self.value['players'].keys():
+                aq = 10 if random.uniform(0, 1) <= prob else 5
+                bq = 10 if random.uniform(0, 1) <= prob else 5
+                self.value['aq'][pid] = aq
+                self.value['bq'][pid] = bq
+        self.value.save('aq')
+        self.value.save('bq')
 
         self.add_delay('inforun', 180, self.info_run_timeout)
         for pid in self.value['players'].keys():
-            aq = 10 if random.uniform(0, 1) <= prob else 5
-            bq = 10 if random.uniform(0, 1) <= prob else 5
-            self.value['aq'][pid] = aq
-            self.value['bq'][pid] = bq
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 self.add_delay('infoagentbid'+pid, random.uniform(5, 30), self.info_agent_bid, pid)
             else:
                 player = utils.exprv.Player(self.redis, self.expid, pid)
                 player.set('stage', player_stage)
                 self.RemotePlayer.change_substage(pid)
-            self.value.save('aq')
-            self.value.save('bq')
 
         self.init_database()
 
@@ -94,8 +85,6 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
         round_ = self.value['round_']
         for pid in self.value['players'].keys():
             aq, bq = self.value['aq'][pid], self.value['bq'][pid]
-            if pid.startswith('agent'):
-                pid = int(pid[5:]) + 1
             self.db.execute('delete from info_sequence where exp_id=%s and user_id=%s and round=%s and '
                             'session=%s and `group`=%s', self.expid, pid, round_, self.sid, self.gid)
             self.db.insert('insert into info_sequence(exp_id, user_id, round, session, `group`, aq, bq) '
@@ -116,7 +105,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
     def info_run_timeout(self, data=None):
         for pid in self.value['players'].keys():
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 self.execute_delay('infoagentbid'+pid)
 
         group_stage = '%s:%s:%s' % ('GroupInfoAcquiSequence', 'info', 'result')
@@ -132,7 +121,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         self.add_delay('inforesult', 10, self.info_result_timeout)
         for pid in self.value['players'].keys():
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 continue
 
             player = utils.exprv.Player(self.redis, self.expid, pid)
@@ -149,10 +138,9 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
                             'round=%s and session=%s and `group`=%s'.format(main_stage)
         for pid in self.value['players'].keys():
             bid = self.value['%sbids' % main_stage][pid]['bid'] if pid in self.value['%sbids' % main_stage] else 0
-            _pid = int(pid[5:]) + 1 if pid.startswith('agent') else pid
-            self.db.update(sql_info_sequence, bid, self.expid, _pid, round_, self.sid, self.gid)
+            self.db.update(sql_info_sequence, bid, self.expid, pid, round_, self.sid, self.gid)
 
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 continue
             pay, price = result['pay'], result['winprice']
             if pid == result['winner']:
@@ -176,7 +164,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         self.add_delay('arun', 180, self.a_run_timeout)
         for pid in self.value['players'].keys():
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 self.add_delay('aagentbid'+pid, random.uniform(5, 30), self.a_agent_bid, pid)
             else:
                 player = utils.exprv.Player(self.redis, self.expid, pid)
@@ -185,7 +173,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
     def a_run_timeout(self, data=None):
         for pid in self.value['players'].keys():
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 self.execute_delay('aagentbid'+pid)
 
         group_stage = '%s:%s:%s' % ('GroupInfoAcquiSequence', 'a', 'result')
@@ -201,7 +189,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         self.add_delay('aresult', 10, self.a_result_timeout)
         for pid in self.value['players'].keys():
-            if pid.startswith('agent'):
+            if int(pid) <= 5:
                 continue
             player = utils.exprv.Player(self.redis, self.expid, pid)
             if pid == result['winner']:
@@ -222,7 +210,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
         for pid in self.value['players'].keys():
             if pid == self.value['results'].get('a', {}).get('winner'):
                 continue
-            elif pid.startswith('agent'):
+            elif int(pid) <= 5:
                 self.add_delay('bagentbid'+pid, random.uniform(5, 30), self.b_agent_bid, pid)
             else:
                 player = utils.exprv.Player(self.redis, self.expid, pid)
@@ -231,7 +219,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
     def b_run_timeout(self, data=None):
         for pid in self.value['players'].keys():
-            if pid.startswith('agent') and pid != self.value['results'].get('a', {}).get('winner'):
+            if int(pid) <= 5 and pid != self.value['results'].get('a', {}).get('winner'):
                 self.execute_delay('bagentbid'+pid)
 
         group_stage = '%s:%s:%s' % ('GroupInfoAcquiSequence', 'b', 'result')
@@ -247,7 +235,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         self.add_delay('bresult', 10, self.b_result_timeout)
         for pid in self.value['players'].keys():
-            if pid.startswith('agent') or pid == self.value['results'].get('a', {}).get('winner'):
+            if int(pid) <= 5 or pid == self.value['results'].get('a', {}).get('winner'):
                 continue
             player = utils.exprv.Player(self.redis, self.expid, pid)
             player.set('stage', player_stage)
@@ -288,7 +276,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
             return
 
         tmp = '%sbids' % stages[1]
-        if data['pid'].startswith('agent'):
+        if int(data['pid']) <= 5:
             self.value[tmp][data['pid']] = data
         elif data['pid'] in self.value['players']:
             self.value[tmp][data['pid']] = data

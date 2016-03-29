@@ -38,11 +38,13 @@ class PlayerOnly(Treatment):
 class PlayerGroup(Treatment):
     @staticmethod
     def next_stage_code(settings, stage_code=None, round_=0):
-        if len(stage_code.split('-')) == 1:
-            return stage_code + '-1', round_ + 1
+        stage_code_split = stage_code.split('-')
+        if len(stage_code_split) == 1:
+            return ('%s-0' % stage_code_split[0]), round_
+        elif stage_code_split[1] == '0':
+            return ('%s-1' % stage_code_split[0]), round_ + 1
         else:
             return None
-
 
 
 class Container(Treatment):
@@ -64,7 +66,7 @@ class Sessions(Container):
     def get_stage(settings, stage_code, cur_stage=None):
         stage_code_split = stage_code.split(':')
         if len(stage_code_split) == 1:
-            return 'PlayerWait', 'HostShuffle', None, settings
+            return 'PlayerSessionWait', 'HostShuffle', None, settings
         else:
             cur = int(stage_code_split[1].split('-')[0])
             treatment_code = settings['sessions'][0]['treatments'][cur]['code']
@@ -93,10 +95,7 @@ class Sessions(Container):
             sub_stage_code = treatment.next_stage_code(settings['sessions'][0]['treatments'][cur],
                                                   ':'.join(stage_code_split[1:]), round_)
             if not sub_stage_code:
-                new_stage_code = Sessions.next_stage_code(settings, '%s:%s' % (cur_stage_code, cur+1), round_)
-                if new_stage_code:
-                    return new_stage_code
-                return None
+                return Sessions.next_stage_code(settings, '%s:%s' % (cur_stage_code, cur+1), round_)
             else:
                 return '%s:%s' % (cur_stage_code, sub_stage_code[0]), sub_stage_code[1]
 
@@ -136,7 +135,6 @@ class Sessions(Container):
                         <div class="col-md-2">
                             <input class="form-control" type="number" form-domain="ratio" value="{{ session.get('ratio', 100) }}">
                         </div>
-
                     </div>
 
                     <div class="treatments">
@@ -160,8 +158,14 @@ class Sessions(Container):
                 <div role="tabpanel" class="tab-pane session empty" id="" form-domain="[]sessions">
                     <br/>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">session名称</label>
-                        <div class="col-md-8"><input class="form-control" type="text" form-domain="des"></div>
+                        <label class="col-md-2 control-label">名称</label>
+                        <div class="col-md-3">
+                            <input class="form-control" type="text" form-domain="des"">
+                        </div>
+                        <label class="col-md-2 control-label">比例</label>
+                        <div class="col-md-2">
+                            <input class="form-control" type="number" form-domain="ratio" value="100">
+                        </div>
                     </div>
 
                     <div class="treatments">
@@ -185,8 +189,8 @@ class Repeat(Container):
         stage_code_split = stage_code.split(':')
         if len(stage_code_split) == 1:
             if settings.get('auto'):
-                return 'PlayerWait', 'AutoHostShuffle', None, settings
-            return 'PlayerWait', 'HostShuffle', None, settings
+                return 'PlayerShuffleWait', 'AutoHostShuffle', None, settings
+            return 'PlayerShuffleWait', 'HostShuffle', None, settings
         else:
             cur = int(stage_code_split[1].split('-')[0])
             treatment_code = settings['treatments'][cur]['code']
@@ -225,10 +229,7 @@ class Repeat(Container):
             sub_stage_code = treatment.next_stage_code(settings['treatments'][cur],
                                                        ':'.join(stage_code_split[1:]), round_)
             if not sub_stage_code:
-                new_stage_code = Repeat.next_stage_code(settings, '%s:%s' % (cur_stage_code,cur+1), round_)
-                if new_stage_code:
-                    return new_stage_code
-                return None
+                return Repeat.next_stage_code(settings, '%s:%s' % (cur_stage_code,cur+1), round_)
             else:
                 return '%s:%s' % (cur_stage_code, sub_stage_code[0]), sub_stage_code[1]
 

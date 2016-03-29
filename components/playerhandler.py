@@ -64,7 +64,7 @@ class PlayerHandler(WSMessageHandler):
                                      self.env.redis.publish)
         self.RemoteGroup = None
         self.sub = None
-        self.loader = components.hs.loader
+        self.loader = components.hub.loader
 
     def listen(self, channel, callback):
         self.sub = RedisSub(channel, callback)
@@ -90,13 +90,13 @@ class PlayerHandler(WSMessageHandler):
     @on_redis
     def switch_handler(self, msg=None):
         if 'stage' not in self.player:
-            self.env.msg_handler = components.hs.handlers['PlayerInit'](self.env)
+            self.env.msg_handler = components.hub.handlers['PlayerInit'](self.env)
             return
 
         stage = self.player.get('stage', refresh=True).split(':')[0]
         self.close()
         try:
-            self.env.msg_handler = components.hs.handlers[stage](self.env)
+            self.env.msg_handler = components.hub.handlers[stage](self.env)
             if msg:
                 self.env.on_message(json.dumps(msg))
         except:

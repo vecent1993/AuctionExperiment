@@ -72,34 +72,11 @@ class GroupHandler(object):
     def init_tasks(self):
         pass
 
-    def prepare(self):
-        readyps = self.value.get('ready', [])
-        if len(readyps) == len(filter(lambda pid: not pid.startswith('agent'),
-                                                      self.value['players'].keys())):
-            self.start()
-            return
-
-    @on_redis
-    def report_ready(self, pid):
-        if 'ready' not in self.value:
-            self.value.set('ready', [])
-        if pid not in self.value['ready']:
-            self.value['ready'].append(pid)
-            self.value.save('ready')
-            player = Player(self.redis, self.expid, pid)
-            stage = player['stage'].split(':')[0]
-            player.set('stage', stage+':Ready')
-            self.RemotePlayer.change_substage(pid)
-
-        if len(self.value['ready']) == len(filter(lambda pid: not pid.startswith('agent'),
-                                                      self.value['players'].keys())):
-            self.start()
-
     def start(self):
         pass
 
     def end(self):
-        for pid in filter(lambda pid: not pid.startswith('agent'), self.value['players'].keys()):
+        for pid in self.value.get('ready', []):
             self.RemotePool.next_player_stage(pid)
 
         settings = self.value.get('settings', {})

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import functools
+import traceback
 
 from utils.log import FileLogger, Logger
 
@@ -56,7 +57,10 @@ class WSMessageHandler(object):
     @logger.log
     def handle(self, msg):
         if hasattr(self, msg['cmd']):
-            getattr(self, msg['cmd'])(msg.get('data'))
+            try:
+                getattr(self, msg['cmd'])(msg.get('data'))
+            except:
+                self.RemoteWS.error(traceback.format_exc())
 
     def publish(self, channel, msg):
         self.env.redis.publish(channel, msg)

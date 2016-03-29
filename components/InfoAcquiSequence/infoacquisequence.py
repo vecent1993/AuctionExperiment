@@ -13,6 +13,10 @@ class InfoAcquiSequence(components.treatment.PlayerGroup):
 
     @staticmethod
     def get_stage(settings, stage_code, cur_stage=None):
+        stage_code_split = stage_code.split('-')
+        if stage_code_split[1] == '0':
+            return 'PlayerGroupWait', 'SessionHostMonitor', None, settings
+
         return 'PlayerInfoAcquiSequence', 'SessionHostMonitor', 'GroupInfoAcquiSequence', settings
 
     @staticmethod
@@ -75,17 +79,10 @@ class InfoAcquiSequence(components.treatment.PlayerGroup):
 
     @staticmethod
     def get_data(db, expid):
-        results = db.query("""
-                select * from info_sequence join user using(user_id) where exp_id=%s
+        return db.query("""
+                select * from info_sequence join user using(user_id) where exp_id=%s order by session,
+                `group`, round, user_id
                 """, expid)
-        keys = ['session', 'group', 'round', 'user_id']
-
-        def _cmp(a, b):
-            for key in keys:
-                value = cmp(a[key], b[key])
-                if value:
-                    return value
-        return sorted(results, cmp=_cmp)
 
     @staticmethod
     def host_result(db, expid):

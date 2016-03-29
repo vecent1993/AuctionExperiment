@@ -17,7 +17,7 @@ import Report.report
 import thandler.privatesecondsealed
 import treatment
 
-loader = Loader('handler')
+loader = Loader('components')
 
 
 handlers = dict(
@@ -40,7 +40,11 @@ handlers = dict(
 
     PlayerInit=Init.init.PlayerInit,
     HostInit=Init.init.HostInit,
-    PlayerWait=Wait.wait.PlayerWait,
+
+    PlayerSessionWait=Wait.wait.PlayerSessionWait,
+    PlayerShuffleWait=Wait.wait.PlayerShuffleWait,
+    PlayerGroupWait=Wait.wait.PlayerGroupWait,
+
     HostReport=Report.report.HostReport,
 
     PlayerTrainPrivateSecondSealed=thandler.privatesecondsealed.PlayerTrainPrivateSecondSealed,
@@ -54,7 +58,7 @@ treatments = dict(
     Sessions=treatment.Sessions,
     Repeat=treatment.Repeat,
 
-    SealedEnglish=SealedEnglish.sealedenglish.SealedEnglish,
+    # SealedEnglish=SealedEnglish.sealedenglish.SealedEnglish,
     InfoAcquiSequence=InfoAcquiSequence.infoacquisequence.InfoAcquiSequence,
 
     TrainPrivateSecondSealed=thandler.privatesecondsealed.TrainPrivateSecondSealed,

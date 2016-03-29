@@ -11,7 +11,7 @@ class AutoHostShuffle(hosthandler.HostHandler):
         super(AutoHostShuffle, self).__init__(env)
         self.players = {}
 
-        # self.listen(self.msg_channel, self.on_message)
+        self.listen(self.msg_channel, self.on_message)
         self.auto_shuffle()
 
     @hosthandler.on_ws

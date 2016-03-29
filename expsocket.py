@@ -41,7 +41,7 @@ class ExpSocketHandler(BaseSocketHandler):
                 self.msg_handler = PlayerHandler(self)
                 self.msg_handler.switch_handler()
         except:
-            self.write_message(json.dumps({'error': str(traceback.format_exc())}))
+            self.write_message(json.dumps({'cmd': 'error', 'data': str(traceback.format_exc())}))
 
     def on_message(self, msg):
         msg = json.loads(msg)
@@ -68,7 +68,7 @@ class TrainSocketHandler(BaseSocketHandler):
 
             self.msg_handler = components.hub.handlers[treatment_code](self)
         except:
-            self.write_message(json.dumps({'error': str(traceback.format_exc())}))
+            self.write_message(json.dumps({'cmd': 'error', 'data': str(traceback.format_exc())}))
 
     def on_message(self, msg):
         msg = json.loads(msg)

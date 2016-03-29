@@ -175,7 +175,7 @@ class AutoShuffle(object):
 # a = AutoShuffle()
 # a.auto_shuffle()
 
-import torndb
+# import torndb
 
 # db = torndb.Connection("localhost", 'exp', user='JKiriS', password='910813gyb')
 # expid = 8
@@ -183,3 +183,5 @@ import torndb
 #             select user_email, round, GROUP_CONCAT(profit order by t) as profits from result_info_sequence join user using(user_id)
 #             where exp_id=%s group by user_id, round;
 #         """, expid)
+
+

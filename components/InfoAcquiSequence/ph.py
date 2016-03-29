@@ -24,25 +24,17 @@ class PlayerInfoAcquiSequence(playerhandler.PlayerHandler):
 
         stages = self.player.get('stage', refresh=True).split(':')
         if len(stages) == 1:
-            self.RemoteWS.replace(self.render('Wait/wait.html', substage='GroupReady',
-                                              message="是否做好准备？"))
-        elif len(stages) == 2:
-            if stages[1] == 'Ready':
-                self.RemoteWS.replace(self.render('Wait/wait.html', substage='Ready',
-                                                  message="等待其他人做好准备，注意实验可能随时开始！"))
-            elif stages[1] == 'end':
-                self.RemoteWS.replace(self.render('InfoAcquiSequence/sealed.html', mainstage='end',
-                                                  player=self.player, substage=None, settings=self.settings,
-                                                  group=self.group))
-        else:
-            mainstage, substage = stages[-2], stages[-1]
-            self.RemoteWS.replace(self.render('InfoAcquiSequence/sealed.html', mainstage=mainstage,
-                                              player=self.player,  substage=substage, settings=self.settings,
-                                              group=self.group))
+            self.RemoteWS.replace('')
+            return
+        if stages[1] == 'end':
+            self.RemoteWS.replace(self.render('InfoAcquiSequence/sealed.html', mainstage='end',
+                                            player=self.player,  substage=None, settings=self.settings,
+                                          group=self.group))
 
-    @playerhandler.on_ws
-    def ready(self, data):
-        self.RemoteGroup.report_ready(self.player.pid)
+        mainstage, substage = stages[-2], stages[-1]
+        self.RemoteWS.replace(self.render('InfoAcquiSequence/sealed.html', mainstage=mainstage,
+                                          player=self.player,  substage=substage, settings=self.settings,
+                                          group=self.group))
 
     @playerhandler.on_ws
     def sealed_bid(self, data):

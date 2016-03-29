@@ -103,7 +103,7 @@
         <ul class="nav nav-tabs" role="tablist">
             {% for i, session in enumerate(pool['sessions']) %}
             <li role="presentation" class="{% if i == 0 %}active{% end %}">
-                <a href="#session{{ i }}" aria-controls="session{{ i }}" role="tab" data-toggle="tab">session{{ session['id'] }}</a>
+                <a href="#session{{ i }}" aria-controls="session{{ i }}" role="tab" data-toggle="tab">session{{ i }}</a>
             </li>
             {% end %}
         </ul>

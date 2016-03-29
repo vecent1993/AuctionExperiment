@@ -11,4 +11,8 @@ class SealedEnglish(components.treatment.PlayerGroup):
 
     @staticmethod
     def get_stage(settings, stage_code, cur_stage=None):
+        stage_code_split = stage_code.split('-')
+        if stage_code_split[1] == '0':
+            return 'PlayerWait', 'SessionHostMonitor', None, settings
+
         return 'PlayerSealedEnglish', 'SessionHostMonitor', 'GroupSealedEnglish', settings

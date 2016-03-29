@@ -21,6 +21,9 @@ class PlayerEnd(playerhandler.PlayerHandler):
     def __init__(self, env):
         super(PlayerEnd, self).__init__(env)
 
+        if len(self.player.get('stage').split(':')) == 1:
+            self.RemotePool.report_exp_end(self.player.pid)
+
     @playerhandler.on_ws
     def get(self, data):
         href = '/exp/{}/result'.format(self.env.exp['id'])
