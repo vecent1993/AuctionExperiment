@@ -144,36 +144,36 @@ $(document).ready(function(){
         event.preventDefault();
 
         var bid = $("input[name='bid']").val();
-        sendCmd('sealed_bid', {bid:bid});
-        ws.handler.wait();
+        ws.sendCmd('sealed_bid', {bid:bid});
+        ws.wait();
     });
 
-    ws.handler.refresh = function(data, evt) {
+    ws.refresh = function(data, evt) {
         sealedT.stop();
-        sendCmd('get');
+        ws.sendCmd('get');
     };
 
-    ws.handler.wait = function(data, evt){
+    ws.wait = function(data, evt){
         disableForm("form#bid", "等待对方出价");
     };
 
-    ws.handler.end = function(data, evt){
+    ws.end = function(data, evt){
         disableForm("form#bid", "本轮实验已完成");
-        sendCmd('get_result');
+        ws.sendCmd('get_result');
     };
 
-    ws.handler.result = function(data, evt){
+    ws.result = function(data, evt){
         disableForm("form#bid", "本阶段已结束");
-        sendCmd('get_result');
-        sendCmd('get_timeout');
+        ws.sendCmd('get_result');
+        ws.sendCmd('get_timeout');
     };
 
-    ws.handler.showresult = function(data, evt){
+    ws.showresult = function(data, evt){
         $(".result").html(data);
         $(".result").show();
     };
 
-    ws.handler.timeout = function(data, evt){
+    ws.timeout = function(data, evt){
         if(data.seconds){
             sealedT.show();
             sealedT.set(data.seconds);
@@ -184,14 +184,14 @@ $(document).ready(function(){
     sealedT.stop();
 
     {% if mainstage == 'end' %}
-    ws.handler.end();
+    ws.end();
     {% elif substage == 'wait' %}
-    ws.handler.wait();
-    sendCmd('get_timeout');
+    ws.wait();
+    ws.sendCmd('get_timeout');
     {% elif substage == 'result' %}
-    ws.handler.result();
+    ws.result();
     {% elif substage == 'run' %}
-    sendCmd('get_timeout');
+    ws.sendCmd('get_timeout');
     {% end %}
 
 });

@@ -106,36 +106,36 @@ $(document).ready(function(){
         event.preventDefault();
 
         var bid = $("input[name='bid']").val();
-        sendCmd('sealed_bid', {bid:bid});
-        ws.handler.wait();
+        ws.sendCmd('sealed_bid', {bid:bid});
+        ws.wait();
     });
 
-    ws.handler.wait = function(data, evt){
+    ws.wait = function(data, evt){
         disableForm("form#bid", "等待对方出价");
 
-        ws.handler.result();
+        ws.result();
     };
 
-    ws.handler.result = function(data, evt){
+    ws.result = function(data, evt){
         disableForm("form#bid", "本部分已结束");
-        sendCmd('get_result');
+        ws.sendCmd('get_result');
     };
 
-    ws.handler.showresult = function(data, evt){
+    ws.showresult = function(data, evt){
         sealedT.close();
         $(".result").html(data);
         $(".result").show();
     };
 
-    ws.handler.timeout = function(data, evt){
+    ws.timeout = function(data, evt){
         sealedT.show();
         sealedT.set(data);
     };
 
     sideInfo("欢迎你进行训练，注意：训练时你的对手是一个智能AGENT。");
 
-    var sealedT = new Timer(10, "sealedT", ws.handler.result);
-    sendCmd('get_timeout');
+    var sealedT = new Timer(10, "sealedT", ws.result);
+    ws.sendCmd('get_timeout');
 
 });
 </script>

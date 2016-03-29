@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：实验介绍组件和相应用于参与人端的处理服务。
+"""
+
 import json
 
 from tornado.template import Template
@@ -11,8 +15,6 @@ import components.treatment
 class PlayerIntro(playerhandler.PlayerHandler):
     def __init__(self, env):
         super(PlayerIntro, self).__init__(env)
-
-        self.player_domain = ':'.join(('player', str(self.env.exp['id']), str(self.player.pid)))
 
         self.listen(self.msg_channel, self.on_message)
 
@@ -60,9 +62,6 @@ class PlayerIntro(playerhandler.PlayerHandler):
 
 
 class Intro(components.treatment.PlayerOnly):
-    ph = PlayerIntro
-    GROUPREADY = True
-
     title = '实验说明'
     description = '详细地告知被试实验流程'
 

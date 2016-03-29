@@ -33,23 +33,23 @@ function disableForm(){
 
 $(document).ready(function(){
 
-    ws.handler.deny = function(data, evt){
+    ws.deny = function(data, evt){
         alert(data);
         $("form button[type='submit']").html(data);
     };
 
-    ws.handler.GroupReady = function(data, evt){
+    ws.GroupReady = function(data, evt){
         disableForm();
         alert("是否准备好？");
-        sendCmd('ready');
+        ws.sendCmd('ready');
     };
 
-    ws.handler.Ready = function(data, evt){
+    ws.Ready = function(data, evt){
         disableForm();
         sideWarn("等待其他人做好准备，注意：实验可能随时开始！");
     };
 
-    ws.handler.Inpool = function(data, evt){
+    ws.Inpool = function(data, evt){
         disableForm();
         sideWarn("主持人正在努力分组，请耐心等待。。。");
     };
@@ -57,15 +57,15 @@ $(document).ready(function(){
     $("form").submit( function(e){
         event.preventDefault();
         disableForm();
-        sendCmd('register');
+        ws.sendCmd('register');
     });
 
     {% if substage == 'GroupReady'%}
-     ws.handler.GroupReady();
+     ws.GroupReady();
     {% elif substage == 'Ready' %}
-     ws.handler.Ready();
+     ws.Ready();
     {% elif substage == 'Inpool' %}
-     ws.handler.Inpool();
+     ws.Inpool();
     {% else %}
      sideInfo("请仔细阅读实验流程介绍，并点击报到按钮以确认加入实验。");
     {% end %}

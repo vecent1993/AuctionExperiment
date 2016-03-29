@@ -10,72 +10,72 @@
 {% end %}
 
 {% block style %}
-    <style type="text/css">
-        .timer span.countdown {
-            font-family: Helvetica, Microsoft YaHei, Arial, sans-serif;
-            font-size: 20px;
-            color: #151515;
-            font-weight: bold;
-        }
+<style type="text/css">
+    .timer span.countdown {
+        font-family: Helvetica, Microsoft YaHei, Arial, sans-serif;
+        font-size: 20px;
+        color: #151515;
+        font-weight: bold;
+    }
 
-        .toolbar {
-            font-size: 20px;
-            float: right;
-            margin-right: 50px;
-        }
+    .toolbar {
+        font-size: 20px;
+        float: right;
+        margin-right: 50px;
+    }
 
-        .error {
-            display: none;
-        }
+    .error {
+        display: none;
+    }
 
-        .error .error-detail {
-            display: none;
-            margin-top: 20px;
-        }
+    .error .error-detail {
+        display: none;
+        margin-top: 20px;
+    }
 
-        .sidebar {
-            padding: 0px 30px;
-            border-left: 1px solid #eee;
-            margin-top: 60px;
-            padding-top: 20px;
-        }
+    .sidebar {
+        padding: 0px 30px;
+        border-left: 1px solid #eee;
+        margin-top: 60px;
+        padding-top: 20px;
+    }
 
-        .sidebar h4 {
-            background-color: #F3F3F3;
-            padding: 8px;
-        }
+    .sidebar h4 {
+        background-color: #F3F3F3;
+        padding: 8px;
+    }
 
-        p {
-            text-indent: 2em;
-        }
+    p {
+        text-indent: 2em;
+    }
 
-        .page-header {
-            margin-top: 0px;
-        }
+    .page-header {
+        margin-top: 0px;
+    }
 
-        .account-info {
-            margin-bottom: 20px;
-        }
+    .account-info {
+        margin-bottom: 20px;
+    }
 
-        .chat {
-            position: fixed;
-            right: 30px;
-            bottom: 3px;
-            width: 30%;
-            display: none;
-            background-color: white;
-        }
+    .chat {
+        position: fixed;
+        right: 30px;
+        bottom: 3px;
+        width: 30%;
+        display: none;
+        background-color: white;
+    }
 
-        .chat ul {
-            overflow-y: auto;
-            height: 300px;
-        }
+    .chat ul {
+        overflow-y: auto;
+        height: 300px;
+    }
 
-        .empty {
-            display: none;
-        }
+    .empty {
+        display: none;
+    }
 
-    </style>
+</style>
 {% end %}
 
 {% block row %}
@@ -127,75 +127,11 @@
         </form>
     </div>
 
+    <script type="text/javascript" src="/static/js/ws.js"></script>
     <script type="text/javascript" language="javascript">
-
-        var ws = new WebSocket("ws://{{ request.host }}/train/{{ treatment.get_stage() }}/websocket");
-
-        var sendCmd = function(cmd, data, callback){
-             waitForConnection(function () {
-                ws.send( JSON.stringify({cmd: cmd, data: data}) );
-                if (typeof callback !== 'undefined') {
-                    callback();
-                }
-            }, 5);
-        }
-
-        var waitForConnection = function (callback, interval) {
-            if (ws.readyState === 1) {
-                callback();
-            } else {
-                setTimeout(function () {
-                    waitForConnection(callback, interval);
-                }, interval);
-            }
-        };
-
-        function msgHandler(ws){
-            var that = this;
-            ws.onmessage = function (evt) {
-                msg = JSON.parse(evt.data);
-                if( that[msg.cmd] ){
-                    that[msg.cmd](msg.data, evt);
-                }
-            };
-        };
-
-        function sideInfo(text){
-            $(".sidebar .alert").removeClass("alert-warning");
-            $(".sidebar .alert").addClass("alert-info");
-            $(".sidebar .alert").html(text);
-        }
-
-        function sideWarn(text){
-            $(".sidebar .alert").removeClass("alert-info");
-            $(".sidebar .alert").addClass("alert-warning");
-            $(".sidebar .alert").html(text);
-        }
-
-        ws.handler = new msgHandler(ws)
-
+        var ws = new WS("ws://{{ request.host }}/train/{{ treatment.get_stage() }}/websocket");
         $(document).ready(function(){
-            ws.handler.replace = function(data, evt){
-                $("#main").html(data);
-            };
-
-            ws.handler.refresh = function(data, evt) {
-                sendCmd('get');
-            };
-
-            ws.handler.redirect = function(data, evt){
-                document.location.href = data;
-            };
-
-            ws.handler.error = function(data, evt){
-                var errorDIV = $(".error").clone(true);
-                errorDIV.find(".error-detail").html(data);
-                $("#main").html("");
-                $("#main").append(errorDIV);
-                errorDIV.show();
-            }
-
-            sendCmd('get');
+            ws.sendCmd('get');
         });
 
         function newChatMsg(text){
@@ -213,10 +149,9 @@
             });
 
             $("a#toggle-msg").on("click", function(){
-                $(".chat").toggle();
+                    $(".chat").toggle();
             });
 
         });
-
     </script>
 {% end %}

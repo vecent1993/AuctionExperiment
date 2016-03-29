@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：用于自动分组的主持人端处理服务。
+"""
+
 import random
 
 from utils.exprv import *

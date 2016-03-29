@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：实验结束组件和相应用于参与人、主持人端的处理服务。
+"""
+
 import utils.exprv
 
 import components.playerhandler as playerhandler

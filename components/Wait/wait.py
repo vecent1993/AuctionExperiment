@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：用于参与人、主持人端的等待处理服务。
+"""
+
 import json
 
 from tornado.template import Template
@@ -11,7 +15,6 @@ class PlayerSessionWait(playerhandler.PlayerHandler):
     def __init__(self, env):
         super(PlayerSessionWait, self).__init__(env)
 
-        self.player_domain = ':'.join(('player', str(self.env.exp['id']), str(self.player.pid)))
         self.listen(self.msg_channel, self.on_message)
 
         if len(self.player.get('stage').split(':')) == 1:
@@ -33,7 +36,6 @@ class PlayerShuffleWait(playerhandler.PlayerHandler):
     def __init__(self, env):
         super(PlayerShuffleWait, self).__init__(env)
 
-        self.player_domain = ':'.join(('player', str(self.env.exp['id']), str(self.player.pid)))
         self.listen(self.msg_channel, self.on_message)
 
         if len(self.player.get('stage').split(':')) == 1:

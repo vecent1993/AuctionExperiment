@@ -11,7 +11,7 @@ class PlayerInfoAcquiSequence(playerhandler.PlayerHandler):
         super(PlayerInfoAcquiSequence, self).__init__(env)
 
         self.group = Group(self.env.redis, self.env.exp['id'], self.player['sid'], self.player['gid'])
-        self.group_domain = ':'.join(('group', str(self.player['sid']), str(self.player['gid'])))
+        self.group_domain = 'group:%s:%s' % (self.player['sid'], self.player['gid'])
         self.RemoteGroup = playerhandler.RemoteGroup(self.msg_channel, self.group_domain,
                                                      self.env.redis.publish)
 

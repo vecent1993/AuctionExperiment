@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：所有主持人端处理服务的父类。
+"""
+
 import os
 import traceback
 import json

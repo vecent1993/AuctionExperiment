@@ -15,21 +15,21 @@
 
 $(document).ready(function(){
 
-    ws.handler.GroupReady = function(data, evt){
+    ws.GroupReady = function(data, evt){
         alert("是否准备好？");
-        sendCmd('ready');
+        ws.sendCmd('ready');
     };
 
-    ws.handler.Ready = function(data, evt){
+    ws.Ready = function(data, evt){
         $(".alert").removeClass("alert-info");
         $(".alert").addClass("alert-warning");
         $(".alert").html("等待其他人做好准备，注意：实验可能随时开始！");
     }
 
     {% if substage == 'GroupReady'%}
-     ws.handler.GroupReady();
+     ws.GroupReady();
     {% elif substage == 'Ready' %}
-     ws.handler.Ready();
+     ws.Ready();
     {% end %}
 
 });

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+这个模块包含：测试组件列表、测试入口
+"""
+
 import traceback
 import json
 import datetime

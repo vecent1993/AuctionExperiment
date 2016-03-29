@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：含信息获取的序贯拍卖组件和相应用于参与人、主持人端的处理服务。
+"""
+
 from tornado.template import Template
 
 import components.treatment

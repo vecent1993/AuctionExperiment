@@ -75,7 +75,7 @@ function Timer(seconds, eid, func){
     	that.stop();
     	that.hide();
     };
-}
+};
 
 String.prototype.format = function() {
   var src = this;
@@ -101,4 +101,33 @@ String.prototype.format = function() {
     src += s;
   });
   return src;
+};
+
+
+String.prototype.startsWith = function(compareStr){
+    return this.indexOf(compareStr) == 0;
+};
+
+
+Array.prototype.sum = function () {
+    for(var sum = i = 0; i < this.length; i++)
+        sum += parseInt(this[i]);
+    return sum;
+};
+
+
+function shuffle(aArr){
+    var iLength = aArr.length,
+        i = iLength,
+        mTemp,
+        iRandom;
+
+    while(i--){
+        if(i !== (iRandom = Math.floor(Math.random() * iLength))){
+            mTemp = aArr[i];
+            aArr[i] = aArr[iRandom];
+            aArr[iRandom] = mTemp;
+        }
+    }
+    return aArr;
 }

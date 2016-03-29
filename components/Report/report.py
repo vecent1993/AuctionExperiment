@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：用于主持人端的监控入场处理服务。
+"""
+
 import time
 
 from utils.exprv import *
@@ -27,7 +31,7 @@ class HostReport(hosthandler.HostHandler):
     @hosthandler.on_ws
     def get(self, data):
         if not self.exp:
-            self.RemoteWS.error('no experiment')
+            self.RemoteWS.error('实验不存在。')
 
         for pid in self.pool.get('pool', [], True):
             if not pid.startswith('agent'):

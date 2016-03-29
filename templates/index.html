@@ -21,30 +21,30 @@
 {% block style %}
 <style type="text/css">
     body {
-    background: url(/static/img/loginbg.jpg);
-    background-size: 100%;
-    background-repeat: no-repeat;
+        background: url(/static/img/loginbg.jpg);
+        background-size: 100%;
+        background-repeat: no-repeat;
     }
 
     .input-form {
-    margin-top: 10%;
+        margin-top: 10%;
     }
 
     .home {
-    margin-top: 3%;
+        margin-top: 3%;
     }
 
     .title {
-    margin-top: 15px;
-    margin-left: 8%;
+        margin-top: 15px;
+        margin-left: 8%;
     }
 
     .title-cn {
-    font-size: 30px;
+        font-size: 30px;
     }
 
     .title-en {
-    font-size: 15px;
+        font-size: 15px;
     }
 
 </style>
@@ -138,36 +138,36 @@
 {% end %}
 
 <script>
-        function formData(selector){
-            var args = $(selector).serializeArray();
-            var data = {};
-            for(var i=0; i < args.length; i++){
-                data[args[i].name] = args[i].value;
+function formData(selector){
+    var args = $(selector).serializeArray();
+    var data = {};
+    for(var i=0; i < args.length; i++){
+        data[args[i].name] = args[i].value;
+    }
+    return data;
+};
+
+$(document).ready(function(){
+    $("form").submit(function(event){
+        event.preventDefault();
+
+        $("form button[type='submit']").attr("disabled", "disabled");
+        $("form button[type='submit']").html("正在登陆");
+        $.post("", formData("form"), function(res){
+            if(res.errors){
+                $("form button[type='submit']").removeAttr("disabled");
+                $("form button[type='submit']").html("登陆");
+                for(var i=0; i < res.errors.length; i++){
+                    var field = document.getElementsByName(res.errors[i].name)[0];
+                    field.setCustomValidity(res.errors[i].reason);
+                    $("form button[type='submit']").click();
+                }
             }
-            return data;
-        };
-
-        $(document).ready(function(){
-            $("form").submit(function(event){
-                event.preventDefault();
-
-                $("form button[type='submit']").attr("disabled", "disabled");
-                $("form button[type='submit']").html("正在登陆");
-                $.post("", formData("form"), function(res){
-                    if(res.errors){
-                        $("form button[type='submit']").removeAttr("disabled");
-                        $("form button[type='submit']").html("登陆");
-                        for(var i=0; i < res.errors.length; i++){
-                            var field = document.getElementsByName(res.errors[i].name)[0];
-                            field.setCustomValidity(res.errors[i].reason);
-                            $("form button[type='submit']").click();
-                        }
-                    }
-                    else{
-                        document.location.href = res.redirect;
-                    }
-                });
-            });
+            else{
+                document.location.href = res.redirect;
+            }
         });
-    </script>
+    });
+});
+</script>
 {% end %}

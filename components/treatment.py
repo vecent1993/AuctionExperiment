@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：四种可供选择的组件父类，即个体组件、组组件、测试组件和容器组件；两种基本的容器组件、即Session和Repeat。
+"""
+
 from tornado.template import Template
 
 import components

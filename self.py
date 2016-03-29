@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：个人主页
+"""
+
 import tornado.web
 
 from utils.web import BaseHandler

@@ -247,19 +247,19 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
         self.end()
 
     def info_agent_bid(self, pid):
-        if pid not in self.value['players']:
+        if pid not in self.value.get('players', []):
             return
         infoq = round(random.uniform(0, 0.5), 1)
         self.report_sealed_bid({'pid': pid, 'bid': infoq, 'username': 'AGENT'})
 
     def a_agent_bid(self, pid):
-        if pid not in self.value['players']:
+        if pid not in self.value.get('players', []):
             return
         aq = self.value['aq'][pid]
         self.report_sealed_bid({'pid': pid, 'bid': aq, 'username': 'AGENT'})
 
     def b_agent_bid(self, pid):
-        if pid not in self.value['players']:
+        if pid not in self.value.get('players', []):
             return
         bq = self.value['bq'][pid]
         self.report_sealed_bid({'pid': pid, 'bid': bq, 'username': 'AGENT'})

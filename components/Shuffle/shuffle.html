@@ -298,28 +298,6 @@ function updateCounts(){
     });
 }
 
-function shuffle(aArr){
-    var iLength = aArr.length,
-        i = iLength,
-        mTemp,
-        iRandom;
-
-    while(i--){
-        if(i !== (iRandom = Math.floor(Math.random() * iLength))){
-            mTemp = aArr[i];
-            aArr[i] = aArr[iRandom];
-            aArr[iRandom] = mTemp;
-        }
-    }
-    return aArr;
-}
-
-Array.prototype.sum = function () {
-    for(var sum = i = 0; i < this.length; i++)
-        sum += parseInt(this[i]);
-    return sum;
-};
-
 function newPlayer(player){
     var p = $(".player.empty").clone(true);
     p.attr("player", player.pid);
@@ -454,26 +432,26 @@ $(document).ready(function(){
     updateCounts();
     initDropDrag();
 
-    ws.handler.addplayer = function(data, evt){
+    ws.addplayer = function(data, evt){
         if(data.pid != undefined){
             $("div.pool").append( newPlayer(data) );
         }
         updateCounts();
     };
 
-    ws.handler.online = function(data, evt){
+    ws.online = function(data, evt){
         var player = $(".player[player='"+data+"']");
         player.removeClass("offline");
         player.addClass("online");
     };
 
-    ws.handler.offline = function(data, evt){
+    ws.offline = function(data, evt){
         var player = $(".player[player='"+data+"']");
         player.removeClass("online");
         player.addClass("offline");
     };
 
-    ws.handler.showInfo = function(data, evt){
+    ws.showInfo = function(data, evt){
         $(".info .panel-body").html(data);
         $(".info").show();
     };
@@ -486,7 +464,7 @@ $(document).ready(function(){
         var pid = $(this).attr("player");
         if(pid == "")
             return ;
-        sendCmd('getInfo', {pid: pid});
+        ws.sendCmd('getInfo', {pid: pid});
         return false;
     });
 
@@ -554,7 +532,7 @@ $(document).ready(function(){
             });
             data.sessions.push(session);
         });
-        sendCmd('shuffle', data);
+        ws.sendCmd('shuffle', data);
     });
 
     $("button.auto-shuffle").on('click', function(e){

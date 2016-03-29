@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-import traceback
+"""
+这个模块包含：组件列表、组件展示
+"""
 
 import tornado.web
 

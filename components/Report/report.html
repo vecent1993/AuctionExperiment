@@ -72,22 +72,12 @@
 
 <script type="text/javascript">
 
-String.prototype.startsWith = function(compareStr){
-    return this.indexOf(compareStr) == 0;
-}
-
 function updateCounts(){
     $(".players").each(function(){
         var player_count = parseInt($(this).find(".pool .player, .pool .agent").length);
         $(this).find(".badge").html(player_count);
     });
 }
-
-Array.prototype.sum = function () {
-    for(var sum = i = 0; i < this.length; i++)
-        sum += parseInt(this[i]);
-    return sum;
-};
 
 function newPlayer(player){
     var p = $(".player.empty").clone(true);
@@ -100,27 +90,27 @@ function newPlayer(player){
 $(document).ready(function(){
     updateCounts();
 
-    ws.handler.addplayer = function(data, evt){
+    ws.addplayer = function(data, evt){
         if(data.pid != undefined){
             $("div.pool").append( newPlayer(data) );
         }
         updateCounts();
     };
 
-    ws.handler.online = function(data, evt){
+    ws.online = function(data, evt){
         var player = $(".player[player='"+data+"']");
         player.removeClass("offline");
         player.addClass("online");
     };
 
-    ws.handler.offline = function(data, evt){
+    ws.offline = function(data, evt){
         var player = $(".player[player='"+data+"']");
         player.removeClass("online");
         player.addClass("offline");
     };
 
     $("a.start").on("click", function(){
-        sendCmd('start');
+        ws.sendCmd('start');
     });
 
 });

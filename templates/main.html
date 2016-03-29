@@ -64,7 +64,7 @@
 
     <script>
         // 调整footer使得其始终在页面底部
-        $(document).ready(function(){
+        function adjustFooter(){
             var footer = $("body").children(".footer");
             if(footer) {
                 var height = $(window).innerHeight();
@@ -74,6 +74,12 @@
                     main.css("min-height", height + "px");
                 }
             }
+        }
+
+        $(document).ready(function(){
+            adjustFooter();
+
+            $(window).resize(adjustFooter);
         });
     </script>
 

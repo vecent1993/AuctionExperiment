@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：用于参与人、主持人端的初始化处理服务。
+"""
+
 import json
 
 from tornado.template import Template
@@ -11,8 +15,6 @@ import components.treatment
 class PlayerInit(playerhandler.PlayerHandler):
     def __init__(self, env):
         super(PlayerInit, self).__init__(env)
-
-        self.player_domain = ':'.join(('player', str(self.env.exp['id']), str(self.player.pid)))
 
         self.listen(self.msg_channel, self.on_message)
         self.RemotePool.next_player_stage(self.player.pid)

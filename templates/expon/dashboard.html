@@ -13,6 +13,13 @@
 
 {% block style %}
 <style type="text/css">
+    .timer span.countdown {
+        font-family: Helvetica, Microsoft YaHei, Arial, sans-serif;
+        font-size: 20px;
+        color: #151515;
+        font-weight: bold;
+    }
+
     .toolbar {
         font-size: 20px;
         float: right;
@@ -59,76 +66,15 @@
     </div>
 </div>
 
+<script type="text/javascript" src="/static/js/ws.js"></script>
 <script type="text/javascript" language="javascript">
 
-        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
+    var ws = new WS("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
 
-        var send = function (data, callback) {
-            waitForConnection(function () {
-                ws.send( JSON.stringify(data) );
-                if (typeof callback !== 'undefined') {
-                    callback();
-                }
-            }, 5);
-        };
-
-        var sendCmd = function(cmd, data, callback){
-             waitForConnection(function () {
-                ws.send( JSON.stringify({cmd: cmd, data: data}) );
-                if (typeof callback !== 'undefined') {
-                    callback();
-                }
-            }, 5);
-        }
-
-        var waitForConnection = function (callback, interval) {
-            if (ws.readyState === 1) {
-                callback();
-            } else {
-                setTimeout(function () {
-                    waitForConnection(callback, interval);
-                }, interval);
-            }
-        };
-
-        function msgHandler(ws){
-            var that = this;
-            ws.onmessage = function (evt) {
-                msg = JSON.parse(evt.data);
-                if( that[msg.cmd] ){
-                    that[msg.cmd](msg.data, evt);
-                }
-            };
-        };
-
-        ws.handler = new msgHandler(ws)
-
-        $(document).ready(function(){
-            ws.handler.replace = function(data, evt){
-                 $("#main").html(msg.data);
-            };
-
-            ws.handler.wait = function(data, evt){
-                 $(".waiting").show();
-            };
-
-            ws.handler.error = function(data, evt){
-                var errorDIV = $(".error").clone(true);
-                errorDIV.find(".error-detail").html(data);
-                $("#main").html("");
-                $("#main").append(errorDIV);
-                errorDIV.show();
-            }
-
-            ws.handler.redirect = function(data, evt){
-                document.location.href = data;
-            };
-
-            sendCmd('get');
-
-            var heartbeat = setInterval(sendCmd, 30000, 'heartbeat');
-
-        });
+    $(document).ready(function(){
+        ws.sendCmd('get');
+        var heartbeat = setInterval(ws.sendCmd, 30000, 'heartbeat');
+    });
 
 </script>
 {% end %}

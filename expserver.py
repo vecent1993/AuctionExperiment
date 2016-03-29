@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：后台运行的实验处理程序
+需要手动运行！！！
+"""
+
 import traceback
 import json
 import time
@@ -78,7 +83,7 @@ class Exp(Greenlet):
         self.db = db
         self.expid = expid
         self.value = utils.exprv.RedisExp(self.redis, expid)
-        self.sub = RedisSub('exp:'+str(expid), self.on_message)
+        self.sub = RedisSub('exp:%s' % expid, self.on_message)
 
         self.groups = {}
         self.host = None
@@ -116,7 +121,7 @@ class Exp(Greenlet):
                 self.host.handle(data)
             elif domain.startswith('group'):
                 _, sid, gid = domain.strip().split(':')
-                group_key = ':'.join(('group', str(self.expid), str(sid), str(gid)))
+                group_key = 'group:%s:%s:%s' % (self.expid, sid, gid)
                 if group_key in self.groups:
                     self.groups[group_key].handle(data)
             elif not domain:
@@ -133,7 +138,7 @@ class Exp(Greenlet):
         self.sub.start()
 
     def publish(self, data):
-        self.redis.publish('exp:'+str(self.expid), json.dumps(data))
+        self.redis.publish('exp:%s' % self.expid, json.dumps(data))
 
     def close(self):
         if self.sub:
@@ -164,7 +169,7 @@ class Experiment(Exp):
         if not group.get('stage'):
             return
 
-        group_key = ':'.join(('group', str(self.expid), str(sid), str(gid)))
+        group_key = 'group:%s:%s:%s' % (self.expid, sid, gid)
         stage = group.get('stage', refresh=True).split(':')[0]
         if group_key in self.groups:
             self.groups[group_key].close()
@@ -172,16 +177,10 @@ class Experiment(Exp):
         self.groups[group_key] = hub.handlers[stage](self, sid, gid)
 
     def close_group(self, data=None):
-        group_key = ':'.join(('group', str(self.expid), str(data['sid']), str(data['gid'])))
+        group_key = 'group:%s:%s:%s' % (self.expid, data['sid'], data['gid'])
         if group_key in self.groups:
             self.groups[group_key].close()
             self.groups.pop(group_key)
-            # self.host.next_group_stage(data)
-        else:
-            return
-
-        # if not self.groups:
-        #     self.host.next_host_stage()
 
     def close(self):
         remote_redis = RemoteRedis(self.redis.publish)

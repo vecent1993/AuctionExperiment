@@ -190,7 +190,7 @@ $(document).ready(function(){
         $(".floatinfo").css("left", left);
         $(".floatinfo").css("top", top);
         var sid = $(this).parents("div.session").attr("session");
-        sendCmd('getGroupInfo', {sid: sid,  gid: $(this).attr('group')});
+        ws.sendCmd('getGroupInfo', {sid: sid,  gid: $(this).attr('group')});
         return false;
     });
 
@@ -200,7 +200,7 @@ $(document).ready(function(){
         $(".floatinfo").css("left", left);
         $(".floatinfo").css("top", top);
         var pid = $(this).attr("player");
-        sendCmd('getPlayerInfo', pid);
+        ws.sendCmd('getPlayerInfo', pid);
         return false;
     });
 
@@ -212,19 +212,19 @@ $(document).ready(function(){
         $(".floatinfo").hide();
     });
 
-    ws.handler.online = function(data, evt){
+    ws.online = function(data, evt){
         var player = $(".player[player='"+data+"']");
         player.removeClass("offline");
         player.addClass("online");
     };
 
-    ws.handler.offline = function(data, evt){
+    ws.offline = function(data, evt){
         var player = $(".player[player='"+data+"']");
         player.removeClass("online");
         player.addClass("offline");
     };
 
-    ws.handler.addgroup = function(data, evt){
+    ws.addgroup = function(data, evt){
         if(data.gid != undefined & data.sid != undefined){
             $("#session"+data.sid+" div.groups").append(
                 newGroup(data)
@@ -232,7 +232,7 @@ $(document).ready(function(){
         }
     };
 
-    ws.handler.showInfo = function(data, evt){
+    ws.showInfo = function(data, evt){
         $(".floatinfo .panel-body").html(data);
         $(".floatinfo").show();
     };

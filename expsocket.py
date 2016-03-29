@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：正式试验和测试的websocket处理对象。
+"""
+
 import traceback
 import json
 
@@ -56,6 +60,7 @@ class TrainSocketHandler(BaseSocketHandler):
     def __init__(self, *args, **kwargs):
         super(TrainSocketHandler, self).__init__(*args, **kwargs)
         self.player = None
+        self.msg_handler = None
 
     def open(self, treatment_code):
         super(TrainSocketHandler, self).open()

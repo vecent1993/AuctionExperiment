@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：所有组端处理服务的父类。
+"""
+
 import traceback
 import time
 import json
-
-import torndb
-from gevent import monkey; monkey.patch_all()
-from gevent import Greenlet
-import redis
 import functools
 
-from utils.exprv import Group, Player
 from utils.delay import TaskHub
 
 _task_hub = TaskHub()
@@ -25,8 +23,8 @@ def on_redis(func):
 class RemotePlayer(object):
     def __init__(self, expid, publish):
         self.publish = publish
-        self.channel = 'exp:' + str(expid)
-        self.domain_prefix = 'player:' + str(expid) + ':'
+        self.channel = 'exp:%s' % expid
+        self.domain_prefix = 'player:%s:' % expid
 
     def __getattr__(self, cmd):
         def _wrap(pid, data=None, **kwargs):
@@ -42,8 +40,8 @@ class RemotePlayer(object):
 class RemoteGroup(object):
     def __init__(self, expid, sid, gid, publish):
         self.publish = publish
-        self.channel = 'exp:' + str(expid)
-        self.group_domain = ':'.join(('group', str(sid), str(gid)))
+        self.channel = 'exp:%s' % expid
+        self.group_domain = 'group:%s:%s' % (sid, gid)
 
     def __getattr__(self, cmd):
         def _wrap(data=None, **kwargs):

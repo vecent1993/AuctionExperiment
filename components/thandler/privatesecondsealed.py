@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含： 私人价值第二价格密封拍卖训练处理服务。
+"""
+
 import random
 import time
 

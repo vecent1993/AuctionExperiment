@@ -24,7 +24,7 @@ class IndexHandler(BaseHandler):
     def login_user(self, email, password):
         user = self.db.get('select * from user where user_email=%s', email)
         if not user:
-            res = {'errors':[{'name': 'email', 'reason': '账户尚未注册'}, ]}
+            res = {'errors': [{'name': 'email', 'reason': '账户尚未注册'}, ]}
         else:
             if self.check_password(password, user):
                 user.pop('user_pwd')

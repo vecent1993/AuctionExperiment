@@ -82,186 +82,113 @@
 {% end %}
 
 {% block row %}
-    <div class="toolbar">
-        <a href="javascript:void(0)" title="聊天室">
-            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-        </a>
-        <a href="/help" target="_blank" title="FAQ">
-            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-        </a>
-        <a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');" title="实验说明">
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-        </a>
-        <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
-            <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
-        </a>
+<div class="toolbar">
+    <a href="javascript:void(0)" title="聊天室">
+        <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+    </a>
+    <a href="/help" target="_blank" title="FAQ">
+        <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+    </a>
+    <a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');" title="实验说明">
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+    </a>
+    <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
+        <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
+    </a>
+</div>
+
+<div class="col-md-7 col-md-offset-1" id="main">
+    {% module xsrf_form_html() %}
+</div>
+
+<div class="error">
+    <div class="page-header col-md-offset-1 col-md-10">
+        <h2>错误<small></small></h2>
     </div>
 
-    <div class="col-md-7 col-md-offset-1" id="main">
-        {% module xsrf_form_html() %}
-    </div>
+    <div class="col-md-offset-1 col-md-10">
+        <span style="font-size: 20px;">网页发生错误，请稍后刷新网页。若重复出现错误，请联系管理员。</span>
+        <a href="javascript:void(0)" onclick="$('.error-detail').toggle()">详细信息</a>
+        <div class="error-detail" style="display: none">
 
-    <div class="error">
-        <div class="page-header col-md-offset-1 col-md-10">
-            <h2>错误<small></small></h2>
         </div>
+    </div>
+</div>
 
-        <div class="col-md-offset-1 col-md-10">
-            <span style="font-size: 20px;">网页发生错误，请稍后刷新网页。若重复出现错误，请联系管理员。</span>
-            <a href="javascript:void(0)" onclick="$('.error-detail').toggle()">详细信息</a>
-            <div class="error-detail" style="display: none">
+<div class="sidebar col-md-3">
 
+    <div class="account-info">
+        <h4>账户信息</h4>
+        <p>邮箱: {{ current_user['user_email'] }}</p>
+        <p>用户名: {{ current_user['user_name'] }}</p>
+        <p>性别: {% if current_user['user_gender'] == '0' %}男
+            {% else %}女{% end %}</p>
+        <p>年龄: {{ current_user['user_age'] }}</p>
+        <p>身份: {% if current_user['user_identity'] == '0' %}学生
+            {% else %}其他{% end %}</p>
+    </div>
+    <div class="exp-info">
+        <h4>实验信息</h4>
+        <p>标题: {{ exp['exp_title'] }}</p>
+        <div style="overflow-y: auto; max-height: 250px;">
+            {% raw exp['exp_des'] %}
+        </div>
+        <p>
+            对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
+        </p>
+        <p>
+            还不熟悉流程？<a href="/exp/{{ exp['exp_id'] }}/train" target="_blank">前往训练</a>
+            或者查看<a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');">实验说明</a>
+        </p>
+    </div>
+
+    <div class="alert alert-warning" role="alert" style="margin-top: 40px;">
+
+    </div>
+
+</div>
+
+<div class="modal fade introduction" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">实验说明</h4>
+            </div>
+            <div class="modal-body">
+                <div class="box effect7">
+                    {% raw exp['exp_intro'] %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="sidebar col-md-3">
+<!--<div class="chat" style="width: 500px">-->
+<!--<ul class="list-unstyled well well-sm" id="msg-container" style="height: 300px; overflow-y: auto;">-->
+<!--<li class="chat-msg empty"></li>-->
+<!--</ul>-->
+<!--<form class="form-inline" id="sendmsg">-->
+<!--<div class="form-group col-md-8">-->
+<!--<input type="text" class="form-control" name="text">-->
+<!--</div>-->
+<!--<button class="btn btn-primary send-chat-msg" type="submit">发送</button>-->
+<!--</form>-->
+<!--</div>-->
+<script type="text/javascript" src="/static/js/ws.js"></script>
+<script type="text/javascript" language="javascript">
 
-        <div class="account-info">
-            <h4>账户信息</h4>
-            <p>邮箱: {{ current_user['user_email'] }}</p>
-            <p>用户名: {{ current_user['user_name'] }}</p>
-            <p>性别: {% if current_user['user_gender'] == '0' %}男
-                {% else %}女{% end %}</p>
-            <p>年龄: {{ current_user['user_age'] }}</p>
-            <p>身份: {% if current_user['user_identity'] == '0' %}学生
-                {% else %}其他{% end %}</p>
-        </div>
-        <div class="exp-info">
-            <h4>实验信息</h4>
-            <p>标题: {{ exp['exp_title'] }}</p>
-            <div style="overflow-y: auto; max-height: 250px;">
-                {% raw exp['exp_des'] %}
-            </div>
-            <p>
-                对网站有问题？查看<a href="/help" target="_blank">常见的问题与解答</a>
-            </p>
-            <p>
-                还不熟悉流程？<a href="/exp/{{ exp['exp_id'] }}/train" target="_blank">前往训练</a>
-                或者查看<a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');">实验说明</a>
-            </p>
-        </div>
+    var ws = new WS("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
 
-        <div class="alert alert-warning" role="alert" style="margin-top: 40px;">
+    $(document).ready(function(){
+        ws.sendCmd('get');
+        var heartbeat = setInterval(ws.sendCmd, 30000, 'heartbeat');
+    });
 
-        </div>
-
-    </div>
-
-    <div class="modal fade introduction" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title">实验说明</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="box effect7">
-                        {% raw exp['exp_intro'] %}
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--<div class="chat" style="width: 500px">-->
-        <!--<ul class="list-unstyled well well-sm" id="msg-container" style="height: 300px; overflow-y: auto;">-->
-            <!--<li class="chat-msg empty"></li>-->
-        <!--</ul>-->
-        <!--<form class="form-inline" id="sendmsg">-->
-            <!--<div class="form-group col-md-8">-->
-                <!--<input type="text" class="form-control" name="text">-->
-            <!--</div>-->
-            <!--<button class="btn btn-primary send-chat-msg" type="submit">发送</button>-->
-        <!--</form>-->
-    <!--</div>-->
-
-    <script type="text/javascript" language="javascript">
-
-        var ws = new WebSocket("ws://{{ request.host }}/exp/{{ exp['exp_id'] }}/websocket");
-
-        var sendCmd = function(cmd, data, callback){
-             waitForConnection(function () {
-                ws.send( JSON.stringify({cmd: cmd, data: data}) );
-                if (typeof callback !== 'undefined') {
-                    callback();
-                }
-            }, 5);
-        }
-
-        var waitForConnection = function (callback, interval) {
-            if (ws.readyState === 1) {
-                callback();
-            } else {
-                setTimeout(function () {
-                    waitForConnection(callback, interval);
-                }, interval);
-            }
-        };
-
-        function msgHandler(ws){
-            var that = this;
-            ws.onmessage = function (evt) {
-                msg = JSON.parse(evt.data);
-                if( that[msg.cmd] ){
-                    that[msg.cmd](msg.data, evt);
-                }
-            };
-        };
-
-        function sideInfo(text){
-            if(text == "")
-                $(".sidebar .alert").hide();
-            else
-                $(".sidebar .alert").show();
-            $(".sidebar .alert").removeClass("alert-warning");
-            $(".sidebar .alert").addClass("alert-info");
-            $(".sidebar .alert").html(text);
-        }
-
-        function sideWarn(text){
-            if(text == "")
-                $(".sidebar .alert").hide();
-            else
-                $(".sidebar .alert").show();
-            $(".sidebar .alert").removeClass("alert-info");
-            $(".sidebar .alert").addClass("alert-warning");
-            $(".sidebar .alert").html(text);
-        }
-
-        ws.handler = new msgHandler(ws)
-
-        $(document).ready(function(){
-            ws.handler.replace = function(data, evt){
-                sideInfo("");
-                $("#main").html(data);
-            };
-
-            ws.handler.refresh = function(data, evt) {
-                sendCmd('get');
-            };
-
-            ws.handler.redirect = function(data, evt){
-                document.location.href = data;
-            };
-
-            ws.handler.error = function(data, evt){
-                var errorDIV = $(".error").clone(true);
-                errorDIV.find(".error-detail").html(data);
-                $("#main").html("");
-                $("#main").append(errorDIV);
-                errorDIV.show();
-            }
-
-            sendCmd('get');
-
-            var heartbeat = setInterval(sendCmd, 30000, 'heartbeat');
-        });
-
-    </script>
+</script>
 {% end %}

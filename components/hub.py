@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：所有组件和处理服务的声明配置。
+"""
 
 from tornado.template import Loader
-
-# from util.loader import MultiDirLoader
 
 import End.end
 import Intro.intro

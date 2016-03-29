@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：实验主页、实验创建、配置修改、实验激活、实验关闭、实验测试、正式实验入口
+"""
 
 import traceback
 import json
@@ -15,7 +18,7 @@ import components
 class NewExpHandler(BaseHandler):
     @hostAuthenticated
     def get(self):
-        settings=dict(title='', des='', intro='', treatments=[])
+        settings = dict(title='', des='', intro='', treatments=[])
         self.render('expmanage/newexp.html', settings=settings, treatments=components.hub.treatments,
                     PlayerOnly=components.treatment.PlayerOnly, PlayerGroup=components.treatment.PlayerGroup,
                     Container=components.treatment.Container, Train=components.treatment.Train)
@@ -28,9 +31,8 @@ class NewExpHandler(BaseHandler):
                                    'host_id,exp_setuptime) values (%s,%s,%s,%s,%s,%s)',
                                    settings['title'], settings['des'], settings['intro'],
                                    json.dumps(settings), self.current_user['user_id'],
-                                   datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-                            )
-            self.write(json.dumps(dict(redirect='/exp/' + str(expid))))
+                                   datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S"))
+            self.write(json.dumps(dict(redirect='/exp/%s ' % expid)))
         except:
             self.write(json.dumps(dict(error=str(traceback.format_exc()))))
 

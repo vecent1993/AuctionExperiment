@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+这个模块包含：所有参与人端处理服务的父类。
+"""
+
 import traceback
 import time
 import json
@@ -54,9 +58,9 @@ class PlayerHandler(WSMessageHandler):
         self.player.set('heartbeat', time.time())
         self.player.set('online', True)
 
-        self.msg_channel = 'exp:' + str(self.env.exp['id'])
-        self.pool_domain = 'pool:' + str(self.env.exp['id'])
-        self.player_domain = ':'.join(('player', str(self.env.exp['id']), str(self.player.pid)))
+        self.msg_channel = 'exp:%s' % self.env.exp['id']
+        self.pool_domain = 'pool:%s' % self.env.exp['id']
+        self.player_domain = 'player:%s:%s' % (self.env.exp['id'], self.player.pid)
         self.group_domain = None
         self.settings = self.player.get('settings', dict(), True)
 
