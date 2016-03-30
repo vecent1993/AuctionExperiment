@@ -64,25 +64,6 @@ target/
 *.war
 *.ear
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
-# nohup.out
-nohup.out
-
-# self configuration
-self.cfg
-*.conf
-
-# lucene index file
-index/
-
-# lsi index file
-lsiindex/
-
-# classify file
-clsindex/
-
 # runnable jar file
 *.jar
 
@@ -90,9 +71,6 @@ clsindex/
 *.log
 *.log.*
 
-*.sh
-
-tmp/
-
+sql.txt/
 
 .idea/

@@ -45,7 +45,7 @@ class InfoAcquiSequence(components.treatment.PlayerGroup):
     def player_result(db, expid, pid):
         results = db.query('select * from result_info_sequence where exp_id=%s and user_id=%s', expid, pid)
         return Template('''
-        <table class="table table-hover">
+        <table class="table table-hover" style="margin-bottom: 50px;">
             <thead>
             <tr>
                 <th>#</th>
@@ -97,7 +97,7 @@ class InfoAcquiSequence(components.treatment.PlayerGroup):
                 """, expid)
         return Template('''
         <h3>参与人收益：</h3>
-        <table class="table table-hover">
+        <table class="table table-hover" style="margin-bottom: 50px;">
             <thead>
             <tr>
                 <th>#</th>
@@ -125,7 +125,7 @@ class InfoAcquiSequence(components.treatment.PlayerGroup):
             </tbody>
         </table>
         <h3>实验数据：</h3>
-        <table class="table table-hover">
+        <table class="table table-hover" style="margin-bottom: 50px;">
             <thead>
             <tr>
                 <th>#</th>

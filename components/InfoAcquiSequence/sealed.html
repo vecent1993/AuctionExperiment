@@ -16,13 +16,10 @@
     }
 
     .timer {
-        display: none;
-    }
-
-    .timers {
-        margin-top: 20px;
         display: inline-block;
         float: right;
+        display: none;
+        margin-left: 30px;
     }
 
     .page-header {
@@ -48,17 +45,15 @@
 </style>
 
 <div class="page-header col-md-offset-1 col-md-10">
-    <h3>
-        第{{ group.get('round_', refresh=True) }}轮 -
+    <div style="font-size: 25px; display: inline-block; margin-top: 20px; font-weight: bold;">
+        <div style="display: inline-block;">第{{ group.get('round_', refresh=True) }}轮 -
         {% if mainstage == 'info' %}信息获取拍卖（p = {{ round(float(settings['prob']), 3) }}）
         {% elif mainstage == 'a' %}A物品拍卖（p = {{ round(float(settings['prob']), 3) }}）
         {% elif mainstage == 'b' %}B物品拍卖（p = {{ round(float(settings['prob']), 3) }}）
         {% else %}结束（p = {{ round(float(settings['prob']), 3) }}）
-        {% end %}
-    </h3>
-    <div class="timers">
+        {% end %}</div>
         <div class="timer" id="sealedT">
-            <span class="countdown" title="剩余时间"></span><span>秒</span>
+            <span class="countdown" title="剩余时间"></span><span style="font-size: 20px;">秒</span>
         </div>
     </div>
 </div>
