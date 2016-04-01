@@ -28,16 +28,21 @@ class PlayerInfoAcquiSequence(playerhandler.PlayerHandler):
             return
         if stages[1] == 'end':
             self.RemoteWS.replace(self.render('InfoAcquiSequence/sealed.html', mainstage='end',
-                                            player=self.player,  substage=None, settings=self.settings,
-                                          group=self.group))
+                                              player=self.player, substage=None, settings=self.settings,
+                                              group=self.group))
+            return
 
         mainstage, substage = stages[-2], stages[-1]
         self.RemoteWS.replace(self.render('InfoAcquiSequence/sealed.html', mainstage=mainstage,
-                                          player=self.player,  substage=substage, settings=self.settings,
+                                          player=self.player, substage=substage, settings=self.settings,
                                           group=self.group))
 
     @playerhandler.on_ws
     def sealed_bid(self, data):
+        stages = self.player.get('stage', refresh=True).split(':')
+        if stages[-1] != 'run':
+            return
+
         bid = round(float(data['bid']), 1)
         self.RemoteGroup.report_sealed_bid(dict(pid=self.player.pid, bid=bid, username=self.player['username']))
 
@@ -62,11 +67,7 @@ class PlayerInfoAcquiSequence(playerhandler.PlayerHandler):
         if stages[-1] == 'end':
             result = self.group.get('results', refresh=True).get('a')
             if result['winner'] == self.player.pid:
-                text = '<li>恭喜你赢得了A物品拍卖，你获得收益为%s。</li><li>你将不再参加B物品拍卖。' \
-                    '本轮实验即将结束！</li>' % (result['winprice'] - result['pay'])
-            else:
-                text = '<li>很遗憾，你并未赢得A物品拍卖，而获胜者的收益为%s！</li>' \
-                       '<li>下一阶段即将开始，请做好准备！</li>' % (result['winprice'] - result['pay'])
+                text = '<li>恭喜你赢得了A物品拍卖。</li><li>你将不再参加B物品拍卖。本轮实验即将结束！</li>'
             self.RemoteWS.showresult('拍卖结果：<ul>%s</ul>' % text)
 
         if len(stages) != 3 or stages[-1] != 'result':
@@ -78,23 +79,21 @@ class PlayerInfoAcquiSequence(playerhandler.PlayerHandler):
         if stages[1] == 'info':
             if result['winner'] == self.player.pid:
                 text = '<li>恭喜你赢得了信息获取拍卖，你在下一阶段（A物品拍卖）将会得知B物品估价。' \
-                       '</li><li>下一阶段即将开始，请做好准备！</li>'
+                       '</li><li>下一阶段A物品拍卖即将开始，请做好准备！</li>'
             else:
-                text = '<li>很遗憾，你并未赢得信息获取拍卖！</li><li>下一阶段即将开始，请做好准备！</li>'
+                text = '<li>很遗憾，你并未赢得信息获取拍卖！</li><li>下一阶段A物品拍卖即将开始，请做好准备！</li>'
         elif stages[1] == 'a':
             if result['winner'] == self.player.pid:
-                text = '<li>恭喜你赢得了A物品拍卖，你获得收益为%s。</li><li>你将不再参加B物品拍卖。' \
-                    '本轮实验即将结束！</li>' % (result['winprice'] - result['pay'])
+                text = '<li>恭喜你赢得了A物品拍卖。</li><li>你将不再参加B物品拍卖。本轮实验即将结束！</li>'
             else:
-                text = '<li>很遗憾，你并未赢得A物品拍卖，而获胜者的收益为%s！</li><li>' \
-                       '下一阶段即将开始，请做好准备！</li>' % (result['winprice'] - result['pay'])
+                text = '<li>很遗憾，你并未赢得A物品拍卖，且获胜者的报价为%s！</li><li>' \
+                       '下一阶段B物品拍卖即将开始，请做好准备！</li>' % result['winprice']
         else:
             if result['winner'] == self.player.pid:
-                text = '<li>恭喜你赢得了B物品拍卖，你获得收益为%s。</li><li>' \
-                    '本轮实验即将结束！</li>' % (result['winprice'] - result['pay'])
+                text = '<li>恭喜你赢得了B物品拍卖。</li><li>本轮实验即将结束！</li>'
             else:
-                text = '<li>很遗憾，你并未赢得B物品拍卖，而获胜者的收益为%s！</li><li>' \
-                       '本轮实验即将结束！</li>'  % (result['winprice'] - result['pay'])
+                text = '<li>很遗憾，你并未赢得B物品拍卖，且获胜者的报价为%s！</li><li>' \
+                       '本轮实验即将结束！</li>' % result['winprice']
         self.RemoteWS.showresult('拍卖结果：<ul>%s</ul>' % text)
 
     @playerhandler.on_redis

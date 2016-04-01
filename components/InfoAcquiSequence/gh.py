@@ -9,7 +9,8 @@ import components.grouphandler as grouphandler
 import components.playerhandler as playerhandler
 
 
-_qs = ((5, 10), (10, 10), (5, 5), (10, 5))
+_qs = [(5, 10), (10, 10), (5, 5), (10, 5), (10, 10), (10, 5), (5, 10)]
+random.shuffle(_qs)
 
 
 class GroupInfoAcquiSequence(grouphandler.GroupHandler):
@@ -70,7 +71,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
         self.value.save('aq')
         self.value.save('bq')
 
-        self.add_delay('inforun', 180, self.info_run_timeout)
+        self.add_delay('inforun', 120, self.info_run_timeout)
         for pid in self.value['players'].keys():
             if int(pid) <= 5:
                 self.add_delay('infoagentbid'+pid, random.uniform(5, 30), self.info_agent_bid, pid)
@@ -83,12 +84,14 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
     def init_database(self):
         round_ = self.value['round_']
+        now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
         for pid in self.value['players'].keys():
             aq, bq = self.value['aq'][pid], self.value['bq'][pid]
             self.db.execute('delete from info_sequence where exp_id=%s and user_id=%s and round=%s and '
                             'session=%s and `group`=%s', self.expid, pid, round_, self.sid, self.gid)
-            self.db.insert('insert into info_sequence(exp_id, user_id, round, session, `group`, aq, bq) '
-                           'values(%s,%s,%s,%s,%s,%s,%s)', self.expid, pid, round_, self.sid, self.gid, aq, bq)
+            self.db.insert('insert into info_sequence(exp_id, user_id, round, session, `group`, starttime, '
+                           'aq, bq) values(%s,%s,%s,%s,%s,%s,%s,%s)', self.expid, pid, round_, self.sid, self.gid,
+                           now, aq, bq)
             self.db.execute('delete from result_info_sequence where exp_id=%s and user_id=%s and round=%s',
                             self.expid, pid, round_)
 
@@ -162,7 +165,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         player_stage = '%s:%s:%s' % ('PlayerInfoAcquiSequence', 'a', 'run')
 
-        self.add_delay('arun', 180, self.a_run_timeout)
+        self.add_delay('arun', 120, self.a_run_timeout)
         for pid in self.value['players'].keys():
             if int(pid) <= 5:
                 self.add_delay('aagentbid'+pid, random.uniform(5, 30), self.a_agent_bid, pid)
@@ -206,7 +209,7 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
 
         player_stage = '%s:%s:%s' % ('PlayerInfoAcquiSequence', 'b', 'run')
 
-        self.add_delay('brun', 180, self.b_run_timeout)
+        self.add_delay('brun', 120, self.b_run_timeout)
         for pid in self.value['players'].keys():
             if pid == self.value['results'].get('a', {}).get('winner'):
                 continue
@@ -298,8 +301,8 @@ class GroupInfoAcquiSequence(grouphandler.GroupHandler):
     def render_info(group):
         group.clear()
         return Template('''
-            当前阶段：<br/>
-                {{ group['stage'] }}<br/>
+            当前阶段：{{ group['stage'] }}<br/>
+            轮数：{{ group.get('round_', '') }}<br/>
             <table class="table">
                 <thead>
                     {% set pids = group['players'].keys() %}

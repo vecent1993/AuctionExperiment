@@ -116,9 +116,9 @@ class InfoAcquiSequence(components.treatment.PlayerGroup):
                 <td>{{ r['user_email'] }}</td>
                 <td>{{ r['round'] }}</td>
                 {% set profits = map(float, r['profits'].split(',')) %}
-                <td>{{ profits[0] }}</td>
-                <td>{{ profits[1] }}</td>
-                <td>{{ profits[2] }}</td>
+                <td>{{ profits[0] if len(profits) >= 1 else '' }}</td>
+                <td>{{ profits[1] if len(profits) >= 2 else '' }}</td>
+                <td>{{ profits[2] if len(profits) >= 3 else '' }}</td>
                 <td>{{ sum(profits) }}</td>
             </tr>
             {% end %}

@@ -1,10 +1,12 @@
 <style type="text/css">
     .common-info {
         font-size: 20px;
+        background-color: #FBF5F5;
     }
 
     .private-info {
         font-size: 20px;
+        background-color: #F9F9D3;
     }
 
     p {
@@ -19,11 +21,11 @@
         display: inline-block;
         float: right;
         display: none;
-        margin-left: 30px;
     }
 
     .page-header {
         margin-top: 0px;
+        margin-bottom: 0px;
     }
 
     .page-header h3 {
@@ -41,19 +43,18 @@
         margin-top: 10px;
         margin-bottom: 10px;
     }
-
 </style>
 
 <div class="page-header col-md-offset-1 col-md-10">
     <div style="font-size: 25px; display: inline-block; margin-top: 20px; font-weight: bold;">
         <div style="display: inline-block;">第{{ group.get('round_', refresh=True) }}轮 -
-        {% if mainstage == 'info' %}信息获取拍卖（p = {{ round(float(settings['prob']), 3) }}）
-        {% elif mainstage == 'a' %}A物品拍卖（p = {{ round(float(settings['prob']), 3) }}）
-        {% elif mainstage == 'b' %}B物品拍卖（p = {{ round(float(settings['prob']), 3) }}）
-        {% else %}结束（p = {{ round(float(settings['prob']), 3) }}）
+        {% if mainstage == 'info' %}信息获取拍卖（高价值概率p={{ round(float(settings['prob']), 3) }}）
+        {% elif mainstage == 'a' %}A物品拍卖（高价值概率p={{ round(float(settings['prob']), 3) }}）
+        {% elif mainstage == 'b' %}B物品拍卖（高价值概率p={{ round(float(settings['prob']), 3) }}）
+        {% else %}结束（高价值概率p={{ round(float(settings['prob']), 3) }}）
         {% end %}</div>
         <div class="timer" id="sealedT">
-            <span class="countdown" title="剩余时间"></span><span style="font-size: 20px;">秒</span>
+            <span style="font-size: 18px;">剩余时间：</span><span class="countdown"></span><span style="font-size: 20px;">秒</span>
         </div>
     </div>
 </div>
@@ -65,57 +66,76 @@
             <li>在A、B两物品序贯拍卖中，所有竞拍者对每件物品的估价服从<span class="highlight">{5, 10}</span>上概率
                 <span class="highlight">p={{ round(float(settings['prob']), 3) }}</span>的两点（伯努利）分布
                 （即估价为10的概率为{{ round(float(settings['prob']), 3) }}，估价5的概率为{{ round(1 - float(settings['prob']), 3) }}）。</li>
-            <li>实验中的拍卖均采用第二价格密封拍卖，即竞拍者都以密封的形式独立出价，出价最高的竞拍者成为胜者，但胜者只需支付所有出价中的次高价。
-                <span class="highlight">理论上，在第二价格密封拍卖中，报出你的真实估价是你的占优策略。</span></li>
         </ul>
     </div>
 
     <div class="box effect7 private-info">
         就你而言:
         <ul>
-            <li><span class="highlight">拍卖物A的估价为{{ group.get('aq', refresh=True)[player.pid] }}。</span></li>
-            {% if mainstage == 'b' or mainstage == 'end' %}
-            <li><span class="highlight">拍卖物B的估价为{{ group.get('bq', refresh=True)[player.pid] }}。</span></li>
-            {% end %}
+            <li><span class="highlight">拍卖物A对你的价值为{{ group.get('aq', refresh=True)[player.pid] }}。</span></li>
             {% if mainstage == 'a'%}
-            {% if player.pid == group.get('results', refresh=True).get('info', {}).get('winner') %}
-            <li>你赢得了信息获取拍卖，<span class="highlight">拍卖物B的估价为{{ group.get('bq', refresh=True)[player.pid] }}。</span></li>
-            {% else %}
-            <li>你未赢得信息获取拍卖， 你尚不知道拍卖物B的估价</li>
+                {% if player.pid == group.get('results', refresh=True).get('info', {}).get('winner') %}
+                <li>你赢得了信息获取拍卖，所以现在告知<span class="highlight">拍卖物B对你的价值为{{ group.get('bq', refresh=True)[player.pid] }}。</span></li>
+                {% else %}
+                <li>你未赢得信息获取拍卖， 所以还不能告知拍卖物B对你的价值。</li>
+                {% end %}
             {% end %}
+            {% if mainstage == 'b'%}
+                {% if player.pid == group.get('results', refresh=True).get('info', {}).get('winner') %}
+                <li>你赢得了信息获取拍卖。</li>
+                {% else %}
+                <li>你未赢得信息获取拍卖。</li>
+                {% end %}
+                {% if player.pid == group.get('results', {}).get('a', {}).get('winner') %}
+                <li>你赢得了A物品拍卖。</li>
+                {% else %}
+                <li>你未赢得A物品拍卖，且获胜者的报价为{{ group['results']['a']['winprice'] }}。</li>
+                {% end %}
+                <li><span class="highlight">拍卖物B对你的价值为{{ group.get('bq', refresh=True)[player.pid] }}。</span></li>
+            {% end %}
+            {% if mainstage == 'end' %}
+                {% if player.pid == group.get('results', refresh=True).get('info', {}).get('winner') %}
+                <li>你赢得了信息获取拍卖。</li>
+                {% else %}
+                <li>你未赢得信息获取拍卖。</li>
+                {% end %}
+                <li>你赢得了A物品拍卖。你将不再参加B物品拍卖。本轮实验即将结束！</li>
             {% end %}
         </ul>
     </div>
     <div class="tip">
         {% if mainstage == 'info' %}
-        现在进行<span class="highlight">信息获取拍卖</span>:<br/>
-            <p>为了在A物品拍卖前获得对物品B的估价信息，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
+            现在进行的是<span class="highlight">信息获取拍卖</span>:<br/>
+            <p>为了在A物品拍卖前获得对物品B的价值信息，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
         {% elif mainstage == 'a' %}
-        现在进行<span class="highlight">A物品拍卖</span>:<br/>
+            现在进行的是<span class="highlight">A物品拍卖</span>:<br/>
             <p>为了赢得A物品拍卖，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
         {% elif mainstage == 'b' %}
-        现在进行<span class="highlight">B物品拍卖</span>:<br/>
+            现在进行的是<span class="highlight">B物品拍卖</span>:<br/>
             <p>为了赢得B物品拍卖，你愿意付出多少？请在输入框报价（报价只保留一位小数）。</p>
         {% elif mainstage == 'end' %}
-            <p>你已经完成了本轮实验。</p>
+            <p>你已经完成了本轮实验，请等待组内其他人完成实验。</p>
         {% end %}
     </div>
 
-    <div style="margin-bottom: 30px;">
+    <div class="col-md-offset-2" style="margin-top: 10px;">
+        <!--<form id="bid">-->
+            <!--<div class="">-->
+                <!--<input type="number" class="" name="bid" style="font-size: 25px; padding: 3px; border-color: #3c763d; border-radius: 5px; width: 200px; padding-left: 10px; margin-bottom: 0px;"-->
+                           <!--required oninput="setCustomValidity('');" min="0" step="0.1"-->
+                           <!--value="{% if mainstage == 'a' %}{{ group.get('aq')[player.pid] }}{% elif mainstage == 'b' %}{{ group.get('bq')[player.pid] }}{% else %}0.1{% end %}"-->
+                           <!--oninvalid="setCustomValidity('必须输入大于'+this.min+'的整数或一位小数');">-->
+                <!--<button class="btn btn-primary" type="submit" role="button" style="margin-bottom: 10px; margin-left: 50px;">提交</button>-->
+            <!--</div>-->
+        <!--</form>-->
         <form class="form-inline" id="bid">
-            <div class="form-group col-md-3 has-success">
-                <div class="input-group">
-                    <input type="number" class="form-control input-lg" aria-describedby="addon" name="bid"
-                           required oninput="setCustomValidity('');" min="0" step="0.1" value="{{ 0.1 }}"
+          <div class="form-group form-group-lg has-success">
+            <input type="number" class="form-control input-lg" name="bid" style="font-size: 20px;"
+                           required oninput="setCustomValidity('');" min="0" step="0.1"
+                           value="{% if mainstage == 'a' %}{{ group.get('aq')[player.pid] }}{% elif mainstage == 'b' %}{{ group.get('bq')[player.pid] }}{% else %}0.1{% end %}"
                            oninvalid="setCustomValidity('必须输入大于'+this.min+'的整数或一位小数');">
-                    <span class="input-group-addon" id="addon">点</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-1">
-                    <button class="btn btn-primary" type="submit" role="button">提交</button>
-                </div>
-            </div>
+                <button class="btn btn-primary" type="submit" role="button" style="margin-bottom: 5px; margin-left: 50px;">提交</button>
+          </div>
         </form>
     </div>
 
@@ -139,6 +159,8 @@ $(document).ready(function(){
         event.preventDefault();
 
         var bid = $("input[name='bid']").val();
+        if(! confirm("你报价为{}，确认提交该报价吗？".format(bid)))
+			return ;
         ws.sendCmd('sealed_bid', {bid:bid});
         ws.wait();
     });
@@ -149,12 +171,12 @@ $(document).ready(function(){
     };
 
     ws.wait = function(data, evt){
-        disableForm("form#bid", "等待对方出价");
+        disableForm("form#bid", "你已报过价，等待对方出价");
     };
 
     ws.end = function(data, evt){
         disableForm("form#bid", "本轮实验已完成");
-        ws.sendCmd('get_result');
+        //ws.sendCmd('get_result');
     };
 
     ws.result = function(data, evt){

@@ -27,7 +27,7 @@
         .sidebar {
             padding: 0px 30px;
             border-left: 1px solid #eee;
-            margin-top: 20px;
+            margin-top: 30px;
             padding-top: 20px;
         }
 
@@ -82,20 +82,20 @@
 {% end %}
 
 {% block row %}
-<div class="toolbar">
-    <a href="javascript:void(0)" title="聊天室">
-        <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-    </a>
-    <a href="/help" target="_blank" title="FAQ">
-        <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-    </a>
-    <a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');" title="实验说明">
-        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-    </a>
-    <a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">
-        <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
-    </a>
-</div>
+<!--<div class="toolbar">-->
+    <!--<a href="javascript:void(0)" title="聊天室">-->
+        <!--<span class="glyphicon glyphicon-comment" aria-hidden="true"></span>-->
+    <!--</a>-->
+    <!--<a href="/help" target="_blank" title="FAQ">-->
+        <!--<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>-->
+    <!--</a>-->
+    <!--<a href="javascript:void(0)" onclick="$('.modal.introduction').modal('toggle');" title="实验说明">-->
+        <!--<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>-->
+    <!--</a>-->
+    <!--<a href="/exp/{{ exp['exp_id'] }}" title="返回实验首页">-->
+        <!--<span class="glyphicon glyphicon-link" aria-hidden="true"></span>-->
+    <!--</a>-->
+<!--</div>-->
 
 <div class="col-md-7 col-md-offset-1" id="main">
     {% module xsrf_form_html() %}
